@@ -513,6 +513,11 @@ public struct StatRequirement
         if (this.stat != stat.type) return false;
         return stat.value >= min && stat.value <= max;
     }
+
+    public override string ToString()
+    {
+        return $"{stat} : {min}, {max}";
+    }
 }
 
 /// <summary>
@@ -535,6 +540,11 @@ public struct StatData
 
         return new StatData { type = a.type, value = a.value + b.value };
     }
+
+    public override string ToString()
+    {
+        return $"{type} : {value}";
+    }
 }
 
 public enum StatType
@@ -546,14 +556,21 @@ public enum StatType
     TalentPoint,
 
     // Talents. Talents must be early since 
-    TalentBrawny,
-    TalentBrainy,
-    TalentLithe,
+    TalentPhysique,
+    TalentReason,
+    TalentDexterity,
+    TalentPerception,
+    TalentMelee,
+    TalentRanged,
+    TalentEngineering,
+    TalentMysticism,
+    TalentMedicine,
+    TalentDefense,
 
     // Base stats
     Strength,
     Intelligence,
-    Dexterity,
+    Nimbleness,
 
     // Resources
     Health,

@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement style="background-color: rgba(0, 0, 0, 0); width: 217px; flex-direction: row;">
+        <ui:Button text="GUNSMOKE" display-tooltip-when-elided="true" name="button" style="width: 70%;" />
+        <ui:Label tabindex="-1" text="0 / 10" display-tooltip-when-elided="true" name="points" style="color: rgb(255, 255, 255); -unity-text-align: middle-center; margin-left: 15px;" />
+    </ui:VisualElement>
+</ui:UXML>

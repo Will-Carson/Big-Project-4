@@ -9,6 +9,7 @@ using UnityEngine.UIElements;
 
 public struct TalentAuthoring
 {
+    public string name;
     public StatType stat;
     public int pointCost;
     public int levelRequirement;
@@ -25,9 +26,10 @@ public static class TalentDefinitions
 {
     public static TalentAuthoring[] Talents = new TalentAuthoring[]
     {
-        new TalentAuthoring // Brawny
+        new TalentAuthoring
         {
-            stat = StatType.TalentBrawny,
+            name = "Physique",
+            stat = StatType.TalentPhysique,
             pointCost = 1,
             levelRequirement = 1,
             maxTalentLevel = 10,
@@ -40,9 +42,10 @@ public static class TalentDefinitions
                 new StatData { type = StatType.Strength, value = 10 },
             },
         },
-        new TalentAuthoring // Brainy
+        new TalentAuthoring
         {
-            stat = StatType.TalentBrainy,
+            name = "Reason",
+            stat = StatType.TalentReason,
             pointCost = 1,
             levelRequirement = 1,
             maxTalentLevel = 10,
@@ -52,12 +55,13 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Intelligence, value = 10 },
+                new StatData { type = StatType.Strength, value = 10 },
             },
         },
-        new TalentAuthoring // Lithe
+        new TalentAuthoring
         {
-            stat = StatType.TalentLithe,
+            name = "Dexterity",
+            stat = StatType.TalentDexterity,
             pointCost = 1,
             levelRequirement = 1,
             maxTalentLevel = 10,
@@ -67,7 +71,119 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Dexterity, value = 10 },
+                new StatData { type = StatType.Strength, value = 10 },
+            },
+        },
+        new TalentAuthoring
+        {
+            name = "Perception",
+            stat = StatType.TalentPerception,
+            pointCost = 1,
+            levelRequirement = 1,
+            maxTalentLevel = 10,
+            requires = new StatRequirement[]
+            {
+                // No special requirements
+            },
+            grants = new StatData[]
+            {
+                new StatData { type = StatType.Strength, value = 10 },
+            },
+        },
+        new TalentAuthoring
+        {
+            name = "Melee",
+            stat = StatType.TalentMelee,
+            pointCost = 1,
+            levelRequirement = 1,
+            maxTalentLevel = 10,
+            requires = new StatRequirement[]
+            {
+                // No special requirements
+            },
+            grants = new StatData[]
+            {
+                new StatData { type = StatType.Strength, value = 10 },
+            },
+        },
+        new TalentAuthoring
+        {
+            name = "Ranged",
+            stat = StatType.TalentRanged,
+            pointCost = 1,
+            levelRequirement = 1,
+            maxTalentLevel = 10,
+            requires = new StatRequirement[]
+            {
+                // No special requirements
+            },
+            grants = new StatData[]
+            {
+                new StatData { type = StatType.Strength, value = 10 },
+            },
+        },
+        new TalentAuthoring
+        {
+            name = "Engineering",
+            stat = StatType.TalentEngineering,
+            pointCost = 1,
+            levelRequirement = 1,
+            maxTalentLevel = 10,
+            requires = new StatRequirement[]
+            {
+                // No special requirements
+            },
+            grants = new StatData[]
+            {
+                new StatData { type = StatType.Strength, value = 10 },
+            },
+        },
+        new TalentAuthoring
+        {
+            name = "Mysticism",
+            stat = StatType.TalentMysticism,
+            pointCost = 1,
+            levelRequirement = 1,
+            maxTalentLevel = 10,
+            requires = new StatRequirement[]
+            {
+                // No special requirements
+            },
+            grants = new StatData[]
+            {
+                new StatData { type = StatType.Strength, value = 10 },
+            },
+        },
+        new TalentAuthoring
+        {
+            name = "Medicine",
+            stat = StatType.TalentMedicine,
+            pointCost = 1,
+            levelRequirement = 1,
+            maxTalentLevel = 10,
+            requires = new StatRequirement[]
+            {
+                // No special requirements
+            },
+            grants = new StatData[]
+            {
+                new StatData { type = StatType.Strength, value = 10 },
+            },
+        },
+        new TalentAuthoring
+        {
+            name = "Defense",
+            stat = StatType.TalentDefense,
+            pointCost = 1,
+            levelRequirement = 1,
+            maxTalentLevel = 10,
+            requires = new StatRequirement[]
+            {
+                // No special requirements
+            },
+            grants = new StatData[]
+            {
+                new StatData { type = StatType.Strength, value = 10 },
             },
         },
     };
@@ -174,7 +290,7 @@ public partial class TalentServerSystem : SystemBase
         var talentEntities = talentQuery.ToEntityArray(Allocator.Temp);
         var talentComponents = talentQuery.ToComponentDataArray<TalentComponent>(Allocator.Temp);
 
-        var netIdToEntity = NetIdTrackerSystem.NetIdToEntity;
+        var netIdToEntity = NetworkServerSystem.NetIdToEntity;
 
         Entities
         .ForEach((
@@ -206,7 +322,8 @@ public partial class TalentServerSystem : SystemBase
     }
 }
 
-public partial class NetIdTrackerSystem : SystemBase
+[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+public partial class NetworkServerSystem : SystemBase
 {
     public static NativeHashMap<int, Entity> NetIdToEntity = 
         new NativeHashMap<int, Entity>(10, Allocator.Persistent);
@@ -257,6 +374,41 @@ public partial class NetIdTrackerSystem : SystemBase
     }
 }
 
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
+public partial class NetworkClientSystem : SystemBase
+{
+    protected override void OnCreate()
+    {
+        var singleton = EntityManager.CreateEntity();
+        EntityManager.AddComponentData(singleton, new Singleton { world = World.Unmanaged });
+    }
+
+    protected override void OnUpdate()
+    {
+
+    }
+
+    public struct Singleton : IComponentData
+    {
+        public WorldUnmanaged world;
+
+        public void SendRpc<T>(T rpc)
+            where T : unmanaged, IRpcCommand
+        {
+            var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(world);
+            SendRpc(rpc, commandBuffer);
+        }
+
+        public void SendRpc<T>(T rpc, EntityCommandBuffer commandBuffer)
+            where T : unmanaged, IRpcCommand
+        {
+            var rpcEntity = commandBuffer.CreateEntity();
+            commandBuffer.AddComponent<SendRpcCommandRequestComponent>(rpcEntity);
+            commandBuffer.AddComponent(rpcEntity, rpc);
+        }
+    }
+}
+
 public struct TalentAllocationRequestRPC : IRpcCommand
 {
     public StatType stat;
@@ -267,7 +419,6 @@ public struct TalentAllocationRequestRPC : IRpcCommand
 public partial class TalentClientSystem : SystemBase
 {
     /// <summary>
-    /// Send requests to allocate talents to the server
     /// Update the UI when the player successfully allocates
     /// Allow the player to un-allocate talents
     /// </summary>
