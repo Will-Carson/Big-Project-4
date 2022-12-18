@@ -5,7 +5,6 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using UnityEngine.UIElements;
 
 public struct TalentAuthoring
 {
@@ -26,6 +25,7 @@ public static class TalentDefinitions
 {
     public static TalentAuthoring[] Talents = new TalentAuthoring[]
     {
+        // Level 1 talents
         new TalentAuthoring
         {
             name = "Physique",
@@ -41,7 +41,7 @@ public static class TalentDefinitions
             {
                 new StatData { type = StatType.Strength, value = 10 },
             },
-        },
+        }, // Physique
         new TalentAuthoring
         {
             name = "Reason",
@@ -57,7 +57,7 @@ public static class TalentDefinitions
             {
                 new StatData { type = StatType.Strength, value = 10 },
             },
-        },
+        }, // Reason
         new TalentAuthoring
         {
             name = "Dexterity",
@@ -73,7 +73,7 @@ public static class TalentDefinitions
             {
                 new StatData { type = StatType.Strength, value = 10 },
             },
-        },
+        }, // Dexterity
         new TalentAuthoring
         {
             name = "Perception",
@@ -89,7 +89,7 @@ public static class TalentDefinitions
             {
                 new StatData { type = StatType.Strength, value = 10 },
             },
-        },
+        }, // Perception
         new TalentAuthoring
         {
             name = "Melee",
@@ -105,7 +105,7 @@ public static class TalentDefinitions
             {
                 new StatData { type = StatType.Strength, value = 10 },
             },
-        },
+        }, // Melee
         new TalentAuthoring
         {
             name = "Ranged",
@@ -121,7 +121,7 @@ public static class TalentDefinitions
             {
                 new StatData { type = StatType.Strength, value = 10 },
             },
-        },
+        }, // Ranged
         new TalentAuthoring
         {
             name = "Engineering",
@@ -137,7 +137,7 @@ public static class TalentDefinitions
             {
                 new StatData { type = StatType.Strength, value = 10 },
             },
-        },
+        }, // Engineering
         new TalentAuthoring
         {
             name = "Mysticism",
@@ -153,7 +153,7 @@ public static class TalentDefinitions
             {
                 new StatData { type = StatType.Strength, value = 10 },
             },
-        },
+        }, // Mysticism
         new TalentAuthoring
         {
             name = "Medicine",
@@ -169,7 +169,7 @@ public static class TalentDefinitions
             {
                 new StatData { type = StatType.Strength, value = 10 },
             },
-        },
+        }, // Medicine
         new TalentAuthoring
         {
             name = "Defense",
@@ -185,7 +185,25 @@ public static class TalentDefinitions
             {
                 new StatData { type = StatType.Strength, value = 10 },
             },
-        },
+        }, // Defense
+
+        // Level 4 talents
+        new TalentAuthoring
+        {
+            name = "Technique",
+            stat = StatType.TalentTechnique,
+            pointCost = 1,
+            levelRequirement = 4,
+            maxTalentLevel = 10,
+            requires = new StatRequirement[]
+            {
+                // No special requirements
+            },
+            grants = new StatData[]
+            {
+                new StatData { type = StatType.Strength, value = 10 },
+            },
+        }, // Technique
     };
 
     public static void CreateTalentsAsEntities(EntityManager entityManager)

@@ -1,13 +1,20 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/gameUSS.uss?fileID=7433441132597879392&amp;guid=45a1f232f0865b542a364661fc4377b2&amp;type=3#gameUSS" />
-    <ui:VisualElement name="talents-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.5); flex-direction: row-reverse;">
+    <ui:VisualElement name="main-menu-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); align-items: center; display: flex; opacity: 1;">
+        <ui:VisualElement class="menu-dark" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.82); width: 250px; justify-content: center;">
+            <ui:Label tabindex="-1" text="Big Project 4" display-tooltip-when-elided="true" style="-unity-text-align: upper-center; font-size: 69px; color: rgb(255, 255, 255); margin-bottom: 53px;" />
+            <ui:Button text="Button" display-tooltip-when-elided="true" />
+            <ui:Button text="Button" display-tooltip-when-elided="true" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="talents-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.5); flex-direction: row-reverse; display: none;">
         <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
             <ui:ScrollView style="flex-grow: 1; height: 100%;">
                 <ui:VisualElement name="talent-column-parent" style="background-color: rgba(0, 0, 0, 0); flex-direction: row; position: absolute;" />
             </ui:ScrollView>
         </ui:VisualElement>
-        <ui:VisualElement name="tooltip" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0.82); min-height: 100%; width: 30%; min-width: 300px; justify-content: center; align-items: flex-start; color: rgb(255, 255, 255);">
-            <ui:Toggle label="Refund" name="talent-refund-toggle" value="false" style="color: rgb(255, 255, 255); width: 194px; font-size: 19px; position: absolute; top: 10px; left: 317px;" />
+        <ui:VisualElement name="tooltip" class="menu-dark" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0.82); min-height: 100%; width: 30%; min-width: 300px; justify-content: center; align-items: flex-start; color: rgb(255, 255, 255);">
+            <ui:Toggle label="Refund" name="talent-refund-toggle" value="false" class="menu-light" style="color: rgb(255, 255, 255); width: 186px; font-size: 19px; position: absolute; top: 10px; left: 317px; background-color: rgba(0, 0, 0, 0.5);" />
             <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="tooltip-text" style="min-width: 100%; padding-right: 8px; padding-left: 8px; white-space: normal; text-overflow: ellipsis; -unity-text-align: middle-left;" />
         </ui:VisualElement>
     </ui:VisualElement>

@@ -567,6 +567,8 @@ public enum StatType
     TalentMedicine,
     TalentDefense,
 
+    TalentTechnique,
+
     // Base stats
     Strength,
     Intelligence,

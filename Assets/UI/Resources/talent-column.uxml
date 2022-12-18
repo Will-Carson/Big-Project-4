@@ -1,5 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement content-container="true" class="talent-column content-container" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0.5); width: 250px; margin-left: 20px; height: 100%; min-height: 1000px; flex-shrink: 0; justify-content: center; align-items: center;">
+    <Style src="project://database/Assets/UI/gameUSS.uss?fileID=7433441132597879392&amp;guid=45a1f232f0865b542a364661fc4377b2&amp;type=3#gameUSS" />
+    <ui:VisualElement content-container="true" class="talent-column content-container menu-light" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0.5); width: 250px; margin-left: 20px; height: 100%; min-height: 1000px; flex-shrink: 0; justify-content: center; align-items: center;">
         <ui:Label tabindex="-1" text="1" display-tooltip-when-elided="true" name="level-label" style="position: absolute; width: 40px; left: -20px; -unity-text-align: upper-center; color: rgb(236, 236, 236); font-size: 30px;" />
     </ui:VisualElement>
 </ui:UXML>

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -53,7 +52,9 @@ public partial class UISetup : SystemBase
 
             // build the tooltip string
             var tooltipString = $"{talent.name}\n\nRequirements:\n\n";
-            
+
+            tooltipString += $"{StatType.TalentPoint} : {talent.pointCost}\n";
+
             foreach (var requirement in talent.requires)
             {
                 tooltipString += requirement.ToString() + "\n";
@@ -81,5 +82,15 @@ public partial class UISetup : SystemBase
 
             column.Add(talentButton);
         }
+    }
+}
+
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation
+    | WorldSystemFilterFlags.Default)]
+public partial class UISystem : SystemBase
+{
+    protected override void OnUpdate()
+    {
+
     }
 }
