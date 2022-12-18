@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="talents-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);" />
+    <ui:VisualElement name="square1" class="rounded-corners blue-square red-square" />
+    <ui:VisualElement name="square2" class="red-square rounded-corners" />
+    <ui:VisualElement name="square3" class="red-square rounded-corners blue-square" />
+</ui:UXML>

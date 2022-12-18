@@ -12,7 +12,7 @@ public class StatsTestAuthoring : MonoBehaviour
             var extraStatStickEntity = CreateAdditionalEntity(entityName: "Extra stats");
             AddBuffer<EquippedTo>(extraStatStickEntity);
             var extraStatStickStats = AddBuffer<StatContainer>(extraStatStickEntity);
-            extraStatStickStats.Add(new StatContainer { stat = new StatData { type = StatType.Strength, value = 100 } });
+            extraStatStickStats.Add(new StatContainer { stat = new StatData { type = StatType.Intelligence, value = 100 } });
 
             var baseStatStickEntity = CreateAdditionalEntity(entityName: "Base stats");
             AddBuffer<EquippedTo>(baseStatStickEntity);
@@ -21,13 +21,13 @@ public class StatsTestAuthoring : MonoBehaviour
             //baseStatStickStats.Add(new StatContainer { stat = new StatData { type = StatType.Strength, value = 100 } });
 
             var equipStatSticks = AddBuffer<EquipStatStickRequest>();
-            equipStatSticks.Add(new EquipStatStickRequest { equip = true, statStick = extraStatStickEntity });
+            equipStatSticks.Add(new EquipStatStickRequest { unequip = false, statStick = extraStatStickEntity });
             //equipStatSticks.Add(new EquipStatStickRequest { equip = true, statStick = baseStatStickEntity });
 
             var derivedStats = AddBuffer<DerivedStat>();
             derivedStats.Add(new DerivedStat
             {
-                fromStat = new StatData { type = StatType.Strength, value = 10 },
+                fromStat = new StatData { type = StatType.Intelligence, value = 10 },
                 toStat = new StatData { type = StatType.Health, value = 2 }
             });
 

@@ -37,11 +37,13 @@ using Unity.Mathematics;
 public partial struct StatStickEquipper : ISystem
 {
     private BufferLookup<EquippedTo> equippedToLookup;
+    private BufferLookup<StatRequirementContainer> statStickRequirementLookup;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state) 
     { 
         equippedToLookup = state.GetBufferLookup<EquippedTo>();
+        statStickRequirementLookup = state.GetBufferLookup<StatRequirementContainer>(true);
     }
 
     [BurstCompile]
@@ -51,12 +53,14 @@ public partial struct StatStickEquipper : ISystem
     public void OnUpdate(ref SystemState state)
     {
         equippedToLookup.Update(ref state);
+        statStickRequirementLookup.Update(ref state);
 
         var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
 
-        foreach (var (requests, statSticks, entity) in SystemAPI.Query<
+        foreach (var (requests, statSticks, stats, entity) in SystemAPI.Query<
             DynamicBuffer<EquipStatStickRequest>,
-            DynamicBuffer<StatStickContainer>>()
+            DynamicBuffer<StatStickContainer>,
+            DynamicBuffer<StatContainer>>()
             .WithEntityAccess())
         {
             var wasChanged = false;
@@ -71,16 +75,7 @@ public partial struct StatStickEquipper : ISystem
                 }
                 var statStickEquippedToBuffer = equippedToLookup[req.statStick];
 
-                if (req.equip)
-                {
-                    statSticks.Add(new StatStickContainer { statStick = req.statStick });
-
-                    // Add to the EquippedTo buffer on the stat stick
-                    statStickEquippedToBuffer.Add(new EquippedTo { entity = entity });
-
-                    wasChanged = true;
-                }
-                else
+                if (req.unequip)
                 {
                     for (var j = 0; j < statSticks.Length; j++)
                     {
@@ -101,8 +96,45 @@ public partial struct StatStickEquipper : ISystem
                             }
 
                             wasChanged = true;
+                            break;
                         }
                     }
+                }
+                else
+                {
+                    var requirementsMet = true;
+
+                    // Check if this stat stick can be equipped. If the stat stick has no requirements, skip this step
+                    if (statStickRequirementLookup.TryGetBuffer(req.statStick, out var requirementsBuffer))
+                    {
+                        for (var j = 0; j < requirementsBuffer.Length; j++)
+                        {
+                            var requirement = requirementsBuffer[j].requirement;
+                            
+                            for (var k = 0; k < stats.Length; k++)
+                            {
+                                var stat = stats[k].stat;
+                                if (requirement.stat == stat.type && !requirement.IsInRange(stat))
+                                {
+                                    requirementsMet = false;
+                                    break;
+                                }
+                            }
+
+                            // If we have already figured out we don't meet requirements, exit early
+                            if (!requirementsMet) break;
+                        }
+                    }
+
+                    if (!requirementsMet) continue;
+
+                    // Equip the statstick
+                    statSticks.Add(new StatStickContainer { statStick = req.statStick });
+
+                    // Add to the EquippedTo buffer on the stat stick
+                    statStickEquippedToBuffer.Add(new EquippedTo { entity = entity });
+
+                    wasChanged = true;
                 }
             }
             if (wasChanged)
@@ -119,7 +151,7 @@ public partial struct StatStickEquipper : ISystem
 public struct EquipStatStickRequest : IBufferElementData
 {
     public Entity statStick;
-    public bool equip;
+    public bool unequip;
 }
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
@@ -416,8 +448,10 @@ public class StatRecalculationSystemGroup : ComponentSystemGroup
 /// </summary>
 public struct StatRecalculationTag : IComponentData { }
 
+[GhostComponent(OwnerSendType = SendToOwnerType.SendToOwner)]
 public struct StatContainer : IBufferElementData
 {
+    [GhostField]
     public StatData stat;
 
     public static void Add(DynamicBuffer<StatContainer> stats, StatData statToAdd)
@@ -463,6 +497,24 @@ public struct ResourceContainer : IBufferElementData
     }
 }
 
+public struct StatRequirementContainer : IBufferElementData
+{
+    public StatRequirement requirement;
+}
+
+public struct StatRequirement
+{
+    public StatType stat;
+    public int min;
+    public int max;
+
+    public bool IsInRange(StatData stat)
+    {
+        if (this.stat != stat.type) return false;
+        return stat.value >= min && stat.value <= max;
+    }
+}
+
 /// <summary>
 /// Matches a stat and a value
 /// </summary>
@@ -488,6 +540,23 @@ public struct StatData
 public enum StatType
 {
     None,
+
+    // Meta stats. Must be at the top since they can grant anything. 
+    Level,
+    TalentPoint,
+
+    // Talents. Talents must be early since 
+    TalentBrawny,
+    TalentBrainy,
+    TalentLithe,
+
+    // Base stats
     Strength,
-    Health
+    Intelligence,
+    Dexterity,
+
+    // Resources
+    Health,
+
+    // Other stats
 }
