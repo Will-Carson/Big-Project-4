@@ -392,41 +392,6 @@ public partial class NetworkServerSystem : SystemBase
     }
 }
 
-[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
-public partial class NetworkClientSystem : SystemBase
-{
-    protected override void OnCreate()
-    {
-        var singleton = EntityManager.CreateEntity();
-        EntityManager.AddComponentData(singleton, new Singleton { world = World.Unmanaged });
-    }
-
-    protected override void OnUpdate()
-    {
-
-    }
-
-    public struct Singleton : IComponentData
-    {
-        public WorldUnmanaged world;
-
-        public void SendRpc<T>(T rpc)
-            where T : unmanaged, IRpcCommand
-        {
-            var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(world);
-            SendRpc(rpc, commandBuffer);
-        }
-
-        public void SendRpc<T>(T rpc, EntityCommandBuffer commandBuffer)
-            where T : unmanaged, IRpcCommand
-        {
-            var rpcEntity = commandBuffer.CreateEntity();
-            commandBuffer.AddComponent<SendRpcCommandRequestComponent>(rpcEntity);
-            commandBuffer.AddComponent(rpcEntity, rpc);
-        }
-    }
-}
-
 public struct TalentAllocationRequestRPC : IRpcCommand
 {
     public StatType stat;

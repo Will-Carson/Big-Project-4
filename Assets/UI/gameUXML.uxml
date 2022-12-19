@@ -1,10 +1,29 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/gameUSS.uss?fileID=7433441132597879392&amp;guid=45a1f232f0865b542a364661fc4377b2&amp;type=3#gameUSS" />
     <ui:VisualElement name="main-menu-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); align-items: center; display: flex; opacity: 1;">
-        <ui:VisualElement class="menu-dark" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.82); width: 250px; justify-content: center;">
-            <ui:Label tabindex="-1" text="Big Project 4" display-tooltip-when-elided="true" style="-unity-text-align: upper-center; font-size: 69px; color: rgb(255, 255, 255); margin-bottom: 53px;" />
-            <ui:Button text="Button" display-tooltip-when-elided="true" />
-            <ui:Button text="Button" display-tooltip-when-elided="true" />
+        <ui:VisualElement class="menu-dark" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.82); width: 250px; justify-content: flex-start;">
+            <ui:VisualElement name="initial-screen" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; display: flex;">
+                <ui:Label tabindex="-1" text="Big Project 4" display-tooltip-when-elided="true" style="-unity-text-align: upper-center; font-size: 69px; color: rgb(255, 255, 255); margin-bottom: 53px; -unity-text-outline-width: 2px; -unity-text-outline-color: rgb(0, 0, 0);" />
+                <ui:Button text="Create Account" display-tooltip-when-elided="true" name="create-account-button" />
+                <ui:Button text="Login" display-tooltip-when-elided="true" name="login-button" />
+                <ui:Button text="Exit" display-tooltip-when-elided="true" name="exit-button" style="margin-top: 40px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="create-account-screen" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; display: none;">
+                <ui:TextField picking-mode="Ignore" value="Username" name="username-textfield" />
+                <ui:TextField picking-mode="Ignore" value="Email" name="email-textfield" />
+                <ui:TextField picking-mode="Ignore" value="Password" name="password-textfield" />
+                <ui:TextField picking-mode="Ignore" value="Verify password" name="verify-password-textfield" />
+                <ui:Button text="Create Account" display-tooltip-when-elided="true" name="create-account-button" style="margin-top: 40px;" />
+                <ui:Button text="Back" display-tooltip-when-elided="true" name="back-button" style="margin-top: 40px;" />
+                <ui:Button text="Exit" display-tooltip-when-elided="true" name="exit-button" />
+            </ui:VisualElement>
+            <ui:VisualElement name="login-screen" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; display: none;">
+                <ui:TextField picking-mode="Ignore" value="Username" name="username-textfield" />
+                <ui:TextField picking-mode="Ignore" value="Password" name="password-textfield" />
+                <ui:Button text="Login" display-tooltip-when-elided="true" name="create-account-button" style="margin-top: 40px;" />
+                <ui:Button text="Back" display-tooltip-when-elided="true" name="back-button" style="margin-top: 40px;" />
+                <ui:Button text="Exit" display-tooltip-when-elided="true" name="exit-button" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
     <ui:VisualElement name="talents-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.5); flex-direction: row-reverse; display: none;">
@@ -16,6 +35,48 @@
         <ui:VisualElement name="tooltip" class="menu-dark" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0.82); min-height: 100%; width: 30%; min-width: 300px; justify-content: center; align-items: flex-start; color: rgb(255, 255, 255);">
             <ui:Toggle label="Refund" name="talent-refund-toggle" value="false" class="menu-light" style="color: rgb(255, 255, 255); width: 186px; font-size: 19px; position: absolute; top: 10px; left: 317px; background-color: rgba(0, 0, 0, 0.5);" />
             <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="tooltip-text" style="min-width: 100%; padding-right: 8px; padding-left: 8px; white-space: normal; text-overflow: ellipsis; -unity-text-align: middle-left;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="inventory-and-equipment-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); display: none;">
+        <ui:VisualElement class="menu-dark" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.82); position: absolute; left: auto; right: 0; min-height: 100%; width: auto; flex-shrink: 0; padding-left: 20px; padding-right: 20px; padding-top: 20px; padding-bottom: 60px;">
+            <ui:VisualElement name="equipment" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center;">
+                <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row; justify-content: space-around; align-items: center;">
+                    <ui:Button text="Right&#10;Hand" display-tooltip-when-elided="true" name="right-hand-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button text="Head" display-tooltip-when-elided="true" name="head-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button text="Hands" display-tooltip-when-elided="true" name="hands-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button text="Neck" display-tooltip-when-elided="true" name="neck-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button text="Right&#10;Ring" display-tooltip-when-elided="true" name="right-ring-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row; justify-content: space-around; align-items: center;">
+                    <ui:Button text="Left&#10;Hand" display-tooltip-when-elided="true" name="left-hand-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button text="Chest" display-tooltip-when-elided="true" name="chest-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button text="Feet" display-tooltip-when-elided="true" name="feet-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button text="Waist" display-tooltip-when-elided="true" name="waist-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button text="Left&#10;Ring" display-tooltip-when-elided="true" name="left-ring-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="inventory" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); margin-bottom: 0;">
+                <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row;">
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-0" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-1" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-2" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-3" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-4" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-5" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-6" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-7" class="inventory-button" style="width: 50px; height: 100px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row;">
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-8" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-9" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-10" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-11" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-12" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-13" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-14" class="inventory-button" style="width: 50px; height: 100px;" />
+                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-15" class="inventory-button" style="width: 50px; height: 100px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
