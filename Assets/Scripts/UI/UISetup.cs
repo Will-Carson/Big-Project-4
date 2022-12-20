@@ -220,118 +220,118 @@ public partial class UISetup : SystemBase
 
     private void InventoryAndEquipmentUIElementSetup()
     {
-        // TODO add sending rpcs to callbacks
-        var inventoryAndEquipmentRoot = Object.FindObjectOfType<UIDocument>().rootVisualElement.Q("inventory-and-equipment-root");
+        //// TODO add sending rpcs to callbacks
+        //var inventoryAndEquipmentRoot = Object.FindObjectOfType<UIDocument>().rootVisualElement.Q("inventory-and-equipment-root");
 
-        // Configure inventory slots
-        for (var i = 1; i <= 16; i++)
-        {
-            var button = inventoryAndEquipmentRoot.Q<Button>("inventory-slot-" + i);
+        //// Configure inventory slots
+        //for (uint i = 1; i <= 16; i++)
+        //{
+        //    var button = inventoryAndEquipmentRoot.Q<Button>("inventory-slot-" + i);
 
-            if (button == null) continue;
+        //    if (button == null) continue;
 
-            var slotNum = i;
-            button.RegisterCallback<MouseUpEvent>(e =>
-            {
-                Debug.Log((e.target as VisualElement).name);
-                containerRpcs.Add(new PressContainerSlotRpc
-                {
-                    containerType = ContainerType.Inventory,
-                    slotId = slotNum
-                });
-            });
-        }
+        //    var slotNum = i;
+        //    button.RegisterCallback<MouseUpEvent>(e =>
+        //    {
+        //        Debug.Log((e.target as VisualElement).name);
+        //        containerRpcs.Add(new PressContainerSlotRpc
+        //        {
+        //            containerType = ContainerType.Inventory,
+        //            slotId = slotNum
+        //        });
+        //    });
+        //}
 
-        //Configure equipment slots
-        inventoryAndEquipmentRoot.Q<Button>("right-hand-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        {
-            Debug.Log((e.target as VisualElement).name);
-            containerRpcs.Add(new PressContainerSlotRpc
-            {
-                containerType = ContainerType.Equipment,
-                slotId = (int)EquipmentSlot.RightHand
-            });
-        });
-        inventoryAndEquipmentRoot.Q<Button>("left-hand-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        {
-            Debug.Log((e.target as VisualElement).name);
-            containerRpcs.Add(new PressContainerSlotRpc
-            {
-                containerType = ContainerType.Equipment,
-                slotId = (int)EquipmentSlot.LeftHand
-            });
-        });
-        inventoryAndEquipmentRoot.Q<Button>("head-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        {
-            Debug.Log((e.target as VisualElement).name);
-            containerRpcs.Add(new PressContainerSlotRpc
-            {
-                containerType = ContainerType.Equipment,
-                slotId = (int)EquipmentSlot.Head
-            });
-        });
-        inventoryAndEquipmentRoot.Q<Button>("chest-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        {
-            Debug.Log((e.target as VisualElement).name);
-            containerRpcs.Add(new PressContainerSlotRpc
-            {
-                containerType = ContainerType.Equipment,
-                slotId = (int)EquipmentSlot.Chest
-            });
-        });
-        inventoryAndEquipmentRoot.Q<Button>("hands-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        {
-            Debug.Log((e.target as VisualElement).name);
-            containerRpcs.Add(new PressContainerSlotRpc
-            {
-                containerType = ContainerType.Equipment,
-                slotId = (int)EquipmentSlot.Hands
-            });
-        });
-        inventoryAndEquipmentRoot.Q<Button>("feet-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        {
-            Debug.Log((e.target as VisualElement).name);
-            containerRpcs.Add(new PressContainerSlotRpc
-            {
-                containerType = ContainerType.Equipment,
-                slotId = (int)EquipmentSlot.Feet
-            });
-        });
-        inventoryAndEquipmentRoot.Q<Button>("neck-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        {
-            Debug.Log((e.target as VisualElement).name);
-            containerRpcs.Add(new PressContainerSlotRpc
-            {
-                containerType = ContainerType.Equipment,
-                slotId = (int)EquipmentSlot.Neck
-            });
-        });
-        inventoryAndEquipmentRoot.Q<Button>("waist-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        {
-            Debug.Log((e.target as VisualElement).name);
-            containerRpcs.Add(new PressContainerSlotRpc
-            {
-                containerType = ContainerType.Equipment,
-                slotId = (int)EquipmentSlot.Waist
-            });
-        });
-        inventoryAndEquipmentRoot.Q<Button>("right-ring-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        {
-            Debug.Log((e.target as VisualElement).name);
-            containerRpcs.Add(new PressContainerSlotRpc
-            {
-                containerType = ContainerType.Equipment,
-                slotId = (int)EquipmentSlot.RightRing
-            });
-        });
-        inventoryAndEquipmentRoot.Q<Button>("left-ring-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        {
-            Debug.Log((e.target as VisualElement).name);
-            containerRpcs.Add(new PressContainerSlotRpc
-            {
-                containerType = ContainerType.Equipment,
-                slotId = (int)EquipmentSlot.LeftRing
-            });
-        });
+        ////Configure equipment slots
+        //inventoryAndEquipmentRoot.Q<Button>("right-hand-equipment-button").RegisterCallback<MouseUpEvent>(e =>
+        //{
+        //    Debug.Log((e.target as VisualElement).name);
+        //    containerRpcs.Add(new PressContainerSlotRpc
+        //    {
+        //        containerType = ContainerType.Equipment,
+        //        slotId = (int)EquipmentSlot.RightHand
+        //    });
+        //});
+        //inventoryAndEquipmentRoot.Q<Button>("left-hand-equipment-button").RegisterCallback<MouseUpEvent>(e =>
+        //{
+        //    Debug.Log((e.target as VisualElement).name);
+        //    containerRpcs.Add(new PressContainerSlotRpc
+        //    {
+        //        containerType = ContainerType.Equipment,
+        //        slotId = (int)EquipmentSlot.LeftHand
+        //    });
+        //});
+        //inventoryAndEquipmentRoot.Q<Button>("head-equipment-button").RegisterCallback<MouseUpEvent>(e =>
+        //{
+        //    Debug.Log((e.target as VisualElement).name);
+        //    containerRpcs.Add(new PressContainerSlotRpc
+        //    {
+        //        containerType = ContainerType.Equipment,
+        //        slotId = (int)EquipmentSlot.Head
+        //    });
+        //});
+        //inventoryAndEquipmentRoot.Q<Button>("chest-equipment-button").RegisterCallback<MouseUpEvent>(e =>
+        //{
+        //    Debug.Log((e.target as VisualElement).name);
+        //    containerRpcs.Add(new PressContainerSlotRpc
+        //    {
+        //        containerType = ContainerType.Equipment,
+        //        slotId = (int)EquipmentSlot.Chest
+        //    });
+        //});
+        //inventoryAndEquipmentRoot.Q<Button>("hands-equipment-button").RegisterCallback<MouseUpEvent>(e =>
+        //{
+        //    Debug.Log((e.target as VisualElement).name);
+        //    containerRpcs.Add(new PressContainerSlotRpc
+        //    {
+        //        containerType = ContainerType.Equipment,
+        //        slotId = (int)EquipmentSlot.Hands
+        //    });
+        //});
+        //inventoryAndEquipmentRoot.Q<Button>("feet-equipment-button").RegisterCallback<MouseUpEvent>(e =>
+        //{
+        //    Debug.Log((e.target as VisualElement).name);
+        //    containerRpcs.Add(new PressContainerSlotRpc
+        //    {
+        //        containerType = ContainerType.Equipment,
+        //        slotId = (int)EquipmentSlot.Feet
+        //    });
+        //});
+        //inventoryAndEquipmentRoot.Q<Button>("neck-equipment-button").RegisterCallback<MouseUpEvent>(e =>
+        //{
+        //    Debug.Log((e.target as VisualElement).name);
+        //    containerRpcs.Add(new PressContainerSlotRpc
+        //    {
+        //        containerType = ContainerType.Equipment,
+        //        slotId = (int)EquipmentSlot.Neck
+        //    });
+        //});
+        //inventoryAndEquipmentRoot.Q<Button>("waist-equipment-button").RegisterCallback<MouseUpEvent>(e =>
+        //{
+        //    Debug.Log((e.target as VisualElement).name);
+        //    containerRpcs.Add(new PressContainerSlotRpc
+        //    {
+        //        containerType = ContainerType.Equipment,
+        //        slotId = (int)EquipmentSlot.Waist
+        //    });
+        //});
+        //inventoryAndEquipmentRoot.Q<Button>("right-ring-equipment-button").RegisterCallback<MouseUpEvent>(e =>
+        //{
+        //    Debug.Log((e.target as VisualElement).name);
+        //    containerRpcs.Add(new PressContainerSlotRpc
+        //    {
+        //        containerType = ContainerType.Equipment,
+        //        slotId = (int)EquipmentSlot.RightRing
+        //    });
+        //});
+        //inventoryAndEquipmentRoot.Q<Button>("left-ring-equipment-button").RegisterCallback<MouseUpEvent>(e =>
+        //{
+        //    Debug.Log((e.target as VisualElement).name);
+        //    containerRpcs.Add(new PressContainerSlotRpc
+        //    {
+        //        containerType = ContainerType.Equipment,
+        //        slotId = (int)EquipmentSlot.LeftRing
+        //    });
+        //});
     }
 }
