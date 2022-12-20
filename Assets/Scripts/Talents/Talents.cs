@@ -310,7 +310,7 @@ public partial class TalentServerSystem : SystemBase
 
         Entities
         .ForEach((
-        in TalentAllocationRequestRPC rpc,
+        in TalentAllocationRequestRpc rpc,
         in ReceiveRpcCommandRequestComponent receive,
         in Entity entity) =>
         {
@@ -337,7 +337,7 @@ public partial class TalentServerSystem : SystemBase
     }
 }
 
-public struct TalentAllocationRequestRPC : IRpcCommand
+public struct TalentAllocationRequestRpc : IRpcCommand
 {
     public StatType stat;
     public bool deallocate;

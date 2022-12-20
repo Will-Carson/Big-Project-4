@@ -10,7 +10,7 @@ public partial class UISetup : SystemBase
 {
     Dictionary<Button, string> tooltips = new Dictionary<Button, string>();
 
-    NativeList<TalentAllocationRequestRPC> talentRpcs = new NativeList<TalentAllocationRequestRPC>(Allocator.Persistent);
+    NativeList<TalentAllocationRequestRpc> talentRpcs = new NativeList<TalentAllocationRequestRpc>(Allocator.Persistent);
     NativeList<PressContainerSlotRpc> containerRpcs = new NativeList<PressContainerSlotRpc>(Allocator.Persistent);
 
     protected override void OnDestroy()
@@ -42,6 +42,8 @@ public partial class UISetup : SystemBase
             commandBuffer.AddComponent(rpcEntity, rpc);
         }
         containerRpcs.Clear();
+
+
     }
 
     bool setup = false;
@@ -205,7 +207,7 @@ public partial class UISetup : SystemBase
             button.RegisterCallback<MouseUpEvent>(e =>
             {
                 Debug.Log($"stat: {talent.stat}, refund: {talentRefundToggle.value}");
-                talentRpcs.Add(new TalentAllocationRequestRPC
+                talentRpcs.Add(new TalentAllocationRequestRpc
                 {
                     deallocate = talentRefundToggle.value,
                     stat = talent.stat
@@ -222,7 +224,7 @@ public partial class UISetup : SystemBase
         var inventoryAndEquipmentRoot = Object.FindObjectOfType<UIDocument>().rootVisualElement.Q("inventory-and-equipment-root");
 
         // Configure inventory slots
-        for (var i = 0; i < 16; i++)
+        for (var i = 1; i <= 16; i++)
         {
             var button = inventoryAndEquipmentRoot.Q<Button>("inventory-slot-" + i);
 
@@ -235,7 +237,7 @@ public partial class UISetup : SystemBase
                 containerRpcs.Add(new PressContainerSlotRpc
                 {
                     containerType = ContainerType.Inventory,
-                    slot = slotNum
+                    slotId = slotNum
                 });
             });
         }
@@ -247,7 +249,7 @@ public partial class UISetup : SystemBase
             containerRpcs.Add(new PressContainerSlotRpc
             {
                 containerType = ContainerType.Equipment,
-                slot = (int)EquipmentSlot.RightHand
+                slotId = (int)EquipmentSlot.RightHand
             });
         });
         inventoryAndEquipmentRoot.Q<Button>("left-hand-equipment-button").RegisterCallback<MouseUpEvent>(e =>
@@ -256,7 +258,7 @@ public partial class UISetup : SystemBase
             containerRpcs.Add(new PressContainerSlotRpc
             {
                 containerType = ContainerType.Equipment,
-                slot = (int)EquipmentSlot.LeftHand
+                slotId = (int)EquipmentSlot.LeftHand
             });
         });
         inventoryAndEquipmentRoot.Q<Button>("head-equipment-button").RegisterCallback<MouseUpEvent>(e =>
@@ -265,7 +267,7 @@ public partial class UISetup : SystemBase
             containerRpcs.Add(new PressContainerSlotRpc
             {
                 containerType = ContainerType.Equipment,
-                slot = (int)EquipmentSlot.Head
+                slotId = (int)EquipmentSlot.Head
             });
         });
         inventoryAndEquipmentRoot.Q<Button>("chest-equipment-button").RegisterCallback<MouseUpEvent>(e =>
@@ -274,7 +276,7 @@ public partial class UISetup : SystemBase
             containerRpcs.Add(new PressContainerSlotRpc
             {
                 containerType = ContainerType.Equipment,
-                slot = (int)EquipmentSlot.Chest
+                slotId = (int)EquipmentSlot.Chest
             });
         });
         inventoryAndEquipmentRoot.Q<Button>("hands-equipment-button").RegisterCallback<MouseUpEvent>(e =>
@@ -283,7 +285,7 @@ public partial class UISetup : SystemBase
             containerRpcs.Add(new PressContainerSlotRpc
             {
                 containerType = ContainerType.Equipment,
-                slot = (int)EquipmentSlot.Hands
+                slotId = (int)EquipmentSlot.Hands
             });
         });
         inventoryAndEquipmentRoot.Q<Button>("feet-equipment-button").RegisterCallback<MouseUpEvent>(e =>
@@ -292,7 +294,7 @@ public partial class UISetup : SystemBase
             containerRpcs.Add(new PressContainerSlotRpc
             {
                 containerType = ContainerType.Equipment,
-                slot = (int)EquipmentSlot.Feet
+                slotId = (int)EquipmentSlot.Feet
             });
         });
         inventoryAndEquipmentRoot.Q<Button>("neck-equipment-button").RegisterCallback<MouseUpEvent>(e =>
@@ -301,7 +303,7 @@ public partial class UISetup : SystemBase
             containerRpcs.Add(new PressContainerSlotRpc
             {
                 containerType = ContainerType.Equipment,
-                slot = (int)EquipmentSlot.Neck
+                slotId = (int)EquipmentSlot.Neck
             });
         });
         inventoryAndEquipmentRoot.Q<Button>("waist-equipment-button").RegisterCallback<MouseUpEvent>(e =>
@@ -310,7 +312,7 @@ public partial class UISetup : SystemBase
             containerRpcs.Add(new PressContainerSlotRpc
             {
                 containerType = ContainerType.Equipment,
-                slot = (int)EquipmentSlot.Waist
+                slotId = (int)EquipmentSlot.Waist
             });
         });
         inventoryAndEquipmentRoot.Q<Button>("right-ring-equipment-button").RegisterCallback<MouseUpEvent>(e =>
@@ -319,7 +321,7 @@ public partial class UISetup : SystemBase
             containerRpcs.Add(new PressContainerSlotRpc
             {
                 containerType = ContainerType.Equipment,
-                slot = (int)EquipmentSlot.RightRing
+                slotId = (int)EquipmentSlot.RightRing
             });
         });
         inventoryAndEquipmentRoot.Q<Button>("left-ring-equipment-button").RegisterCallback<MouseUpEvent>(e =>
@@ -328,14 +330,8 @@ public partial class UISetup : SystemBase
             containerRpcs.Add(new PressContainerSlotRpc
             {
                 containerType = ContainerType.Equipment,
-                slot = (int)EquipmentSlot.LeftRing
+                slotId = (int)EquipmentSlot.LeftRing
             });
         });
     }
-}
-
-public struct PressContainerSlotRpc : IRpcCommand
-{
-    public ContainerType containerType;
-    public int slot;
 }
