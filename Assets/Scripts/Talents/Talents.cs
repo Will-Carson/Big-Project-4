@@ -308,16 +308,13 @@ public partial class TalentServerSystem : SystemBase
         var talentEntities = talentQuery.ToEntityArray(Allocator.Temp);
         var talentComponents = talentQuery.ToComponentDataArray<TalentComponent>(Allocator.Temp);
 
-        var netIdToEntity = NetworkServerSystem.NetIdToEntity;
-
         Entities
         .ForEach((
         in TalentAllocationRequestRPC rpc,
         in ReceiveRpcCommandRequestComponent receive,
         in Entity entity) =>
         {
-            var networkId = SystemAPI.GetComponent<NetworkIdComponent>(receive.SourceConnection).Value;
-            netIdToEntity.TryGetValue(networkId, out var targetEntity);
+            var targetEntity = SystemAPI.GetComponent<CommandTargetComponent>(receive.SourceConnection).targetEntity;
 
             for (var i = 0; i < talentComponents.Length; i++)
             {
@@ -340,76 +337,10 @@ public partial class TalentServerSystem : SystemBase
     }
 }
 
-[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
-public partial class NetworkServerSystem : SystemBase
-{
-    public static NativeHashMap<int, Entity> NetIdToEntity = 
-        new NativeHashMap<int, Entity>(10, Allocator.Persistent);
-
-    public static NativeHashMap<Entity, int> EntityToNetId = 
-        new NativeHashMap<Entity, int>(10, Allocator.Persistent);
-
-    protected override void OnDestroy()
-    {
-        NetIdToEntity.Dispose();
-        EntityToNetId.Dispose();
-    }
-
-    protected override void OnUpdate()
-    {
-        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
-
-        // Add new owned entities to the hashmaps.
-        Entities
-        .WithNone<GhostIdSystemCleanupTag>()
-        .ForEach((
-        in GhostOwnerComponent owner,
-        in Entity entity) =>
-        {
-            commandBuffer.AddComponent(entity, new GhostIdSystemCleanupTag { networkId = owner.NetworkId });
-            NetIdToEntity.Add(owner.NetworkId, entity);
-            EntityToNetId.Add(entity, owner.NetworkId);
-        })
-        .Run();
-
-        // Remove expired entities from the hashmaps.
-        Entities
-        .WithNone<GhostOwnerComponent>()
-        .ForEach((
-        in GhostIdSystemCleanupTag cleanup,
-        in Entity entity) =>
-        {
-            commandBuffer.DestroyEntity(entity);
-            NetIdToEntity.Remove(cleanup.networkId);
-            EntityToNetId.Remove(entity);
-        })
-        .Run();
-    }
-
-    public struct GhostIdSystemCleanupTag : ICleanupComponentData 
-    { 
-        public int networkId;
-    }
-}
-
 public struct TalentAllocationRequestRPC : IRpcCommand
 {
     public StatType stat;
     public bool deallocate;
-}
-
-[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
-public partial class TalentClientSystem : SystemBase
-{
-    /// <summary>
-    /// Update the UI when the player successfully allocates
-    /// Allow the player to un-allocate talents
-    /// </summary>
-
-    protected override void OnUpdate()
-    {
-
-    }
 }
 
 public struct TalentComponent : IComponentData

@@ -1,3 +1,4 @@
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
@@ -63,6 +64,6 @@ public struct GoInGameRpc : IRpcCommand { }
 
 public struct PrefabContainer : IBufferElementData
 {
-    public int id;
+    public FixedString64Bytes id;
     public Entity prefab;
 }

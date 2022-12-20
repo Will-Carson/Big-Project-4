@@ -162,13 +162,13 @@ public partial struct StatTotaller : ISystem
     private BufferLookup<StatContainer> statsLookup;
     private BufferLookup<StatStickContainer> statSticksLookup;
 
-    [BurstCompile]
+    //[BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         statsLookup = state.GetBufferLookup<StatContainer>(true);
         statSticksLookup = state.GetBufferLookup<StatStickContainer>(true);
 
-        state.RequireAnyForUpdate(state.GetEntityQuery(typeof(StatRecalculationTag)));
+        state.RequireForUpdate(state.GetEntityQuery(typeof(StatRecalculationTag)));
     }
 
     [BurstCompile]
@@ -177,14 +177,6 @@ public partial struct StatTotaller : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        // Clear stats for the next step
-        foreach (var (tag, stats) in SystemAPI.Query<
-            StatRecalculationTag,
-            DynamicBuffer<StatContainer>>())
-        {
-            stats.Clear();
-        }
-
         // Does it matter where these go if I have multiple foreachs?
         statsLookup.Update(ref state);
         statSticksLookup.Update(ref state);
@@ -196,6 +188,8 @@ public partial struct StatTotaller : ISystem
             .WithEntityAccess())
         {
             if (!statSticksLookup.HasBuffer(entity)) return;
+
+            stats.Clear();
 
             var statSticks = statSticksLookup[entity];
             var statTotals = new NativeHashMap<int, int>(10, Allocator.Temp);

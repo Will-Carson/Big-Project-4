@@ -1,39 +1,114 @@
 using System.Collections.Generic;
 using Unity.Entities;
+using Unity.NetCode;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation | WorldSystemFilterFlags.Default)]
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
 public partial class UISetup : SystemBase
 {
     Dictionary<Button, string> tooltips = new Dictionary<Button, string>();
 
     protected override void OnUpdate()
     {
+        Setup();
+        Enabled = false;
+    }
+
+    public void Setup()
+    {
         MainMenuSetup();
         InventoryAndEquipmentUIElementSetup();
         TalentUIElementSetup();
-
-        Enabled = false;
     }
 
     private void MainMenuSetup()
     {
         var mainMenuRoot = Object.FindObjectOfType<UIDocument>().rootVisualElement.Q("main-menu-root");
 
+        var initalScreen = mainMenuRoot.Q("initial-screen");
+        var createAccountScreen = mainMenuRoot.Q("create-account-screen");
+        var loginScreen = mainMenuRoot.Q("login-screen");
+
         // Setup initial screen
         {
-            var initalScreen = mainMenuRoot.Q("initial-screen");
+            var createAccountButton = initalScreen.Q<Button>("create-account-button");
+            var loginButton = initalScreen.Q<Button>("login-button");
+            var exitButton = initalScreen.Q<Button>("exit-button");
+
+            createAccountButton.RegisterCallback<MouseUpEvent>(e =>
+            {
+                initalScreen.style.display = DisplayStyle.None;
+                createAccountScreen.style.display = DisplayStyle.Flex;
+            }, TrickleDown.NoTrickleDown);
+
+            loginButton.RegisterCallback<MouseUpEvent>(e =>
+            {
+                initalScreen.style.display = DisplayStyle.None;
+                loginScreen.style.display = DisplayStyle.Flex;
+            }, TrickleDown.NoTrickleDown);
+
+            exitButton.RegisterCallback<MouseUpEvent>(e =>
+            {
+                Application.Quit();
+            }, TrickleDown.NoTrickleDown);
         }
 
         // Setup create account screen
         {
-            var createAccountScreen = mainMenuRoot.Q("create-account-screen");
+            var usernameTextField = createAccountScreen.Q<TextField>("username-textfield");
+            var emailTextField = createAccountScreen.Q<TextField>("email-textfield");
+            var passwordTextField = createAccountScreen.Q<TextField>("password-textfield");
+            var verifyPasswordTextField = createAccountScreen.Q<TextField>("verify-password-textfield");
+            var createAccountButton = createAccountScreen.Q<Button>("create-account-button");
+            var backButton = createAccountScreen.Q<Button>("back-button");
+            var exitButton = createAccountScreen.Q<Button>("exit-button");
+
+            createAccountButton.RegisterCallback<MouseUpEvent>(e =>
+            {
+                // Create the user account here
+
+                createAccountScreen.style.display = DisplayStyle.None;
+                loginScreen.style.display = DisplayStyle.Flex;
+            }, TrickleDown.NoTrickleDown);
+
+            backButton.RegisterCallback<MouseUpEvent>(e =>
+            {
+                createAccountScreen.style.display = DisplayStyle.None;
+                initalScreen.style.display = DisplayStyle.Flex;
+            }, TrickleDown.NoTrickleDown);
+
+            exitButton.RegisterCallback<MouseUpEvent>(e =>
+            {
+                Application.Quit();
+            }, TrickleDown.NoTrickleDown);
         }
 
         // Setup login screen
         {
-            var loginScreen = mainMenuRoot.Q("login-screen");
+            var usernameTextField = loginScreen.Q<TextField>("username-textfield");
+            var passwordTextField = loginScreen.Q<TextField>("password-textfield");
+            var loginButton = loginScreen.Q<Button>("login-button");
+            var backButton = loginScreen.Q<Button>("back-button");
+            var exitButton = loginScreen.Q<Button>("exit-button");
+
+            loginButton.RegisterCallback<MouseUpEvent>(e =>
+            {
+                // Log the player in here
+
+                mainMenuRoot.style.display = DisplayStyle.None;
+            }, TrickleDown.NoTrickleDown);
+
+            backButton.RegisterCallback<MouseUpEvent>(e =>
+            {
+                loginScreen.style.display = DisplayStyle.None;
+                initalScreen.style.display = DisplayStyle.Flex;
+            }, TrickleDown.NoTrickleDown);
+
+            exitButton.RegisterCallback<MouseUpEvent>(e =>
+            {
+                Application.Quit();
+            }, TrickleDown.NoTrickleDown);
         }
     }
 
@@ -48,10 +123,9 @@ public partial class UISetup : SystemBase
         var tooltip = talentsRoot.Q<Label>("tooltip-text");
         var talentRefundToggle = talentsRoot.Q<Toggle>("talent-refund-toggle");
 
-        var talents = TalentDefinitions.Talents;
         var talentColumnDictionary = new Dictionary<int, TemplateContainer>();
 
-        foreach (var talent in talents)
+        foreach (var talent in TalentDefinitions.Talents)
         {
             // If necessary build the new column for this talent, otherwise get an existing column
             if (!talentColumnDictionary.TryGetValue(talent.levelRequirement, out var column))
@@ -94,16 +168,18 @@ public partial class UISetup : SystemBase
             // Register the callback
             button.RegisterCallback<MouseEnterEvent>(e => tooltip.text = tooltips[button]);
             button.RegisterCallback<MouseLeaveEvent>(e => tooltip.text = "");
-            button.RegisterCallback<MouseUpEvent>(e => Debug.Log($"stat: {talent.stat}, refund: {talentRefundToggle.value}"));
-            // Need to actually send the rpc.
+            button.RegisterCallback<MouseUpEvent>(e =>
+            {
+                Debug.Log($"stat: {talent.stat}, refund: {talentRefundToggle.value}");
+            });
 
             column.Add(talentButton);
         }
-        Debug.Log("TalentUIElementSetup");
     }
 
     private void InventoryAndEquipmentUIElementSetup()
     {
+        // TODO add sending rpcs to callbacks
         var inventoryAndEquipmentRoot = Object.FindObjectOfType<UIDocument>().rootVisualElement.Q("inventory-and-equipment-root");
 
         // Configure inventory slots
@@ -164,12 +240,13 @@ public partial class UISetup : SystemBase
     }
 }
 
-[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation
-    | WorldSystemFilterFlags.Default)]
-public partial class UISystem : SystemBase
+public struct PressContainerSlotRpc : IRpcCommand
 {
-    protected override void OnUpdate()
-    {
+    public ContainerType containerType;
+    public int slot;
+}
 
-    }
+public struct UIEventRpc : IRpcCommand
+{
+
 }

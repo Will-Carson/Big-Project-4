@@ -20,7 +20,7 @@
             <ui:VisualElement name="login-screen" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; display: none;">
                 <ui:TextField picking-mode="Ignore" value="Username" name="username-textfield" />
                 <ui:TextField picking-mode="Ignore" value="Password" name="password-textfield" />
-                <ui:Button text="Login" display-tooltip-when-elided="true" name="create-account-button" style="margin-top: 40px;" />
+                <ui:Button text="Login" display-tooltip-when-elided="true" name="login-button" style="margin-top: 40px;" />
                 <ui:Button text="Back" display-tooltip-when-elided="true" name="back-button" style="margin-top: 40px;" />
                 <ui:Button text="Exit" display-tooltip-when-elided="true" name="exit-button" />
             </ui:VisualElement>
