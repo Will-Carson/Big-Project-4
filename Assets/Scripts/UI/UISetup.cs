@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using UnityEngine;
@@ -9,17 +10,50 @@ public partial class UISetup : SystemBase
 {
     Dictionary<Button, string> tooltips = new Dictionary<Button, string>();
 
+    NativeList<TalentAllocationRequestRPC> talentRpcs = new NativeList<TalentAllocationRequestRPC>(Allocator.Persistent);
+    NativeList<PressContainerSlotRpc> containerRpcs = new NativeList<PressContainerSlotRpc>(Allocator.Persistent);
+
+    protected override void OnDestroy()
+    {
+        talentRpcs.Dispose();
+        containerRpcs.Dispose();
+    }
+
     protected override void OnUpdate()
     {
         Setup();
-        Enabled = false;
+
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+
+        for (int i = 0; i < talentRpcs.Length; i++)
+        {
+            var rpc = talentRpcs[i];
+            var rpcEntity = commandBuffer.CreateEntity();
+            commandBuffer.AddComponent<SendRpcCommandRequestComponent>(rpcEntity);
+            commandBuffer.AddComponent(rpcEntity, rpc);
+        }
+        talentRpcs.Clear();
+
+        for (int i = 0; i < containerRpcs.Length; i++)
+        {
+            var rpc = containerRpcs[i];
+            var rpcEntity = commandBuffer.CreateEntity();
+            commandBuffer.AddComponent<SendRpcCommandRequestComponent>(rpcEntity);
+            commandBuffer.AddComponent(rpcEntity, rpc);
+        }
+        containerRpcs.Clear();
     }
 
+    bool setup = false;
     public void Setup()
     {
+        if (setup) return;
+
         MainMenuSetup();
         InventoryAndEquipmentUIElementSetup();
         TalentUIElementSetup();
+
+        setup = true;
     }
 
     private void MainMenuSetup()
@@ -171,6 +205,11 @@ public partial class UISetup : SystemBase
             button.RegisterCallback<MouseUpEvent>(e =>
             {
                 Debug.Log($"stat: {talent.stat}, refund: {talentRefundToggle.value}");
+                talentRpcs.Add(new TalentAllocationRequestRPC
+                {
+                    deallocate = talentRefundToggle.value,
+                    stat = talent.stat
+                });
             });
 
             column.Add(talentButton);
@@ -193,6 +232,11 @@ public partial class UISetup : SystemBase
             button.RegisterCallback<MouseUpEvent>(e =>
             {
                 Debug.Log((e.target as VisualElement).name);
+                containerRpcs.Add(new PressContainerSlotRpc
+                {
+                    containerType = ContainerType.Inventory,
+                    slot = slotNum
+                });
             });
         }
 
@@ -200,42 +244,92 @@ public partial class UISetup : SystemBase
         inventoryAndEquipmentRoot.Q<Button>("right-hand-equipment-button").RegisterCallback<MouseUpEvent>(e =>
         {
             Debug.Log((e.target as VisualElement).name);
+            containerRpcs.Add(new PressContainerSlotRpc
+            {
+                containerType = ContainerType.Equipment,
+                slot = (int)EquipmentSlot.RightHand
+            });
         });
         inventoryAndEquipmentRoot.Q<Button>("left-hand-equipment-button").RegisterCallback<MouseUpEvent>(e =>
         {
             Debug.Log((e.target as VisualElement).name);
+            containerRpcs.Add(new PressContainerSlotRpc
+            {
+                containerType = ContainerType.Equipment,
+                slot = (int)EquipmentSlot.LeftHand
+            });
         });
         inventoryAndEquipmentRoot.Q<Button>("head-equipment-button").RegisterCallback<MouseUpEvent>(e =>
         {
             Debug.Log((e.target as VisualElement).name);
+            containerRpcs.Add(new PressContainerSlotRpc
+            {
+                containerType = ContainerType.Equipment,
+                slot = (int)EquipmentSlot.Head
+            });
         });
         inventoryAndEquipmentRoot.Q<Button>("chest-equipment-button").RegisterCallback<MouseUpEvent>(e =>
         {
             Debug.Log((e.target as VisualElement).name);
+            containerRpcs.Add(new PressContainerSlotRpc
+            {
+                containerType = ContainerType.Equipment,
+                slot = (int)EquipmentSlot.Chest
+            });
         });
         inventoryAndEquipmentRoot.Q<Button>("hands-equipment-button").RegisterCallback<MouseUpEvent>(e =>
         {
             Debug.Log((e.target as VisualElement).name);
+            containerRpcs.Add(new PressContainerSlotRpc
+            {
+                containerType = ContainerType.Equipment,
+                slot = (int)EquipmentSlot.Hands
+            });
         });
         inventoryAndEquipmentRoot.Q<Button>("feet-equipment-button").RegisterCallback<MouseUpEvent>(e =>
         {
             Debug.Log((e.target as VisualElement).name);
+            containerRpcs.Add(new PressContainerSlotRpc
+            {
+                containerType = ContainerType.Equipment,
+                slot = (int)EquipmentSlot.Feet
+            });
         });
         inventoryAndEquipmentRoot.Q<Button>("neck-equipment-button").RegisterCallback<MouseUpEvent>(e =>
         {
             Debug.Log((e.target as VisualElement).name);
+            containerRpcs.Add(new PressContainerSlotRpc
+            {
+                containerType = ContainerType.Equipment,
+                slot = (int)EquipmentSlot.Neck
+            });
         });
         inventoryAndEquipmentRoot.Q<Button>("waist-equipment-button").RegisterCallback<MouseUpEvent>(e =>
         {
             Debug.Log((e.target as VisualElement).name);
+            containerRpcs.Add(new PressContainerSlotRpc
+            {
+                containerType = ContainerType.Equipment,
+                slot = (int)EquipmentSlot.Waist
+            });
         });
         inventoryAndEquipmentRoot.Q<Button>("right-ring-equipment-button").RegisterCallback<MouseUpEvent>(e =>
         {
             Debug.Log((e.target as VisualElement).name);
+            containerRpcs.Add(new PressContainerSlotRpc
+            {
+                containerType = ContainerType.Equipment,
+                slot = (int)EquipmentSlot.RightRing
+            });
         });
         inventoryAndEquipmentRoot.Q<Button>("left-ring-equipment-button").RegisterCallback<MouseUpEvent>(e =>
         {
             Debug.Log((e.target as VisualElement).name);
+            containerRpcs.Add(new PressContainerSlotRpc
+            {
+                containerType = ContainerType.Equipment,
+                slot = (int)EquipmentSlot.LeftRing
+            });
         });
     }
 }
@@ -244,9 +338,4 @@ public struct PressContainerSlotRpc : IRpcCommand
 {
     public ContainerType containerType;
     public int slot;
-}
-
-public struct UIEventRpc : IRpcCommand
-{
-
 }
