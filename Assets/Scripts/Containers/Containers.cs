@@ -27,33 +27,35 @@ public partial class ServerContainerSystem : SystemBase
     {
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
         var containerLookup = SystemAPI.GetBufferLookup<ContainerSlot>(false);
+        var idToContainerEntity = this.idToContainerEntity;
 
+        // TODO this needs another pass
         // Set up containers
-        Entities
-        .WithAll<DynamicBuffer<ContainerSlot>>()
-        .WithNone<ContainerSetupTag>()
-        .ForEach((
-        in Entity entity) =>
-        {
-            commandBuffer.SetComponent(entity, new ContainerId
-            {
-                id = nextContainerId++
-            });
-            idToContainerEntity.Add(nextContainerId, entity);
-        })
-        .Run();
+        //Entities
+        //.WithAll<DynamicBuffer<ContainerSlot>>()
+        //.WithNone<ContainerSetupTag>()
+        //.ForEach((
+        //in Entity entity) =>
+        //{
+        //    commandBuffer.SetComponent(entity, new ContainerId
+        //    {
+        //        id = nextContainerId++
+        //    });
+        //    idToContainerEntity.Add(nextContainerId, entity);
+        //})
+        //.Run();
 
-        Entities
-        .WithNone<DynamicBuffer<ContainerSlot>>()
-        .WithAll<ContainerSetupTag>()
-        .ForEach((
-        in ContainerId containerId,
-        in Entity entity) =>
-        {
-            commandBuffer.DestroyEntity(entity);
-            idToContainerEntity.Remove(containerId.id);
-        })
-        .Run();
+        //Entities
+        //.WithNone<DynamicBuffer<ContainerSlot>>()
+        //.WithAll<ContainerSetupTag>()
+        //.ForEach((
+        //in ContainerId containerId,
+        //in Entity entity) =>
+        //{
+        //    commandBuffer.DestroyEntity(entity);
+        //    idToContainerEntity.Remove(containerId.id);
+        //})
+        //.Run();
 
         // Process rpcs
         Entities
@@ -227,4 +229,18 @@ public enum SlotRestriction
     Ring,
     Ability,
     AbilityAugmnet
+}
+
+[GhostComponent]
+public struct ContainerIcon : IComponentData
+{
+    [GhostField]
+    public FixedString64Bytes name;
+}
+
+[GhostComponent]
+public struct ContainerLabel : IComponentData
+{
+    [GhostField]
+    public FixedString64Bytes label;
 }

@@ -38,44 +38,36 @@
         </ui:VisualElement>
     </ui:VisualElement>
     <ui:VisualElement name="inventory-and-equipment-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); display: flex;">
-        <ui:VisualElement class="menu-dark" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.82); position: absolute; left: auto; right: 0; min-height: 100%; width: auto; flex-shrink: 0; padding-left: 20px; padding-right: 20px; padding-top: 20px; padding-bottom: 60px;">
-            <ui:VisualElement name="equipment" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center;">
-                <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row; justify-content: space-around; align-items: center;">
-                    <ui:Button text="Main&#10;Hand" display-tooltip-when-elided="true" name="main-hand-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button text="Head" display-tooltip-when-elided="true" name="head-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button text="Hands" display-tooltip-when-elided="true" name="hands-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button text="Neck" display-tooltip-when-elided="true" name="neck-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button text="Right&#10;Ring" display-tooltip-when-elided="true" name="right-ring-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row; justify-content: space-around; align-items: center;">
-                    <ui:Button text="Off&#10;Hand" display-tooltip-when-elided="true" name="off-hand-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button text="Chest" display-tooltip-when-elided="true" name="chest-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button text="Feet" display-tooltip-when-elided="true" name="feet-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button text="Waist" display-tooltip-when-elided="true" name="waist-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button text="Left&#10;Ring" display-tooltip-when-elided="true" name="left-ring-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
-                </ui:VisualElement>
+        <ui:VisualElement class="menu-dark" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0.82); position: absolute; left: auto; right: 0; min-height: 100%; width: 473px; flex-shrink: 0; padding-left: 20px; padding-right: 20px; padding-top: 20px; padding-bottom: 60px; justify-content: space-around; align-items: center; height: 100%;">
+            <ui:VisualElement name="equipment" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row-reverse; justify-content: space-around; align-items: stretch; flex-wrap: wrap; width: 307px;">
+                <ui:Button text="Main&#10;Hand" display-tooltip-when-elided="true" name="main-hand-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button text="Head" display-tooltip-when-elided="true" name="head-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button text="Hands" display-tooltip-when-elided="true" name="hands-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button text="Neck" display-tooltip-when-elided="true" name="neck-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button text="Right&#10;Ring" display-tooltip-when-elided="true" name="right-ring-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button text="Off&#10;Hand" display-tooltip-when-elided="true" name="off-hand-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button text="Chest" display-tooltip-when-elided="true" name="chest-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button text="Feet" display-tooltip-when-elided="true" name="feet-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button text="Waist" display-tooltip-when-elided="true" name="waist-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button text="Left&#10;Ring" display-tooltip-when-elided="true" name="left-ring-equipment-button" class="inventory-button" style="width: 50px; height: 100px;" />
             </ui:VisualElement>
-            <ui:VisualElement name="inventory" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); margin-bottom: 0;">
-                <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row;">
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-1" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-2" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-3" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-4" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-5" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-6" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-7" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-8" class="inventory-button" style="width: 50px; height: 100px;" />
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row;">
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-9" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-10" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-11" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-12" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-13" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-14" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-15" class="inventory-button" style="width: 50px; height: 100px;" />
-                    <ui:Button display-tooltip-when-elided="true" name="inventory-slot-16" class="inventory-button" style="width: 50px; height: 100px;" />
-                </ui:VisualElement>
+            <ui:VisualElement name="inventory" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row; flex-wrap: wrap;">
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-1" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-2" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-3" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-4" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-5" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-6" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-7" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-8" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-9" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-10" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-11" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-12" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-13" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-14" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-15" class="inventory-button" style="width: 50px; height: 100px;" />
+                <ui:Button display-tooltip-when-elided="true" name="inventory-slot-16" class="inventory-button" style="width: 50px; height: 100px;" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

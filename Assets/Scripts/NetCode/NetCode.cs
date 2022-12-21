@@ -112,3 +112,61 @@ public partial class ClientRpcQueueSystem<T> : SystemBase
         rpcs.Add(rpc);
     }
 }
+
+// Something good here?
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
+public partial class ClientRpcEventSystem<T> : SystemBase
+    where T : unmanaged, IRpcCommand
+{
+    NativeList<T> rpcs = new NativeList<T>(Allocator.Persistent);
+
+    protected override void OnCreate()
+    {
+        var singletonEntity = EntityManager.CreateEntity();
+        var singleton = new Singleton
+        {
+            rpcs = new NativeList<T>(Allocator.Persistent)
+        };
+        EntityManager.AddComponentData(singletonEntity, singleton);
+    }
+
+    protected override void OnDestroy()
+    {
+        rpcs.Dispose();
+    }
+
+    protected override void OnUpdate()
+    {
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+        var rpcs = SystemAPI.GetSingleton<Singleton>().rpcs;
+
+        for (int i = 0; i < rpcs.Length; i++)
+        {
+            var rpc = rpcs[i];
+            var rpcEntity = commandBuffer.CreateEntity();
+            commandBuffer.AddComponent<SendRpcCommandRequestComponent>(rpcEntity);
+            commandBuffer.AddComponent(rpcEntity, rpc);
+        }
+        rpcs.Clear();
+    }
+
+    public struct Singleton : IComponentData
+    {
+        public NativeList<T> rpcs;
+
+        public void OnCreate()
+        {
+            rpcs = new NativeList<T>(Allocator.Persistent);
+        }
+
+        public void OnDestroy()
+        {
+            rpcs.Dispose();
+        }
+
+        public void Trigger(T rpc)
+        {
+            rpcs.Add(rpc);
+        }
+    }
+}

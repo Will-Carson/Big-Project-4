@@ -43,19 +43,59 @@ public partial class UISetup : SystemBase
         }
         containerRpcs.Clear();
 
+        var uiDocument = Object.FindObjectOfType<UIDocument>();
+        Entities
+        .WithAll<LocalPlayerTag>()
+        .ForEach((
+        in Entity entity,
+        in DynamicBuffer<ContainerSlot> rootContainer) =>
+        {
+            // Destroy current container stuff
+            // Build out new container stuff
+            // Link rpcs to buttons
 
+            /// FUCK
+            /// iterate over containers
+            /// match each container id to an object
+            /// that object manages updating and displaying its container
+            /// 
+
+            for (var i = 0; i < rootContainer.Length; i++)
+            {
+                var subContainer = rootContainer[i];
+
+                if (subContainer.id == 0)
+                {
+                    new ItemDisplay(uiDocument.rootVisualElement.Q("inventory"));
+                }
+                if (subContainer.id == 1)
+                {
+                    new ItemDisplay(uiDocument.rootVisualElement.Q("equipment"));
+                }
+                if (subContainer.id == 2)
+                {
+                    new ItemDisplay(uiDocument.rootVisualElement.Q("abilities"));
+                }
+                if (subContainer.id == 3)
+                {
+                    new ItemDisplay(uiDocument.rootVisualElement.Q("foreign"));
+                }
+            }
+        })
+        .WithoutBurst()
+        .Run();
     }
 
-    bool setup = false;
+    bool isSetup = false;
     public void Setup()
     {
-        if (setup) return;
+        if (isSetup) return;
 
         MainMenuSetup();
-        InventoryAndEquipmentUIElementSetup();
+        ContainerUIElementSetup();
         TalentUIElementSetup();
 
-        setup = true;
+        isSetup = true;
     }
 
     private void MainMenuSetup()
@@ -218,8 +258,10 @@ public partial class UISetup : SystemBase
         }
     }
 
-    private void InventoryAndEquipmentUIElementSetup()
+    private void ContainerUIElementSetup()
     {
+
+
         //// TODO add sending rpcs to callbacks
         //var inventoryAndEquipmentRoot = Object.FindObjectOfType<UIDocument>().rootVisualElement.Q("inventory-and-equipment-root");
 
@@ -333,5 +375,82 @@ public partial class UISetup : SystemBase
         //        slotId = (int)EquipmentSlot.LeftRing
         //    });
         //});
+    }
+}
+
+public class ItemDisplay
+{
+    public VisualElement visualElement;
+    public VisualElement containerSlotParentElement;
+    public Button itemButtonElement;
+
+    Dictionary<uint, ItemDisplay> slots = new Dictionary<uint, ItemDisplay>();
+
+    VisualTreeAsset childTemplateElement;
+
+    public ItemDisplay(VisualElement visualElement)
+    {
+        this.visualElement = visualElement;
+        containerSlotParentElement = visualElement.Q("container-slot-parent");
+        itemButtonElement = visualElement.Q<Button>("item-button");
+        childTemplateElement = Resources.Load<VisualTreeAsset>(visualElement.Q<Label>("child-path").text);
+    }
+
+    public void SetItem(Entity itemEntity, EntityManager em)
+    {
+        // Handle item data
+        var icon = Resources.Load<Sprite>(em.GetComponentData<ContainerIcon>(itemEntity).name.ToString());
+        itemButtonElement.style.backgroundImage = new StyleBackground(icon);
+
+        var label = em.GetComponentData<ContainerLabel>(itemEntity).label.ToString();
+        itemButtonElement.text = label;
+
+        // Build tooltip
+        var tooltip = "TEST TOOLTIP";
+        itemButtonElement.tooltip = tooltip;
+
+        // Handle container data
+        if (!em.HasBuffer<ContainerSlot>(itemEntity))
+        {
+            return;
+        }
+
+        var container = em.GetBuffer<ContainerSlot>(itemEntity);
+
+        if (containerSlotParentElement == null)
+        {
+            return;
+        }
+
+        if (childTemplateElement == null)
+        {
+            return;
+        }
+
+        if (!container.IsCreated)
+        {
+            return;
+        }
+
+        if (container.IsEmpty)
+        {
+            return;
+        }
+
+        for (var i = 0; i < container.Length; i++)
+        {
+            var slot = container[i];
+
+            if (slots.ContainsKey(slot.id))
+            {
+                continue;
+            }
+
+            var childElement = childTemplateElement.Instantiate();
+            visualElement.Add(childElement);
+            var itemDisplay = new ItemDisplay(childElement);
+            itemDisplay.SetItem(slot.item, em);
+            slots.Add(slot.id, itemDisplay);
+        }
     }
 }
