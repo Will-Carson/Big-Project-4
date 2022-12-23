@@ -146,30 +146,6 @@ public struct ItemSlotRestriction : IComponentData
     public SlotRestriction restriction;
 }
 
-public enum ContainerType
-{
-    None,
-    Inventory,
-    Equipment,
-    Abilities,
-    Foreign
-}
-
-public enum EquipmentSlot
-{
-    None,
-    RightHand,
-    LeftHand,
-    Head,
-    Chest,
-    Hands,
-    Feet,
-    Neck,
-    Waist,
-    RightRing,
-    LeftRing
-}
-
 public struct PressContainerSlotRpc : IRpcCommand
 {
     public uint containerId;
@@ -188,19 +164,13 @@ public struct ContainerSlot : IBufferElementData
 }
 
 [GhostComponent]
-public struct ContainerId : IComponentData
+public struct ItemSessionId : IComponentData
 {
     [GhostField]
     public uint id;
 }
 
 public struct ContainerSetupTag : ICleanupComponentData { }
-
-public struct SwapItemRequest : IBufferElementData
-{
-    public Entity toContainer;
-    public uint toSlot;
-}
 
 [GhostComponent]
 public struct HandSlot : IComponentData
@@ -212,6 +182,7 @@ public struct HandSlot : IComponentData
 public struct SlotMetaData
 {
     public SlotRestriction restriction;
+    public FixedString64Bytes label;
 }
 
 public enum SlotRestriction
@@ -232,15 +203,18 @@ public enum SlotRestriction
 }
 
 [GhostComponent]
-public struct ContainerIcon : IComponentData
+public struct ItemIcon : IComponentData
 {
     [GhostField]
     public FixedString64Bytes name;
 }
 
+/// <summary>
+/// Used to pick out which uielement this entity writes to
+/// </summary>
 [GhostComponent]
-public struct ContainerLabel : IComponentData
+public struct ContainerDisplayId : IComponentData
 {
     [GhostField]
-    public FixedString64Bytes label;
+    public FixedString64Bytes displayId;
 }

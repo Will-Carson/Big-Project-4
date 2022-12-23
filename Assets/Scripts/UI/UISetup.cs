@@ -44,42 +44,24 @@ public partial class UISetup : SystemBase
         containerRpcs.Clear();
 
         var uiDocument = Object.FindObjectOfType<UIDocument>();
+
         Entities
         .WithAll<LocalPlayerTag>()
         .ForEach((
         in Entity entity,
         in DynamicBuffer<ContainerSlot> rootContainer) =>
         {
-            // Destroy current container stuff
-            // Build out new container stuff
-            // Link rpcs to buttons
-
-            /// FUCK
-            /// iterate over containers
-            /// match each container id to an object
-            /// that object manages updating and displaying its container
-            /// 
-
             for (var i = 0; i < rootContainer.Length; i++)
             {
                 var subContainer = rootContainer[i];
 
-                if (subContainer.id == 0)
+                if (subContainer.item == Entity.Null)
                 {
-                    new ItemDisplay(uiDocument.rootVisualElement.Q("inventory"));
+                    continue;
                 }
-                if (subContainer.id == 1)
-                {
-                    new ItemDisplay(uiDocument.rootVisualElement.Q("equipment"));
-                }
-                if (subContainer.id == 2)
-                {
-                    new ItemDisplay(uiDocument.rootVisualElement.Q("abilities"));
-                }
-                if (subContainer.id == 3)
-                {
-                    new ItemDisplay(uiDocument.rootVisualElement.Q("foreign"));
-                }
+
+                var displayId = SystemAPI.GetComponent<ContainerDisplayId>(subContainer.item).displayId.ToString();
+                SetItem(uiDocument.rootVisualElement.Q(displayId), subContainer.item, EntityManager);
             }
         })
         .WithoutBurst()
@@ -92,7 +74,6 @@ public partial class UISetup : SystemBase
         if (isSetup) return;
 
         MainMenuSetup();
-        ContainerUIElementSetup();
         TalentUIElementSetup();
 
         isSetup = true;
@@ -258,156 +239,22 @@ public partial class UISetup : SystemBase
         }
     }
 
-    private void ContainerUIElementSetup()
+    private void SetItem(VisualElement visualElement, Entity itemEntity, EntityManager em)
     {
+        var containerSlotParentElement = visualElement.Q("container-slot-parent");
+        var itemButtonElement = visualElement.Q<Button>("item-button");
 
+        if (itemEntity == Entity.Null)
+        {
+            return;
+        }
 
-        //// TODO add sending rpcs to callbacks
-        //var inventoryAndEquipmentRoot = Object.FindObjectOfType<UIDocument>().rootVisualElement.Q("inventory-and-equipment-root");
-
-        //// Configure inventory slots
-        //for (uint i = 1; i <= 16; i++)
-        //{
-        //    var button = inventoryAndEquipmentRoot.Q<Button>("inventory-slot-" + i);
-
-        //    if (button == null) continue;
-
-        //    var slotNum = i;
-        //    button.RegisterCallback<MouseUpEvent>(e =>
-        //    {
-        //        Debug.Log((e.target as VisualElement).name);
-        //        containerRpcs.Add(new PressContainerSlotRpc
-        //        {
-        //            containerType = ContainerType.Inventory,
-        //            slotId = slotNum
-        //        });
-        //    });
-        //}
-
-        ////Configure equipment slots
-        //inventoryAndEquipmentRoot.Q<Button>("right-hand-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        //{
-        //    Debug.Log((e.target as VisualElement).name);
-        //    containerRpcs.Add(new PressContainerSlotRpc
-        //    {
-        //        containerType = ContainerType.Equipment,
-        //        slotId = (int)EquipmentSlot.RightHand
-        //    });
-        //});
-        //inventoryAndEquipmentRoot.Q<Button>("left-hand-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        //{
-        //    Debug.Log((e.target as VisualElement).name);
-        //    containerRpcs.Add(new PressContainerSlotRpc
-        //    {
-        //        containerType = ContainerType.Equipment,
-        //        slotId = (int)EquipmentSlot.LeftHand
-        //    });
-        //});
-        //inventoryAndEquipmentRoot.Q<Button>("head-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        //{
-        //    Debug.Log((e.target as VisualElement).name);
-        //    containerRpcs.Add(new PressContainerSlotRpc
-        //    {
-        //        containerType = ContainerType.Equipment,
-        //        slotId = (int)EquipmentSlot.Head
-        //    });
-        //});
-        //inventoryAndEquipmentRoot.Q<Button>("chest-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        //{
-        //    Debug.Log((e.target as VisualElement).name);
-        //    containerRpcs.Add(new PressContainerSlotRpc
-        //    {
-        //        containerType = ContainerType.Equipment,
-        //        slotId = (int)EquipmentSlot.Chest
-        //    });
-        //});
-        //inventoryAndEquipmentRoot.Q<Button>("hands-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        //{
-        //    Debug.Log((e.target as VisualElement).name);
-        //    containerRpcs.Add(new PressContainerSlotRpc
-        //    {
-        //        containerType = ContainerType.Equipment,
-        //        slotId = (int)EquipmentSlot.Hands
-        //    });
-        //});
-        //inventoryAndEquipmentRoot.Q<Button>("feet-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        //{
-        //    Debug.Log((e.target as VisualElement).name);
-        //    containerRpcs.Add(new PressContainerSlotRpc
-        //    {
-        //        containerType = ContainerType.Equipment,
-        //        slotId = (int)EquipmentSlot.Feet
-        //    });
-        //});
-        //inventoryAndEquipmentRoot.Q<Button>("neck-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        //{
-        //    Debug.Log((e.target as VisualElement).name);
-        //    containerRpcs.Add(new PressContainerSlotRpc
-        //    {
-        //        containerType = ContainerType.Equipment,
-        //        slotId = (int)EquipmentSlot.Neck
-        //    });
-        //});
-        //inventoryAndEquipmentRoot.Q<Button>("waist-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        //{
-        //    Debug.Log((e.target as VisualElement).name);
-        //    containerRpcs.Add(new PressContainerSlotRpc
-        //    {
-        //        containerType = ContainerType.Equipment,
-        //        slotId = (int)EquipmentSlot.Waist
-        //    });
-        //});
-        //inventoryAndEquipmentRoot.Q<Button>("right-ring-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        //{
-        //    Debug.Log((e.target as VisualElement).name);
-        //    containerRpcs.Add(new PressContainerSlotRpc
-        //    {
-        //        containerType = ContainerType.Equipment,
-        //        slotId = (int)EquipmentSlot.RightRing
-        //    });
-        //});
-        //inventoryAndEquipmentRoot.Q<Button>("left-ring-equipment-button").RegisterCallback<MouseUpEvent>(e =>
-        //{
-        //    Debug.Log((e.target as VisualElement).name);
-        //    containerRpcs.Add(new PressContainerSlotRpc
-        //    {
-        //        containerType = ContainerType.Equipment,
-        //        slotId = (int)EquipmentSlot.LeftRing
-        //    });
-        //});
-    }
-}
-
-public class ItemDisplay
-{
-    public VisualElement visualElement;
-    public VisualElement containerSlotParentElement;
-    public Button itemButtonElement;
-
-    Dictionary<uint, ItemDisplay> slots = new Dictionary<uint, ItemDisplay>();
-
-    VisualTreeAsset childTemplateElement;
-
-    public ItemDisplay(VisualElement visualElement)
-    {
-        this.visualElement = visualElement;
-        containerSlotParentElement = visualElement.Q("container-slot-parent");
-        itemButtonElement = visualElement.Q<Button>("item-button");
-        childTemplateElement = Resources.Load<VisualTreeAsset>(visualElement.Q<Label>("child-path").text);
-    }
-
-    public void SetItem(Entity itemEntity, EntityManager em)
-    {
         // Handle item data
-        var icon = Resources.Load<Sprite>(em.GetComponentData<ContainerIcon>(itemEntity).name.ToString());
-        itemButtonElement.style.backgroundImage = new StyleBackground(icon);
-
-        var label = em.GetComponentData<ContainerLabel>(itemEntity).label.ToString();
-        itemButtonElement.text = label;
-
-        // Build tooltip
-        var tooltip = "TEST TOOLTIP";
-        itemButtonElement.tooltip = tooltip;
+        var icon = Resources.Load<Sprite>(em.GetComponentData<ItemIcon>(itemEntity).name.ToString());
+        if (icon != null)
+        {
+            itemButtonElement.style.backgroundImage = new StyleBackground(icon);
+        }
 
         // Handle container data
         if (!em.HasBuffer<ContainerSlot>(itemEntity))
@@ -422,11 +269,6 @@ public class ItemDisplay
             return;
         }
 
-        if (childTemplateElement == null)
-        {
-            return;
-        }
-
         if (!container.IsCreated)
         {
             return;
@@ -437,20 +279,50 @@ public class ItemDisplay
             return;
         }
 
+        var childPathElement = visualElement.Q<Label>("child-path");
+        VisualTreeAsset childTemplateElement = null;
+        var childPath = "";
+        if (childTemplateElement == null)
+        {
+            foreach (var element in visualElement.Children())
+            {
+                if (element.name == "child-path")
+                {
+                    childPath = (element as Label).text;
+                }
+            }
+
+            childTemplateElement = Resources.Load<VisualTreeAsset>(childPath);
+        }
+
         for (var i = 0; i < container.Length; i++)
         {
             var slot = container[i];
 
-            if (slots.ContainsKey(slot.id))
+            var childElementName = childPath + "-" + i.ToString();
+            var childElement = containerSlotParentElement.Q(childElementName);
+
+            if (childElement == null)
             {
-                continue;
+                childElement = childTemplateElement.Instantiate();
+                childElement.name = childElementName;
             }
 
-            var childElement = childTemplateElement.Instantiate();
-            visualElement.Add(childElement);
-            var itemDisplay = new ItemDisplay(childElement);
-            itemDisplay.SetItem(slot.item, em);
-            slots.Add(slot.id, itemDisplay);
+            containerSlotParentElement.Add(childElement);
+
+            var slotId = slot.id;
+            childElement.Q<Button>("item-button").RegisterCallback<MouseUpEvent>(e =>
+            {
+                var clickedContainerId = em.GetComponentData<ItemSessionId>(itemEntity).id;
+                containerRpcs.Add(new PressContainerSlotRpc
+                {
+                    containerId = clickedContainerId,
+                    slotId = slotId
+                });
+
+            }, TrickleDown.NoTrickleDown);
+
+            SetItem(childElement, slot.item, em);
         }
     }
 }
