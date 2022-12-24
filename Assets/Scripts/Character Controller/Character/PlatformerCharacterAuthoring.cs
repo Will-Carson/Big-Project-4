@@ -11,7 +11,7 @@ using UnityEngine.Serialization;
 public class PlatformerCharacterAuthoring : MonoBehaviour
 {
     public AuthoringKinematicCharacterProperties CharacterProperties = AuthoringKinematicCharacterProperties.GetDefault();
-    public PlatformerCharacterComponent Character = default;
+    public PlatformerCharacterComponent Character = PlatformerCharacterComponent.GetDefault();
 
     [Header("References")]
     public GameObject MeshPrefab;

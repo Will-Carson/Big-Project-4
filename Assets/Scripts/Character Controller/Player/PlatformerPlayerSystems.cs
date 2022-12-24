@@ -1,14 +1,12 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.NetCode;
 using Unity.Transforms;
 using UnityEngine;
-using Unity.Physics.Systems;
-using Rival;
 
-[UpdateInGroup(typeof(InitializationSystemGroup))]
+[UpdateInGroup(typeof(GhostInputSystemGroup))]
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
 public partial class PlatformerPlayerInputsSystem : SystemBase
 {
     private PlatformerInputActions.GameplayMapActions _defaultActionsMap;
@@ -30,7 +28,10 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
     {
         uint fixedTick = SystemAPI.GetSingleton<FixedTickSystem.Singleton>().Tick;
         
-        foreach (var (playerInputs, player) in SystemAPI.Query<RefRW<PlatformerPlayerInputs>, PlatformerPlayer>())
+        foreach (var (playerInputs, camera, player) in SystemAPI.Query<
+            RefRW<PlatformerPlayerInputs>, 
+            RefRO<OrbitCameraControl>,
+            PlatformerPlayer>())
         {
             playerInputs.ValueRW.Move = Vector2.ClampMagnitude(_defaultActionsMap.Move.ReadValue<Vector2>(), 1f);
             playerInputs.ValueRW.Look = _defaultActionsMap.LookDelta.ReadValue<Vector2>();
@@ -74,8 +75,8 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
 /// <summary>
 /// Apply inputs that need to be read at a variable rate
 /// </summary>
-[UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
-[UpdateBefore(typeof(FixedStepSimulationSystemGroup))]
+[UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderFirst = true)]
+[UpdateBefore(typeof(PlatformerCharacterVariableUpdateSystem))]
 [BurstCompile]
 public partial struct PlatformerPlayerVariableStepControlSystem : ISystem
 {
@@ -92,17 +93,21 @@ public partial struct PlatformerPlayerVariableStepControlSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        foreach (var (playerInputs, player) in SystemAPI.Query<PlatformerPlayerInputs, PlatformerPlayer>().WithAll<Simulate>())
+        foreach (var (playerInputs, controlledCamera, player) in SystemAPI.Query<
+            PlatformerPlayerInputs,
+            ControlledCameraComponent,
+            PlatformerPlayer>()
+            .WithAll<Simulate>())
         {
-            if (SystemAPI.HasComponent<OrbitCameraControl>(player.ControlledCamera))
+            if (SystemAPI.HasComponent<OrbitCameraControl>(controlledCamera.ControlledCamera))
             {
-                OrbitCameraControl cameraControl = SystemAPI.GetComponent<OrbitCameraControl>(player.ControlledCamera);
+                OrbitCameraControl cameraControl = SystemAPI.GetComponent<OrbitCameraControl>(controlledCamera.ControlledCamera);
                 
                 cameraControl.FollowedCharacterEntity = player.ControlledCharacter;
                 cameraControl.Look = playerInputs.Look;
                 cameraControl.Zoom = playerInputs.CameraZoom;
 
-                SystemAPI.SetComponent(player.ControlledCamera, cameraControl);
+                SystemAPI.SetComponent(controlledCamera.ControlledCamera, cameraControl);
             }
         }
     }
@@ -112,7 +117,7 @@ public partial struct PlatformerPlayerVariableStepControlSystem : ISystem
 /// Apply inputs that need to be read at a fixed rate.
 /// It is necessary to handle this as part of the fixed step group, in case your framerate is lower than the fixed step rate.
 /// </summary>
-[UpdateInGroup(typeof(FixedStepSimulationSystemGroup), OrderFirst = true)]
+[UpdateInGroup(typeof(PredictedFixedStepSimulationSystemGroup), OrderFirst = true)]
 [BurstCompile]
 public partial struct PlatformerPlayerFixedStepControlSystem : ISystem
 {
@@ -145,7 +150,7 @@ public partial struct PlatformerPlayerFixedStepControlSystem : ISystem
                 {
                     cameraRotation = SystemAPI.GetComponent<LocalTransform>(player.ControlledCamera).Rotation;
                 }
-                
+
                 stateMachine.GetMoveVectorFromPlayerInput(stateMachine.CurrentState, in playerInputs.ValueRO, cameraRotation, out characterControl.MoveVector);
                 
                 characterControl.JumpHeld = playerInputs.ValueRW.JumpHeld;

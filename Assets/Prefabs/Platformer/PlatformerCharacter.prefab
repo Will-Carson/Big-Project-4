@@ -301,72 +301,72 @@ MonoBehaviour:
     SimulateDynamicBody: 1
     Mass: 1
   Character:
-    GroundRunMaxSpeed: 0
-    GroundSprintMaxSpeed: 0
-    GroundedMovementSharpness: 0
-    GroundedRotationSharpness: 0
-    CrouchedMaxSpeed: 0
-    CrouchedMovementSharpness: 0
-    CrouchedRotationSharpness: 0
-    AirAcceleration: 0
-    AirMaxSpeed: 0
+    GroundRunMaxSpeed: 5
+    GroundSprintMaxSpeed: 10
+    GroundedMovementSharpness: 8
+    GroundedRotationSharpness: 15
+    CrouchedMaxSpeed: 3
+    CrouchedMovementSharpness: 15
+    CrouchedRotationSharpness: 15
+    AirAcceleration: 15
+    AirMaxSpeed: 5
     AirDrag: 0
-    AirRotationSharpness: 0
-    RollingAcceleration: 0
-    WallRunAcceleration: 0
-    WallRunMaxSpeed: 0
+    AirRotationSharpness: 10
+    RollingAcceleration: 5
+    WallRunAcceleration: 50
+    WallRunMaxSpeed: 10
     WallRunDrag: 0
-    WallRunGravityFactor: 0
-    WallRunJumpRatioFromCharacterUp: 0
-    WallRunDetectionDistance: 0
-    FlyingMaxSpeed: 0
-    FlyingMovementSharpness: 0
-    GroundJumpSpeed: 0
-    AirJumpSpeed: 0
-    WallRunJumpSpeed: 0
-    JumpHeldAcceleration: 0
-    MaxHeldJumpTime: 0
-    MaxUngroundedJumps: 0
-    JumpAfterUngroundedGraceTime: 0
-    JumpBeforeGroundedGraceTime: 0
-    LedgeMoveSpeed: 0
-    LedgeRotationSharpness: 0
-    LedgeSurfaceProbingHeight: 0
-    LedgeSurfaceObstructionProbingHeight: 0
-    LedgeSideProbingLength: 0
-    DashDuration: 0
-    DashSpeed: 0
-    SwimmingAcceleration: 0
-    SwimmingMaxSpeed: 0
-    SwimmingDrag: 0
-    SwimmingRotationSharpness: 0
-    SwimmingStandUpDistanceFromSurface: 0
-    WaterDetectionDistance: 0
-    SwimmingJumpSpeed: 0
-    SwimmingSurfaceDiveThreshold: 0
-    RopeSwingAcceleration: 0
-    RopeSwingMaxSpeed: 0
-    RopeSwingDrag: 0
-    RopeLength: 0
+    WallRunGravityFactor: 0.375
+    WallRunJumpRatioFromCharacterUp: 0.75
+    WallRunDetectionDistance: 0.2
+    FlyingMaxSpeed: 10
+    FlyingMovementSharpness: 15
+    GroundJumpSpeed: 5
+    AirJumpSpeed: 10
+    WallRunJumpSpeed: 12
+    JumpHeldAcceleration: 75
+    MaxHeldJumpTime: 0.1
+    MaxUngroundedJumps: 1
+    JumpAfterUngroundedGraceTime: 0.1
+    JumpBeforeGroundedGraceTime: 0.1
+    LedgeMoveSpeed: 3
+    LedgeRotationSharpness: 10
+    LedgeSurfaceProbingHeight: 0.3
+    LedgeSurfaceObstructionProbingHeight: 0.3
+    LedgeSideProbingLength: 0.15
+    DashDuration: 0.3
+    DashSpeed: 20
+    SwimmingAcceleration: 30
+    SwimmingMaxSpeed: 4
+    SwimmingDrag: 4.7
+    SwimmingRotationSharpness: 3
+    SwimmingStandUpDistanceFromSurface: -0.5
+    WaterDetectionDistance: 10
+    SwimmingJumpSpeed: 14
+    SwimmingSurfaceDiveThreshold: -0.75
+    RopeSwingAcceleration: 10
+    RopeSwingMaxSpeed: 10
+    RopeSwingDrag: 0.1
+    RopeLength: 5
     LocalRopeAnchorPoint:
       x: 0
-      y: 0
+      y: 1.1
       z: 0
-    ClimbingDistanceFromSurface: 0
-    ClimbingSpeed: 0
-    ClimbingMovementSharpness: 0
-    ClimbingRotationSharpness: 0
+    ClimbingDistanceFromSurface: 0.375
+    ClimbingSpeed: 5
+    ClimbingMovementSharpness: 20
+    ClimbingRotationSharpness: 5
     StepAndSlopeHandling:
       StepHandling: 0
-      MaxStepHeight: 0
-      ExtraStepChecksDistance: 0
-      PreventGroundingWhenMovingTowardsNoGrounding: 0
+      MaxStepHeight: 0.5
+      ExtraStepChecksDistance: 0.1
+      PreventGroundingWhenMovingTowardsNoGrounding: 1
       HasMaxDownwardSlopeChangeAngle: 0
-      MaxDownwardSlopeChangeAngle: 0
-      ConstrainVelocityToGroundPlane: 0
+      MaxDownwardSlopeChangeAngle: 90
+      ConstrainVelocityToGroundPlane: 1
     StickySurfaceTag:
       Tag00: 0
-      Tag01: 0
+      Tag01: 1
       Tag02: 0
       Tag03: 0
       Tag04: 0
@@ -374,7 +374,7 @@ MonoBehaviour:
       Tag06: 0
       Tag07: 0
     ClimbableTag:
-      Tag00: 0
+      Tag00: 1
       Tag01: 0
       Tag02: 0
       Tag03: 0
@@ -384,7 +384,7 @@ MonoBehaviour:
       Tag07: 0
     WaterPhysicsCategory:
       Category00: 0
-      Category01: 0
+      Category01: 1
       Category02: 0
       Category03: 0
       Category04: 0
@@ -418,7 +418,7 @@ MonoBehaviour:
     RopeAnchorCategory:
       Category00: 0
       Category01: 0
-      Category02: 0
+      Category02: 1
       Category03: 0
       Category04: 0
       Category05: 0
@@ -448,41 +448,41 @@ MonoBehaviour:
       Category29: 0
       Category30: 0
       Category31: 0
-    UpOrientationAdaptationSharpness: 0
+    UpOrientationAdaptationSharpness: 8
     StandingGeometry:
-      Radius: 0
-      Height: 0
+      Radius: 0.3
+      Height: 1.4
       Center:
         x: 0
-        y: 0
+        y: 0.7
         z: 0
     CrouchingGeometry:
-      Radius: 0
-      Height: 0
+      Radius: 0.3
+      Height: 0.9
       Center:
         x: 0
-        y: 0
+        y: 0.45
         z: 0
     RollingGeometry:
-      Radius: 0
-      Height: 0
+      Radius: 0.3
+      Height: 0.6
       Center:
         x: 0
-        y: 0
+        y: 0.3
         z: 0
     ClimbingGeometry:
-      Radius: 0
-      Height: 0
+      Radius: 1
+      Height: 2
       Center:
         x: 0
-        y: 0
+        y: 0.7
         z: 0
     SwimmingGeometry:
-      Radius: 0
-      Height: 0
+      Radius: 0.3
+      Height: 1.4
       Center:
         x: 0
-        y: 0
+        y: 0.7
         z: 0
     LocalLedgeDetectionPoint:
       x: 0

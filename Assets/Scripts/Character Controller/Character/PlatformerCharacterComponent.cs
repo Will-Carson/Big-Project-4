@@ -142,6 +142,121 @@ public struct PlatformerCharacterComponent : IComponentData
     public bool IsSprinting;
     [HideInInspector]
     public bool IsOnStickySurface;
+
+    public static PlatformerCharacterComponent GetDefault()
+    {
+        var result = new PlatformerCharacterComponent
+        {
+            GroundRunMaxSpeed = 5,
+            GroundSprintMaxSpeed = 10,
+            GroundedMovementSharpness = 8,
+            GroundedRotationSharpness = 15,
+
+            CrouchedMaxSpeed = 3,
+            CrouchedMovementSharpness = 15,
+            CrouchedRotationSharpness = 15,
+
+            AirAcceleration = 15,
+            AirMaxSpeed = 5,
+            AirDrag = 0,
+            AirRotationSharpness = 10,
+
+            RollingAcceleration = 5,
+
+            WallRunAcceleration = 50,
+            WallRunMaxSpeed = 10,
+            WallRunDrag = 0,
+            WallRunGravityFactor = .375f,
+            WallRunJumpRatioFromCharacterUp = .75f,
+            WallRunDetectionDistance = .2f,
+
+            FlyingMaxSpeed = 10,
+            FlyingMovementSharpness = 15,
+
+            GroundJumpSpeed = 5,
+            AirJumpSpeed = 10,
+            WallRunJumpSpeed = 12,
+            JumpHeldAcceleration = 75,
+            MaxHeldJumpTime = .1f,
+            MaxUngroundedJumps = 1,
+            JumpAfterUngroundedGraceTime = .1f,
+            JumpBeforeGroundedGraceTime = .1f,
+
+            LedgeMoveSpeed = 3,
+            LedgeRotationSharpness = 10,
+            LedgeSurfaceProbingHeight = .3f,
+            LedgeSurfaceObstructionProbingHeight = .3f,
+            LedgeSideProbingLength = .15f,
+
+            DashDuration = .3f,
+            DashSpeed = 20,
+
+            SwimmingAcceleration = 30,
+            SwimmingMaxSpeed = 4,
+            SwimmingDrag = 4.7f,
+            SwimmingRotationSharpness = 3,
+            SwimmingStandUpDistanceFromSurface = -.5f,
+            WaterDetectionDistance = 10,
+            SwimmingJumpSpeed = 14,
+            SwimmingSurfaceDiveThreshold = -.75f,
+
+            RopeSwingAcceleration = 10,
+            RopeSwingMaxSpeed = 10,
+            RopeSwingDrag = .1f,
+            RopeLength = 5,
+            LocalRopeAnchorPoint = new float3(0, 1.1f, 0),
+
+            ClimbingDistanceFromSurface = .375f,
+            ClimbingSpeed = 5,
+            ClimbingMovementSharpness = 20,
+            ClimbingRotationSharpness = 5,
+
+            StepAndSlopeHandling = new BasicStepAndSlopeHandlingParameters
+            {
+                MaxStepHeight = .5f,
+                ExtraStepChecksDistance = .1f,
+                PreventGroundingWhenMovingTowardsNoGrounding = true,
+                MaxDownwardSlopeChangeAngle = 90,
+                ConstrainVelocityToGroundPlane = true
+            },
+
+            // Set tags in editor
+            UpOrientationAdaptationSharpness = 8,
+
+            StandingGeometry = new CapsuleGeometryDefinition
+            {
+                Radius = .3f,
+                Height = 1.4f,
+                Center = new float3(0, .7f, 0)
+            },
+            CrouchingGeometry = new CapsuleGeometryDefinition
+            {
+                Radius = .3f,
+                Height = .9f,
+                Center = new float3(0, .45f, 0)
+            },
+            RollingGeometry = new CapsuleGeometryDefinition
+            {
+                Radius = .3f,
+                Height = .6f,
+                Center = new float3(0, .3f, 0)
+            },
+            ClimbingGeometry = new CapsuleGeometryDefinition
+            {
+                Radius = 1,
+                Height = 2,
+                Center = new float3(0, .7f, 0)
+            },
+            SwimmingGeometry = new CapsuleGeometryDefinition
+            {
+                Radius = .3f,
+                Height = 1.4f,
+                Center = new float3(0, .7f, 0)
+            },
+        };
+
+        return result;
+    }
 }
 
 [Serializable]

@@ -13,10 +13,13 @@ public class PlatformerPlayerAuthoring : MonoBehaviour
         {
             AddComponent(new PlatformerPlayer
             {
-                ControlledCharacter = GetEntity(authoring.ControlledCharacter),
-                ControlledCamera = GetEntity(authoring.ControlledCamera),
+                ControlledCharacter = GetEntity(authoring.ControlledCharacter)
             });
             AddComponent(new PlatformerPlayerInputs());
+            AddComponent(new ControlledCameraComponent
+            {
+                ControlledCamera = GetEntity(authoring.ControlledCamera)
+            });
         }
     }
 }
