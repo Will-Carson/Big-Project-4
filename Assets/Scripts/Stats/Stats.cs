@@ -114,7 +114,7 @@ public partial struct StatStickEquipper : ISystem
                             for (var k = 0; k < stats.Length; k++)
                             {
                                 var stat = stats[k].stat;
-                                if (requirement.stat == stat.type && !requirement.IsInRange(stat))
+                                if (requirement.stat == stat.stat && !requirement.IsInRange(stat))
                                 {
                                     requirementsMet = false;
                                     break;
@@ -205,7 +205,7 @@ public partial struct StatTotaller : ISystem
                 for (var j = 0; j < statStickStats.Length; j++)
                 {
                     var statStickStat = statStickStats[j].stat;
-                    var statKey = (int)statStickStat.type;
+                    var statKey = (int)statStickStat.stat;
                     var statValue = statStickStat.value;
 
                     if (statTotals.ContainsKey(statKey))
@@ -224,7 +224,7 @@ public partial struct StatTotaller : ISystem
             for (var i = 0; i < keyArray.Length; i++)
             {
                 var key = keyArray[i];
-                stats.Add(new StatData { type = (StatType)key, value = statTotals[key]});
+                stats.Add(new StatData { stat = (StatType)key, value = statTotals[key]});
             }
 
             // Dispose of Native* types
@@ -278,7 +278,7 @@ public partial struct DerivedStatHandlerSystem : ISystem
             {
                 for (var i = 0; i < j; i++)
                 {
-                    if (derivedStats[i].toStat.type > derivedStats[i + 1].toStat.type)
+                    if (derivedStats[i].toStat.stat > derivedStats[i + 1].toStat.stat)
                     {
                         var derivedStat1 = derivedStats[i];
                         var derivedStat2 = derivedStats[i + 1];
@@ -307,9 +307,9 @@ public partial struct DerivedStatHandlerSystem : ISystem
                 for (var j = 0; j < stats.Length; j++)
                 {
                     var stat = stats[j].stat;
-                    if (derivedStat.fromStat.type != stat.type) continue;
+                    if (derivedStat.fromStat.stat != stat.stat) continue;
 
-                    var statToAdd = new StatData(derivedStat.toStat.type, (stat.value / derivedStat.fromStat.value) * derivedStat.toStat.value);
+                    var statToAdd = new StatData(derivedStat.toStat.stat, (stat.value / derivedStat.fromStat.value) * derivedStat.toStat.value);
                     StatContainer.Add(stats, statToAdd); // Does this need to be "ref stats"?
                 }
             }
@@ -366,11 +366,11 @@ public partial struct StatToResourceSystem : ISystem
                 for (var j = 0; j < resources.Length; j++)
                 {
                     var resource = resources[j];
-                    if (stat.type == resource.minStat.type)
+                    if (stat.stat == resource.minStat.stat)
                     {
                         resource.minStat.value = stat.value;
                     }
-                    if (stat.type == resource.maxStat.type)
+                    if (stat.stat == resource.maxStat.stat)
                     {
                         resource.maxStat.value = stat.value;
                     }
@@ -454,7 +454,7 @@ public struct StatContainer : IBufferElementData
         for (var i = 0; i < stats.Length; i++)
         {
             var stat = stats[i].stat;
-            if (stat.type == statToAdd.type)
+            if (stat.stat == statToAdd.stat)
             {
                 hasStat = true;
                 stats.Insert(i, statToAdd + stat);
@@ -504,7 +504,7 @@ public struct StatRequirement
 
     public bool IsInRange(StatData stat)
     {
-        if (this.stat != stat.type) return false;
+        if (this.stat != stat.stat) return false;
         return stat.value >= min && stat.value <= max;
     }
 
@@ -519,25 +519,25 @@ public struct StatRequirement
 /// </summary>
 public struct StatData
 {
-    public StatType type;
+    public StatType stat;
     public int value;
 
-    public StatData(StatType type, int value)
+    public StatData(StatType stat, int value)
     {
-        this.type = type;
+        this.stat = stat;
         this.value = value;
     }
 
     public static StatData operator+ (StatData a, StatData b)
     {
-        if (a.type == b.type) return new StatData();
+        if (a.stat == b.stat) return new StatData();
 
-        return new StatData { type = a.type, value = a.value + b.value };
+        return new StatData { stat = a.stat, value = a.value + b.value };
     }
 
     public override string ToString()
     {
-        return $"{type} : {value}";
+        return $"{stat} : {value}";
     }
 }
 
@@ -572,4 +572,32 @@ public enum StatType
     Health,
 
     // Other stats
+}
+
+public readonly partial struct StatStickAspect : IAspect
+{
+    public readonly Entity entity;
+    public readonly DynamicBuffer<StatContainer> stats;
+    public readonly DynamicBuffer<StatRequirementContainer> requirements;
+    public readonly DynamicBuffer<EquippedTo> equippedTo;
+}
+
+public readonly partial struct AdvancedStatStick : IAspect
+{
+    public readonly Entity entity;
+    public readonly DynamicBuffer<StatContainer> stats;
+    public readonly DynamicBuffer<StatRequirementContainer> requirements;
+    public readonly DynamicBuffer<EquippedTo> equippedTo;
+    public readonly DynamicBuffer<StatStickContainer> statSticks;
+    public readonly DynamicBuffer<EquipStatStickRequest> equipRequests;
+}
+
+public readonly partial struct StatEntityAspect : IAspect
+{
+    public readonly Entity entity;
+    public readonly DynamicBuffer<StatContainer> stats;
+    public readonly DynamicBuffer<ResourceContainer> resources;
+    public readonly DynamicBuffer<DerivedStat> derivedStats;
+    public readonly DynamicBuffer<StatStickContainer> statSticks;
+    public readonly DynamicBuffer<EquipStatStickRequest> equipRequests;
 }

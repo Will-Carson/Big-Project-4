@@ -11,6 +11,13 @@ public class PlayerAuthoring : MonoBehaviour
             AddComponent<HandSlot>();
             AddBuffer<ContainerSlot>();
 
+            // Stat stuff
+            AddBuffer<StatContainer>();
+            AddBuffer<ResourceContainer>();
+            AddBuffer<DerivedStat>();
+            AddBuffer<StatStickContainer>();
+            AddBuffer<EquipStatStickRequest>();
+
             AddComponent<LocalPlayerTag>();
         }
     }

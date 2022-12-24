@@ -218,3 +218,13 @@ public struct ContainerDisplayId : IComponentData
     [GhostField]
     public FixedString64Bytes displayId;
 }
+
+public readonly partial struct ItemAspect : IAspect
+{
+    public readonly Entity entity;
+    public readonly DynamicBuffer<ContainerSlot> container;
+    public readonly RefRW<ItemSlotRestriction> restriction;
+    public readonly RefRW<ItemSessionId> sessionId;
+    public readonly RefRW<ItemIcon> icon;
+    public readonly RefRW<ContainerDisplayId> displayId;
+}

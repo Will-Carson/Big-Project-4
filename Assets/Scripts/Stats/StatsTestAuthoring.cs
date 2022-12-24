@@ -12,12 +12,12 @@ public class StatsTestAuthoring : MonoBehaviour
             var extraStatStickEntity = CreateAdditionalEntity(entityName: "Extra stats");
             AddBuffer<EquippedTo>(extraStatStickEntity);
             var extraStatStickStats = AddBuffer<StatContainer>(extraStatStickEntity);
-            extraStatStickStats.Add(new StatContainer { stat = new StatData { type = StatType.Intelligence, value = 100 } });
+            extraStatStickStats.Add(new StatContainer { stat = new StatData { stat = StatType.Intelligence, value = 100 } });
 
             var baseStatStickEntity = CreateAdditionalEntity(entityName: "Base stats");
             AddBuffer<EquippedTo>(baseStatStickEntity);
             var baseStatStickStats = AddBuffer<StatContainer>(baseStatStickEntity);
-            baseStatStickStats.Add(new StatContainer { stat = new StatData { type = StatType.Health, value = 100 } });
+            baseStatStickStats.Add(new StatContainer { stat = new StatData { stat = StatType.Health, value = 100 } });
             //baseStatStickStats.Add(new StatContainer { stat = new StatData { type = StatType.Strength, value = 100 } });
 
             var equipStatSticks = AddBuffer<EquipStatStickRequest>();
@@ -27,8 +27,8 @@ public class StatsTestAuthoring : MonoBehaviour
             var derivedStats = AddBuffer<DerivedStat>();
             derivedStats.Add(new DerivedStat
             {
-                fromStat = new StatData { type = StatType.Intelligence, value = 10 },
-                toStat = new StatData { type = StatType.Health, value = 2 }
+                fromStat = new StatData { stat = StatType.Intelligence, value = 10 },
+                toStat = new StatData { stat = StatType.Health, value = 2 }
             });
 
             AddBuffer<StatContainer>();
@@ -36,7 +36,7 @@ public class StatsTestAuthoring : MonoBehaviour
             resources.Add(new ResourceContainer
             {
                 currentValue = 120,
-                maxStat = new StatData { type = StatType.Health }
+                maxStat = new StatData { stat = StatType.Health }
             });
 
             AddComponent<StatRecalculationTag>();

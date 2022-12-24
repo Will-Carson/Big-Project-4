@@ -26,7 +26,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement name="talents-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.5); flex-direction: row-reverse; display: none;">
+    <ui:VisualElement name="talents-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.5); flex-direction: row-reverse; display: flex;">
         <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
             <ui:ScrollView style="flex-grow: 1; height: 100%;">
                 <ui:VisualElement name="talent-column-parent" style="background-color: rgba(0, 0, 0, 0); flex-direction: row; position: absolute;" />
@@ -37,7 +37,7 @@
             <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="tooltip-text" style="min-width: 100%; padding-right: 8px; padding-left: 8px; white-space: normal; text-overflow: ellipsis; -unity-text-align: middle-left;" />
         </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement name="game-ui" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); display: flex;">
+    <ui:VisualElement name="game-ui" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); display: none;">
         <ui:VisualElement name="left-panel" style="position: absolute; width: 475px; height: 100%; left: 0;">
             <ui:ScrollView name="foreign-container" style="min-height: 100%; min-width: 100%; flex-grow: 1; display: none;">
                 <ui:VisualElement name="container-slot-parent" class="menu-light" style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; height: 100%; flex-grow: 1; flex-shrink: 0; min-height: 1000px; padding-top: 60px;" />
@@ -51,11 +51,11 @@
         <ui:VisualElement name="right-panel" style="position: absolute; right: 0; min-height: 100%; width: 475px; justify-content: space-around; align-items: center; height: 100%;">
             <ui:VisualElement name="inventory-and-equipment-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.5); min-width: 100%; min-height: 100%; align-items: center; justify-content: space-around; display: flex;">
                 <ui:VisualElement name="equipment-container" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row-reverse; flex-wrap: wrap; width: 307px; margin-bottom: 80px;">
-                    <ui:VisualElement name="container-slot-parent" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); align-items: center; flex-direction: row; flex-wrap: wrap; justify-content: space-between;" />
+                    <ui:VisualElement name="container-slot-parent" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); align-items: center; flex-direction: row; flex-wrap: wrap; justify-content: space-between; padding-top: 40px;" />
                     <ui:Label tabindex="-1" text="basic-container-slot" display-tooltip-when-elided="true" name="child-path" style="display: none;" />
                 </ui:VisualElement>
                 <ui:VisualElement name="inventory-container" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row; flex-wrap: wrap;">
-                    <ui:VisualElement name="container-slot-parent" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row; flex-wrap: wrap; justify-content: space-between; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;" />
+                    <ui:VisualElement name="container-slot-parent" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row; flex-wrap: wrap; justify-content: space-between; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 40px;" />
                     <ui:Label tabindex="-1" text="basic-container-slot" display-tooltip-when-elided="true" name="child-path" style="display: none;" />
                 </ui:VisualElement>
             </ui:VisualElement>

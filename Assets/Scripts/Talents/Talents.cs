@@ -39,7 +39,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.Strength, value = 10 },
             },
         }, // Physique
         new TalentAuthoring
@@ -55,7 +55,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.Strength, value = 10 },
             },
         }, // Reason
         new TalentAuthoring
@@ -71,7 +71,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.Strength, value = 10 },
             },
         }, // Dexterity
         new TalentAuthoring
@@ -87,7 +87,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.Strength, value = 10 },
             },
         }, // Perception
         new TalentAuthoring
@@ -103,7 +103,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.Strength, value = 10 },
             },
         }, // Melee
         new TalentAuthoring
@@ -119,7 +119,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.Strength, value = 10 },
             },
         }, // Ranged
         new TalentAuthoring
@@ -135,7 +135,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.Strength, value = 10 },
             },
         }, // Engineering
         new TalentAuthoring
@@ -151,7 +151,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.Strength, value = 10 },
             },
         }, // Mysticism
         new TalentAuthoring
@@ -167,7 +167,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.Strength, value = 10 },
             },
         }, // Medicine
         new TalentAuthoring
@@ -183,7 +183,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.Strength, value = 10 },
             },
         }, // Defense
 
@@ -201,28 +201,29 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { type = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.Strength, value = 10 },
             },
         }, // Technique
     };
 
-    public static void CreateTalentsAsEntities(EntityManager entityManager)
+    public static void CreateTalentsAsEntities(EntityManager em)
     {
         var entities = new Entity[Talents.Length];
         for (var i = 0; i < Talents.Length; i++)
         {
             var talent = Talents[i];
 
-            var talentEntity = entityManager.CreateEntity();
+            var talentEntity = em.CreateEntity();
+            em.SetName(talentEntity, "Talent-" + talent.name);
 
             // Add talent component
-            entityManager.AddComponentData(talentEntity, new TalentComponent
+            em.AddComponentData(talentEntity, new TalentComponent
             {
                 stat = talent.stat
             });
 
             // Add requirements
-            var requirementsBuffer = entityManager.AddBuffer<StatRequirementContainer>(talentEntity);
+            var requirementsBuffer = em.AddBuffer<StatRequirementContainer>(talentEntity);
 
             /// Do not allow players to take the talent if they do not meet level requirements, or if
             /// they already have too many points allocated in this talent. Next add the talent points
@@ -260,7 +261,7 @@ public static class TalentDefinitions
             }
 
             // Add granted stats
-            var statsBuffer = entityManager.AddBuffer<StatContainer>(talentEntity);
+            var statsBuffer = em.AddBuffer<StatContainer>(talentEntity);
 
             /// Add the talent to the granted stats buffer, the talent point cost, and then add 
             /// the regular granted stats.
@@ -268,7 +269,7 @@ public static class TalentDefinitions
             {
                 stat = new StatData
                 {
-                    type = talent.stat,
+                    stat = talent.stat,
                     value = 1,
                 }
             });
@@ -276,7 +277,7 @@ public static class TalentDefinitions
             {
                 stat = new StatData
                 {
-                    type = StatType.TalentPoint,
+                    stat = StatType.TalentPoint,
                     value = -talent.pointCost
                 }
             });
@@ -314,6 +315,7 @@ public partial class TalentServerSystem : SystemBase
         in ReceiveRpcCommandRequestComponent receive,
         in Entity entity) =>
         {
+            commandBuffer.DestroyEntity(entity);
             var targetEntity = SystemAPI.GetComponent<CommandTargetComponent>(receive.SourceConnection).targetEntity;
 
             for (var i = 0; i < talentComponents.Length; i++)
@@ -331,7 +333,6 @@ public partial class TalentServerSystem : SystemBase
                     });
                 }
             }
-            commandBuffer.DestroyEntity(entity);
         })
         .Run();
     }
