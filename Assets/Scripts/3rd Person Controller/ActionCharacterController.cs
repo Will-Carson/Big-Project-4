@@ -52,7 +52,7 @@ public partial class PlayerInputSystem : SystemBase
             playerCommands = default;
 
             // Movement direction
-            playerCommands.moveInput = math.clamp(defaultActionsMap.Move.ReadValue<float2>(), 1f, -1f);
+            playerCommands.moveInput = math.clamp(defaultActionsMap.Move.ReadValue<UnityEngine.Vector2>(), 1f, -1f);
 
             // Look input must be accumulated on each update belonging to the same tick, because it is a delta and will be processed at a variable update
             if (!isOnNewTick)
@@ -61,7 +61,7 @@ public partial class PlayerInputSystem : SystemBase
             }
 
             // Mouse look with a mouse move delta value
-            playerCommands.lookInputDelta += defaultActionsMap.Look.ReadValue<float2>() * 2f; // TODO 2f here is look sensitivity
+            playerCommands.lookInputDelta += (float2)defaultActionsMap.LookDelta.ReadValue<UnityEngine.Vector2>() * 2f; // TODO 2f here is look sensitivity
 
             // Jump
             if (defaultActionsMap.Jump.WasPressedThisFrame())

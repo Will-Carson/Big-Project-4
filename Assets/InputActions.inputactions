@@ -9,16 +9,25 @@
                     "name": "Move",
                     "type": "Value",
                     "id": "0e0a3680-8055-4479-90db-a22d5d9703fb",
+                    "expectedControlType": "",
+                    "processors": "Clamp(max=1)",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LookDelta",
+                    "type": "PassThrough",
+                    "id": "3a4e99dd-567f-43fe-aeaf-74fb39e22764",
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Look",
+                    "name": "LookConst",
                     "type": "Value",
-                    "id": "3a4e99dd-567f-43fe-aeaf-74fb39e22764",
-                    "expectedControlType": "Vector2",
+                    "id": "816afc9d-ae57-4b07-821c-db40614d3a94",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -34,21 +43,21 @@
                 },
                 {
                     "name": "Aim",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "5322288e-516f-40cb-ba2b-1eb5ea70d706",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Jump",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "339dcc14-dade-4199-99e5-662018ff6d96",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -246,7 +255,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
-                    "action": "Look",
+                    "action": "LookDelta",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -257,7 +266,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse;Touch",
-                    "action": "Look",
+                    "action": "LookDelta",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -268,7 +277,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
-                    "action": "Look",
+                    "action": "LookDelta",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -279,7 +288,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "DefaultMap",
-                    "action": "Look",
+                    "action": "LookDelta",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -368,6 +377,17 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5d427d43-4797-4523-b44d-2e8a45e4143c",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LookConst",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

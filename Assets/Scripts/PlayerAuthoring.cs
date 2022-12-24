@@ -18,6 +18,10 @@ public class PlayerAuthoring : MonoBehaviour
             AddBuffer<StatStickContainer>();
             AddBuffer<EquipStatStickRequest>();
 
+            // Character controller stuff
+            AddComponent<Player>();
+            AddComponent<PlayerCommands>();
+
             AddComponent<LocalPlayerTag>();
         }
     }

@@ -31,16 +31,25 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
                     ""name"": ""Move"",
                     ""type"": ""Value"",
                     ""id"": ""0e0a3680-8055-4479-90db-a22d5d9703fb"",
+                    ""expectedControlType"": """",
+                    ""processors"": ""Clamp(max=1)"",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""LookDelta"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""3a4e99dd-567f-43fe-aeaf-74fb39e22764"",
                     ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Look"",
+                    ""name"": ""LookConst"",
                     ""type"": ""Value"",
-                    ""id"": ""3a4e99dd-567f-43fe-aeaf-74fb39e22764"",
-                    ""expectedControlType"": ""Vector2"",
+                    ""id"": ""816afc9d-ae57-4b07-821c-db40614d3a94"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -56,21 +65,21 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": ""Aim"",
-                    ""type"": ""Button"",
+                    ""type"": ""Value"",
                     ""id"": ""5322288e-516f-40cb-ba2b-1eb5ea70d706"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""Jump"",
-                    ""type"": ""Button"",
+                    ""type"": ""Value"",
                     ""id"": ""339dcc14-dade-4199-99e5-662018ff6d96"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -268,7 +277,7 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
-                    ""action"": ""Look"",
+                    ""action"": ""LookDelta"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -279,7 +288,7 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse;Touch"",
-                    ""action"": ""Look"",
+                    ""action"": ""LookDelta"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -290,7 +299,7 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Joystick"",
-                    ""action"": ""Look"",
+                    ""action"": ""LookDelta"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -301,7 +310,7 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""DefaultMap"",
-                    ""action"": ""Look"",
+                    ""action"": ""LookDelta"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -390,6 +399,17 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5d427d43-4797-4523-b44d-2e8a45e4143c"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LookConst"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -983,7 +1003,8 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
-        m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
+        m_Player_LookDelta = m_Player.FindAction("LookDelta", throwIfNotFound: true);
+        m_Player_LookConst = m_Player.FindAction("LookConst", throwIfNotFound: true);
         m_Player_Fire = m_Player.FindAction("Fire", throwIfNotFound: true);
         m_Player_Aim = m_Player.FindAction("Aim", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
@@ -1059,7 +1080,8 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Player;
     private IPlayerActions m_PlayerActionsCallbackInterface;
     private readonly InputAction m_Player_Move;
-    private readonly InputAction m_Player_Look;
+    private readonly InputAction m_Player_LookDelta;
+    private readonly InputAction m_Player_LookConst;
     private readonly InputAction m_Player_Fire;
     private readonly InputAction m_Player_Aim;
     private readonly InputAction m_Player_Jump;
@@ -1068,7 +1090,8 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
         private @InputActions m_Wrapper;
         public PlayerActions(@InputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_Player_Move;
-        public InputAction @Look => m_Wrapper.m_Player_Look;
+        public InputAction @LookDelta => m_Wrapper.m_Player_LookDelta;
+        public InputAction @LookConst => m_Wrapper.m_Player_LookConst;
         public InputAction @Fire => m_Wrapper.m_Player_Fire;
         public InputAction @Aim => m_Wrapper.m_Player_Aim;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
@@ -1084,9 +1107,12 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
                 @Move.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
                 @Move.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
                 @Move.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
-                @Look.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLook;
-                @Look.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLook;
-                @Look.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLook;
+                @LookDelta.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLookDelta;
+                @LookDelta.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLookDelta;
+                @LookDelta.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLookDelta;
+                @LookConst.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLookConst;
+                @LookConst.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLookConst;
+                @LookConst.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLookConst;
                 @Fire.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire;
                 @Fire.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire;
                 @Fire.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire;
@@ -1103,9 +1129,12 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
                 @Move.started += instance.OnMove;
                 @Move.performed += instance.OnMove;
                 @Move.canceled += instance.OnMove;
-                @Look.started += instance.OnLook;
-                @Look.performed += instance.OnLook;
-                @Look.canceled += instance.OnLook;
+                @LookDelta.started += instance.OnLookDelta;
+                @LookDelta.performed += instance.OnLookDelta;
+                @LookDelta.canceled += instance.OnLookDelta;
+                @LookConst.started += instance.OnLookConst;
+                @LookConst.performed += instance.OnLookConst;
+                @LookConst.canceled += instance.OnLookConst;
                 @Fire.started += instance.OnFire;
                 @Fire.performed += instance.OnFire;
                 @Fire.canceled += instance.OnFire;
@@ -1281,7 +1310,8 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
     public interface IPlayerActions
     {
         void OnMove(InputAction.CallbackContext context);
-        void OnLook(InputAction.CallbackContext context);
+        void OnLookDelta(InputAction.CallbackContext context);
+        void OnLookConst(InputAction.CallbackContext context);
         void OnFire(InputAction.CallbackContext context);
         void OnAim(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
