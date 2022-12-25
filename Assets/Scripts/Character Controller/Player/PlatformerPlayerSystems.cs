@@ -82,6 +82,7 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         .Run();
 
         Entities
+        .WithAll<GhostOwnerIsLocal>()
         .ForEach((
         Entity entity,
         ref PlatformerPlayerInputs inputs,
