@@ -29,10 +29,10 @@ public struct PlatformerPlayerInputs : IInputComponentData
     public bool RollHeld;
     public bool JumpHeld;
     
-    public FixedInputEvent JumpPressed;
-    public FixedInputEvent DashPressed;
-    public FixedInputEvent CrouchPressed;
-    public FixedInputEvent RopePressed;
-    public FixedInputEvent ClimbPressed;
-    public FixedInputEvent FlyNoCollisionsPressed;
+    public InputEvent JumpPressed;
+    public InputEvent DashPressed;
+    public InputEvent CrouchPressed;
+    public InputEvent RopePressed;
+    public InputEvent ClimbPressed;
+    public InputEvent FlyNoCollisionsPressed;
 }

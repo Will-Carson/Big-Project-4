@@ -19,9 +19,11 @@ public partial class PlatformerCharacterHybridSystem : SystemBase
         EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<EndSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(World.Unmanaged); 
         
         // Create
-        foreach (var (characterAnimation, hybridData, entity) in SystemAPI.Query<RefRW<PlatformerCharacterAnimation>, PlatformerCharacterHybridData>()
-                     .WithNone<PlatformerCharacterHybridLink>()
-                     .WithEntityAccess())
+        foreach (var (characterAnimation, hybridData, entity) in SystemAPI.Query<
+            RefRW<PlatformerCharacterAnimation>, 
+            PlatformerCharacterHybridData>()
+            .WithNone<PlatformerCharacterHybridLink>()
+            .WithEntityAccess())
         {
             GameObject tmpObject = GameObject.Instantiate(hybridData.MeshPrefab);
             Animator animator = tmpObject.GetComponent<Animator>();
@@ -57,7 +59,7 @@ public partial class PlatformerCharacterHybridSystem : SystemBase
             if (hybridLink.Object)
             {
                 // Transform
-                LocalToWorld meshRootLTW = GetComponent<LocalToWorld>(characterComponent.MeshRootEntity);
+                var meshRootLTW = SystemAPI.GetComponent<LocalToWorld>(characterComponent.MeshRootEntity);
                 hybridLink.Object.transform.position = meshRootLTW.Position;
                 hybridLink.Object.transform.rotation = meshRootLTW.Rotation;
 

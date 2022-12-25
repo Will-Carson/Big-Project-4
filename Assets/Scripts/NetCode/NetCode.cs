@@ -92,6 +92,7 @@ public partial struct GoInGameServerSystem : ISystem
             var player = commandBuffer.Instantiate(playerPrefab);
             var character = commandBuffer.Instantiate(characterPrefab);
             commandBuffer.SetComponent(player, new GhostOwnerComponent { NetworkId = networkId });
+            commandBuffer.SetComponent(character, new GhostOwnerComponent { NetworkId = networkId });
             commandBuffer.SetComponent(reqSrc.ValueRO.SourceConnection, 
                 new CommandTargetComponent
                 {
