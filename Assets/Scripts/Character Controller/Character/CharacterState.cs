@@ -5,24 +5,6 @@ using UnityEngine;
 using Rival;
 using Unity.Mathematics;
 
-public enum CharacterState
-{
-    Uninitialized,
-    
-    GroundMove,
-    Crouched,
-    AirMove,
-    WallRun,
-    Rolling,
-    LedgeGrab,
-    LedgeStandingUp,
-    Dashing,
-    Swimming,
-    Climbing,
-    FlyingNoCollisions,
-    RopeSwing,
-}
-
 public interface IPlatformerCharacterState
 {
     void OnStateEnter(CharacterState previousState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect);

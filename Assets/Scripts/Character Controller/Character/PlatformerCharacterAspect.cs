@@ -21,10 +21,11 @@ public struct PlatformerCharacterUpdateContext
 {
     public int ChunkIndex;
     public EntityCommandBuffer.ParallelWriter EndFrameECB;
-    [ReadOnly]
-    public ComponentLookup<CharacterFrictionModifier> CharacterFrictionModifierLookup;
-    [ReadOnly]
-    public BufferLookup<LinkedEntityGroup> LinkedEntityGroupLookup;
+    [ReadOnly] public ComponentLookup<CharacterFrictionModifier> CharacterFrictionModifierLookup;
+    [ReadOnly] public BufferLookup<LinkedEntityGroup> LinkedEntityGroupLookup;
+
+    [ReadOnly] public BufferLookup<StatContainer> StatContainerLookup;
+    [ReadOnly] public BufferLookup<ResourceContainer> ResourceContainerLookup;
 
     public void OnIterateEntity(int chunkIndex)
     {
@@ -35,6 +36,9 @@ public struct PlatformerCharacterUpdateContext
     {
         CharacterFrictionModifierLookup = state.GetComponentLookup<CharacterFrictionModifier>(true);
         LinkedEntityGroupLookup = state.GetBufferLookup<LinkedEntityGroup>(true);
+
+        StatContainerLookup = state.GetBufferLookup<StatContainer>(true);
+        ResourceContainerLookup = state.GetBufferLookup<ResourceContainer>(false);
     }
 
     public void OnSystemUpdate(ref SystemState state, EntityCommandBuffer endFrameECB)
@@ -42,6 +46,9 @@ public struct PlatformerCharacterUpdateContext
         EndFrameECB = endFrameECB.AsParallelWriter();
         CharacterFrictionModifierLookup.Update(ref state);
         LinkedEntityGroupLookup.Update(ref state);
+
+        StatContainerLookup.Update(ref state);
+        ResourceContainerLookup.Update(ref state);
     }
 }
 
