@@ -39,14 +39,19 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         .WithNone<ControlledCameraComponent>()
         .WithAll<GhostOwnerIsLocal, PlatformerPlayer>()
         .ForEach((
-        Entity entity) =>
+        Entity entity,
+        in PlatformerPlayer player) =>
         {
+            // Exit early if we don't have a controlled character yet.
+            if (player.ControlledCharacter == Entity.Null) return;
+
             var camera = commandBuffer.Instantiate(cameraPrefab);
             commandBuffer.AddComponent<MainEntityCamera>(camera);
             commandBuffer.AddComponent(entity, new ControlledCameraComponent
             {
                 ControlledCamera = camera
             });
+            commandBuffer.AddComponent(camera, new OrbitCameraControl { FollowedCharacterEntity = player.ControlledCharacter });
         })
         .Run();
 
@@ -64,7 +69,11 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
                 var cameraControl = SystemAPI.GetComponent<OrbitCameraControl>(camera.ControlledCamera);
 
                 cameraControl.FollowedCharacterEntity = player.ControlledCharacter;
-                cameraControl.Look = defaultActionsMap.LookConst.ReadValue<Vector2>() * SystemAPI.Time.DeltaTime;
+                cameraControl.Look = defaultActionsMap.LookDelta.ReadValue<Vector2>();
+                if (math.lengthsq(defaultActionsMap.LookConst.ReadValue<Vector2>()) > math.lengthsq(defaultActionsMap.LookDelta.ReadValue<Vector2>()))
+                {
+                    cameraControl.Look = defaultActionsMap.LookConst.ReadValue<Vector2>() * SystemAPI.Time.DeltaTime;
+                }
                 cameraControl.Zoom = defaultActionsMap.CameraZoom.ReadValue<float>();
 
                 SystemAPI.SetComponent(camera.ControlledCamera, cameraControl);

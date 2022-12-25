@@ -97,7 +97,7 @@ public partial struct OrbitCameraSystem : ISystem
         job.Schedule();
     }
 
-    [BurstCompile]
+    //[BurstCompile]
     [WithAll(typeof(Simulate))]
     public partial struct OrbitCameraJob : IJobEntity
     {

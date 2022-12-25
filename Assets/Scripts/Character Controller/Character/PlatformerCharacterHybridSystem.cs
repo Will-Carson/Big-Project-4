@@ -5,6 +5,10 @@ using Rival;
 using Unity.Transforms;
 using UnityEngine;
 
+/// <summary>
+/// Only run on the client world (not thin clients) because thin clients don't need gameobjects.
+/// </summary>
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
 [AlwaysSynchronizeSystem]
 [UpdateInGroup(typeof(SimulationSystemGroup), OrderLast = true)]
 [UpdateAfter(typeof(EndSimulationEntityCommandBufferSystem))]
