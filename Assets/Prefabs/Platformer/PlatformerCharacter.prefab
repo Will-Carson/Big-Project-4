@@ -77,6 +77,7 @@ GameObject:
   - component: {fileID: 6581496576431725580}
   - component: {fileID: 5203214638062864760}
   - component: {fileID: 5276763918366939316}
+  - component: {fileID: 2224162488564791421}
   m_Layer: 0
   m_Name: PlatformerCharacter
   m_TagString: Untagged
@@ -566,6 +567,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GravityMultiplier: 3
+--- !u!114 &2224162488564791421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1692896102597148395}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c79d771cedb4794bf100ce60df5f764, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DefaultGhostMode: 1
+  SupportedGhostModes: 3
+  OptimizationMode: 0
+  Importance: 1
+  prefabId: 
+  HasOwner: 1
+  SupportAutoCommandTarget: 0
+  TrackInterpolationDelay: 0
+  GhostGroup: 0
+  UsePreSerialization: 0
 --- !u!1 &3057386589211996020
 GameObject:
   m_ObjectHideFlags: 0

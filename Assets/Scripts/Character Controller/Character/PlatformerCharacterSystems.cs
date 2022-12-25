@@ -7,6 +7,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 using Rival;
+using Unity.NetCode;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 [RequireMatchingQueriesForUpdate]
@@ -99,7 +100,8 @@ public partial struct PlatformerCharacterPhysicsUpdateSystem : ISystem
     }
 }
 
-[UpdateInGroup(typeof(KinematicCharacterVariableUpdateGroup))]
+[UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+[UpdateAfter(typeof(PredictedFixedStepSimulationSystemGroup))]
 [BurstCompile]
 public partial struct PlatformerCharacterVariableUpdateSystem : ISystem
 {

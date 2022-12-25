@@ -16,10 +16,6 @@ public class PlatformerPlayerAuthoring : MonoBehaviour
                 ControlledCharacter = GetEntity(authoring.ControlledCharacter)
             });
             AddComponent(new PlatformerPlayerInputs());
-            AddComponent(new ControlledCameraComponent
-            {
-                ControlledCamera = GetEntity(authoring.ControlledCamera)
-            });
         }
     }
 }

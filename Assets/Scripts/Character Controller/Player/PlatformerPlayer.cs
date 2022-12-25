@@ -12,9 +12,6 @@ public struct PlatformerPlayer : IComponentData
     public FixedString128Bytes Name;
     [GhostField]
     public Entity ControlledCharacter;
-
-    public NetworkTick LastKnownCommandsTick;
-    public PlatformerPlayerInputs LastKnownCommands;
 }
 
 public struct ControlledCameraComponent : IComponentData
@@ -26,8 +23,7 @@ public struct ControlledCameraComponent : IComponentData
 public struct PlatformerPlayerInputs : IInputComponentData
 {
     public float2 Move;
-    public float2 Look;
-    public float CameraZoom;
+    public quaternion LookDirection;
     
     public bool SprintHeld;
     public bool RollHeld;

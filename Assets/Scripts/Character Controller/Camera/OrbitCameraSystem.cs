@@ -10,6 +10,7 @@ using Unity.Transforms;
 using Rival;
 using UnityEngine;
 
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 [UpdateAfter(typeof(TransformSystemGroup))]
 [UpdateBefore(typeof(EndSimulationEntityCommandBufferSystem))]

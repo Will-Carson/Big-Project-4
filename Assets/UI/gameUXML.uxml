@@ -26,7 +26,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement name="talents-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.5); flex-direction: row-reverse; display: flex;">
+    <ui:VisualElement name="talents-root" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.5); flex-direction: row-reverse; display: none;">
         <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
             <ui:ScrollView style="flex-grow: 1; height: 100%;">
                 <ui:VisualElement name="talent-column-parent" style="background-color: rgba(0, 0, 0, 0); flex-direction: row; position: absolute;" />

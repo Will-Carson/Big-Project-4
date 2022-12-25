@@ -70,7 +70,8 @@ public partial struct GoInGameServerSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var prefabs = SystemAPI.GetSingletonBuffer<PrefabContainer>();
-        var playerPrefab = PrefabContainer.GetEntityWithId(prefabs, "Player");
+        var playerPrefab = PrefabContainer.GetEntityWithId(prefabs, "PlatformerPlayer");
+        var characterPrefab = PrefabContainer.GetEntityWithId(prefabs, "PlatformerCharacter");
         var itemPrefab = PrefabContainer.GetEntityWithId(prefabs, "Item");
         state.EntityManager.GetName(playerPrefab, out var prefabName);
         var worldName = new FixedString32Bytes(state.WorldUnmanaged.Name);
@@ -78,7 +79,10 @@ public partial struct GoInGameServerSystem : ISystem
         var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
         networkIdFromEntity.Update(ref state);
 
-        foreach (var (reqSrc, reqEntity) in SystemAPI.Query<RefRO<ReceiveRpcCommandRequestComponent>>().WithAll<GoInGameRpc>().WithEntityAccess())
+        foreach (var (reqSrc, reqEntity) in SystemAPI.Query<
+            RefRO<ReceiveRpcCommandRequestComponent>>()
+            .WithAll<GoInGameRpc>()
+            .WithEntityAccess())
         {
             commandBuffer.AddComponent<NetworkStreamInGame>(reqSrc.ValueRO.SourceConnection);
             var networkId = networkIdFromEntity[reqSrc.ValueRO.SourceConnection].Value;
@@ -86,11 +90,19 @@ public partial struct GoInGameServerSystem : ISystem
             UnityEngine.Debug.Log($"'{worldName}' setting connection '{networkId}' to in game, spawning a Ghost '{prefabName}' for them!");
 
             var player = commandBuffer.Instantiate(playerPrefab);
+            var character = commandBuffer.Instantiate(characterPrefab);
             commandBuffer.SetComponent(player, new GhostOwnerComponent { NetworkId = networkId });
-            commandBuffer.SetComponent(reqSrc.ValueRO.SourceConnection, new CommandTargetComponent
-            {
-                targetEntity = player
-            });
+            commandBuffer.SetComponent(reqSrc.ValueRO.SourceConnection, 
+                new CommandTargetComponent
+                {
+                    targetEntity = player
+                });
+            commandBuffer.SetComponent(player, 
+                new PlatformerPlayer 
+                { 
+                    ControlledCharacter = character, 
+                    Name = "TEST" 
+                });
 
             // Add the player to the linked entity group so it is destroyed automatically on disconnect
             commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = player });
