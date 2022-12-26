@@ -136,9 +136,10 @@ MonoBehaviour:
     RecoilFOVKickSharpness: 150
     RecoilFOVKickRestitutionSharpness: 20
   ShotOrigin: {fileID: 5070349038548459520}
-  ProjectileVisualPrefab: {fileID: 7460990098522836823, guid: 20e7021256e9255458bad88e6e6a59e6, type: 3}
+  ProjectileVisualPrefab: {fileID: 7460990098522836823, guid: 20e7021256e9255458bad88e6e6a59e6,
+    type: 3}
   Range: 1000
-  Damage: 4.4
+  Damage: 4
   SpreadDegrees: 4
   ProjectilesCount: 1
   HitCollisionFilter:
@@ -205,7 +206,7 @@ MonoBehaviour:
   SupportedGhostModes: 3
   OptimizationMode: 0
   Importance: 1
-  prefabId: 913ac431eeee6b64cae9c18f54d21fb1
+  prefabId: 0186383edd93aed489179b154c1645e8
   HasOwner: 1
   SupportAutoCommandTarget: 0
   TrackInterpolationDelay: 0
