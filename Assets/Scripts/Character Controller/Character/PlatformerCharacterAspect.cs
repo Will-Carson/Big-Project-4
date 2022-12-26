@@ -24,8 +24,6 @@ public struct PlatformerCharacterUpdateContext
     [ReadOnly] public ComponentLookup<CharacterFrictionModifier> CharacterFrictionModifierLookup;
     [ReadOnly] public BufferLookup<LinkedEntityGroup> LinkedEntityGroupLookup;
 
-    [ReadOnly] public ComponentLookup<CastTimeComponent> CastTimeComponentLookup;
-
     public void OnIterateEntity(int chunkIndex)
     {
         ChunkIndex = chunkIndex;
@@ -35,8 +33,6 @@ public struct PlatformerCharacterUpdateContext
     {
         CharacterFrictionModifierLookup = state.GetComponentLookup<CharacterFrictionModifier>(true);
         LinkedEntityGroupLookup = state.GetBufferLookup<LinkedEntityGroup>(true);
-
-        CastTimeComponentLookup = state.GetComponentLookup<CastTimeComponent>(true);
     }
 
     public void OnSystemUpdate(ref SystemState state, EntityCommandBuffer endFrameECB)
@@ -44,8 +40,6 @@ public struct PlatformerCharacterUpdateContext
         EndFrameECB = endFrameECB.AsParallelWriter();
         CharacterFrictionModifierLookup.Update(ref state);
         LinkedEntityGroupLookup.Update(ref state);
-
-        CastTimeComponentLookup.Update(ref state);
     }
 }
 
@@ -59,7 +53,6 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
 
     public readonly DynamicBuffer<StatContainer> StatContainer;
     public readonly DynamicBuffer<ResourceContainer> ResourceContainer;
-    public readonly RefRW<CurrentWeaponContainer> CurrentWeaponContainer;
 
     public void PhysicsUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext)
     {
