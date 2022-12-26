@@ -35,4 +35,7 @@ public struct PlatformerPlayerInputs : IInputComponentData
     public InputEvent RopePressed;
     public InputEvent ClimbPressed;
     public InputEvent FlyNoCollisionsPressed;
+
+    public InputEvent Fire1Pressed;
+    public InputEvent Fire2Pressed;
 }

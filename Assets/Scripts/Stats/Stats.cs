@@ -30,6 +30,7 @@ using Unity.Collections;
 using Unity.NetCode;
 using Unity.Burst;
 using Unity.Mathematics;
+using System;
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateBefore(typeof(StatRecalculationSystemGroup))]
@@ -442,6 +443,7 @@ public class StatRecalculationSystemGroup : ComponentSystemGroup
 /// </summary>
 public struct StatRecalculationTag : IComponentData { }
 
+[Serializable]
 [GhostComponent(OwnerSendType = SendToOwnerType.SendToOwner)]
 public struct StatContainer : IBufferElementData
 {
@@ -517,6 +519,7 @@ public struct StatRequirement
 /// <summary>
 /// Matches a stat and a value
 /// </summary>
+[Serializable]
 public struct StatData
 {
     public StatType stat;

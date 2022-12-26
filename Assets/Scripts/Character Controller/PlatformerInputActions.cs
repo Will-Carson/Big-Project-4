@@ -134,6 +134,24 @@ public partial class @PlatformerInputActions : IInputActionCollection2, IDisposa
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Fire1"",
+                    ""type"": ""Button"",
+                    ""id"": ""28191030-f870-4e77-be70-5b5723ffa01d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Fire2"",
+                    ""type"": ""Button"",
+                    ""id"": ""fdcf7a4a-407c-4f7a-befa-5b7c24c681d6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -422,6 +440,28 @@ public partial class @PlatformerInputActions : IInputActionCollection2, IDisposa
                     ""action"": ""LookConst"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3a29aeca-fc43-48a3-be6d-2909349b8efc"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fire2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""56346cb4-5a7d-4372-9722-b0e5d3b38bee"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fire1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -442,6 +482,8 @@ public partial class @PlatformerInputActions : IInputActionCollection2, IDisposa
         m_GameplayMap_Rope = m_GameplayMap.FindAction("Rope", throwIfNotFound: true);
         m_GameplayMap_Climb = m_GameplayMap.FindAction("Climb", throwIfNotFound: true);
         m_GameplayMap_FlyNoCollisions = m_GameplayMap.FindAction("FlyNoCollisions", throwIfNotFound: true);
+        m_GameplayMap_Fire1 = m_GameplayMap.FindAction("Fire1", throwIfNotFound: true);
+        m_GameplayMap_Fire2 = m_GameplayMap.FindAction("Fire2", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -513,6 +555,8 @@ public partial class @PlatformerInputActions : IInputActionCollection2, IDisposa
     private readonly InputAction m_GameplayMap_Rope;
     private readonly InputAction m_GameplayMap_Climb;
     private readonly InputAction m_GameplayMap_FlyNoCollisions;
+    private readonly InputAction m_GameplayMap_Fire1;
+    private readonly InputAction m_GameplayMap_Fire2;
     public struct GameplayMapActions
     {
         private @PlatformerInputActions m_Wrapper;
@@ -529,6 +573,8 @@ public partial class @PlatformerInputActions : IInputActionCollection2, IDisposa
         public InputAction @Rope => m_Wrapper.m_GameplayMap_Rope;
         public InputAction @Climb => m_Wrapper.m_GameplayMap_Climb;
         public InputAction @FlyNoCollisions => m_Wrapper.m_GameplayMap_FlyNoCollisions;
+        public InputAction @Fire1 => m_Wrapper.m_GameplayMap_Fire1;
+        public InputAction @Fire2 => m_Wrapper.m_GameplayMap_Fire2;
         public InputActionMap Get() { return m_Wrapper.m_GameplayMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -574,6 +620,12 @@ public partial class @PlatformerInputActions : IInputActionCollection2, IDisposa
                 @FlyNoCollisions.started -= m_Wrapper.m_GameplayMapActionsCallbackInterface.OnFlyNoCollisions;
                 @FlyNoCollisions.performed -= m_Wrapper.m_GameplayMapActionsCallbackInterface.OnFlyNoCollisions;
                 @FlyNoCollisions.canceled -= m_Wrapper.m_GameplayMapActionsCallbackInterface.OnFlyNoCollisions;
+                @Fire1.started -= m_Wrapper.m_GameplayMapActionsCallbackInterface.OnFire1;
+                @Fire1.performed -= m_Wrapper.m_GameplayMapActionsCallbackInterface.OnFire1;
+                @Fire1.canceled -= m_Wrapper.m_GameplayMapActionsCallbackInterface.OnFire1;
+                @Fire2.started -= m_Wrapper.m_GameplayMapActionsCallbackInterface.OnFire2;
+                @Fire2.performed -= m_Wrapper.m_GameplayMapActionsCallbackInterface.OnFire2;
+                @Fire2.canceled -= m_Wrapper.m_GameplayMapActionsCallbackInterface.OnFire2;
             }
             m_Wrapper.m_GameplayMapActionsCallbackInterface = instance;
             if (instance != null)
@@ -614,6 +666,12 @@ public partial class @PlatformerInputActions : IInputActionCollection2, IDisposa
                 @FlyNoCollisions.started += instance.OnFlyNoCollisions;
                 @FlyNoCollisions.performed += instance.OnFlyNoCollisions;
                 @FlyNoCollisions.canceled += instance.OnFlyNoCollisions;
+                @Fire1.started += instance.OnFire1;
+                @Fire1.performed += instance.OnFire1;
+                @Fire1.canceled += instance.OnFire1;
+                @Fire2.started += instance.OnFire2;
+                @Fire2.performed += instance.OnFire2;
+                @Fire2.canceled += instance.OnFire2;
             }
         }
     }
@@ -632,5 +690,7 @@ public partial class @PlatformerInputActions : IInputActionCollection2, IDisposa
         void OnRope(InputAction.CallbackContext context);
         void OnClimb(InputAction.CallbackContext context);
         void OnFlyNoCollisions(InputAction.CallbackContext context);
+        void OnFire1(InputAction.CallbackContext context);
+        void OnFire2(InputAction.CallbackContext context);
     }
 }

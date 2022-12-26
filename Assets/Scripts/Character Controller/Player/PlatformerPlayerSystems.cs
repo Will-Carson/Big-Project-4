@@ -124,6 +124,15 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
             {
                 inputs.FlyNoCollisionsPressed.Set();
             }
+
+            if (defaultActionsMap.Fire1.WasPressedThisFrame())
+            {
+                inputs.Fire1Pressed.Set();
+            }
+            if (defaultActionsMap.Fire2.WasPressedThisFrame())
+            {
+                inputs.Fire2Pressed.Set();
+            }
         })
         .WithoutBurst() // Required because defaultActionsMap is a managed object.
         .Run();
@@ -176,8 +185,11 @@ public partial struct PlatformerPlayerFixedStepControlSystem : ISystem
                 characterControl.CrouchPressed = playerInputs.ValueRW.CrouchPressed.IsSet; 
                 characterControl.RopePressed = playerInputs.ValueRW.RopePressed.IsSet; 
                 characterControl.ClimbPressed = playerInputs.ValueRW.ClimbPressed.IsSet; 
-                characterControl.FlyNoCollisionsPressed = playerInputs.ValueRW.FlyNoCollisionsPressed.IsSet; 
-                
+                characterControl.FlyNoCollisionsPressed = playerInputs.ValueRW.FlyNoCollisionsPressed.IsSet;
+
+                characterControl.Fire1Pressed = playerInputs.ValueRW.Fire1Pressed.IsSet;
+                characterControl.Fire2Pressed = playerInputs.ValueRW.Fire2Pressed.IsSet;
+
                 SystemAPI.SetComponent(player.ControlledCharacter, characterControl);
             }
         }

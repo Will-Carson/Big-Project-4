@@ -274,6 +274,9 @@ public struct PlatformerCharacterControl : IComponentData
     public bool RopePressed;
     public bool ClimbPressed;
     public bool FlyNoCollisionsPressed;
+
+    public bool Fire1Pressed;
+    public bool Fire2Pressed;
 }
 
 public struct PlatformerCharacterInitialized : IComponentData

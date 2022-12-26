@@ -138,6 +138,12 @@ public struct GroundMoveState : IPlatformerCharacterState
             }
         }
 
+        if (characterControl.Fire1Pressed || characterControl.Fire2Pressed)
+        {
+            stateMachine.TransitionToState(CharacterState.Casting, ref context, ref baseContext, in aspect);
+            return true;
+        }
+
         return aspect.DetectGlobalTransitions(ref context, ref baseContext);
     }
 }

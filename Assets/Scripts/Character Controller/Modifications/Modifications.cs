@@ -3,6 +3,7 @@ using Rival;
 using System;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 
 [Serializable]
 public struct PlatformerCharacterStateMachine : IComponentData
@@ -22,7 +23,7 @@ public struct PlatformerCharacterStateMachine : IComponentData
     public LedgeStandingUpState LedgeStandingUpState;
     public FlyingNoCollisionsState FlyingNoCollisionsState;
     public RopeSwingState RopeSwingState;
-    public CastingState CastingState;
+    public FiringState CastingState;
     public StunnedState StunnedState;
     public DeadState DeadState;
 
@@ -353,37 +354,121 @@ public struct PlatformerCharacterStateMachine : IComponentData
     }
 }
 
-public struct CastingState : IPlatformerCharacterState
+public struct FiringState : IPlatformerCharacterState
 {
-    public void GetCameraParameters(in PlatformerCharacterComponent character, out Entity cameraTarget, out bool calculateUpFromGravity)
-    {
-        cameraTarget = Entity.Null;
-        calculateUpFromGravity = false;
-    }
-
-    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion cameraRotation, out float3 moveVector)
-    {
-        moveVector = new float3();
-    }
+    Entity weaponEntity;
+    float remainingCastTime;
 
     public void OnStateEnter(CharacterState previousState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
+        // Build state data
+        weaponEntity = aspect.CurrentWeaponContainer.ValueRO.entity;
+        //remainingCastTime = context.CastTimeComponentLookup[weaponEntity].castTime;
 
+        ref var character = ref aspect.Character.ValueRW;
+        aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
     }
 
     public void OnStateExit(CharacterState nextState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
+        // Clean up state data
+        weaponEntity = Entity.Null;
+        remainingCastTime = 0;
 
+        ref var character = ref aspect.Character.ValueRW;
+
+        character.IsOnStickySurface = false;
+        character.IsSprinting = false;
     }
 
     public void OnStatePhysicsUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
+        var deltaTime = baseContext.Time.DeltaTime;
+        var elapsedTime = (float)baseContext.Time.ElapsedTime;
+        ref var characterBody = ref aspect.CharacterAspect.CharacterBody.ValueRW;
+        ref var character = ref aspect.Character.ValueRW;
+        ref var characterControl = ref aspect.CharacterControl.ValueRW;
+        ref var characterPosition = ref aspect.CharacterAspect.LocalTransform.ValueRW.Position;
+        ref var characterRotation = ref aspect.CharacterAspect.LocalTransform.ValueRW.Rotation;
 
+        aspect.HandlePhysicsUpdatePhase1(ref context, ref baseContext, true, true);
+
+        remainingCastTime -= deltaTime;
+
+        if (characterBody.IsGrounded)
+        {
+            // Rotate character towards target
+            CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, deltaTime, math.normalizesafe(characterControl.MoveVector), MathUtilities.GetUpFromRotation(characterRotation), character.AirRotationSharpness);
+
+            // Once the cast time <= 0, cast the ability
+            if (remainingCastTime <= 0)
+            {
+                //var abilityEntity = Entity.Null;
+                //context.EndFrameECB.SetComponent(context.ChunkIndex, abilityEntity, LocalTransform.FromPositionRotation(characterPosition, characterRotation));
+            }
+        }
+
+        aspect.HandlePhysicsUpdatePhase2(ref context, ref baseContext, true, true, true, true, true);
+
+        DetectTransitions(ref context, ref baseContext, in aspect);
     }
 
     public void OnStateVariableUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
 
+    }
+
+    public void GetCameraParameters(in PlatformerCharacterComponent character, out Entity cameraTarget, out bool calculateUpFromGravity)
+    {
+        cameraTarget = character.DefaultCameraTargetEntity;
+        calculateUpFromGravity = !character.IsOnStickySurface;
+    }
+
+    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion cameraRotation, out float3 moveVector)
+    {
+        PlatformerCharacterAspect.GetCommonMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+    }
+
+    public bool DetectTransitions(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
+    {
+        ref KinematicCharacterBody characterBody = ref aspect.CharacterAspect.CharacterBody.ValueRW;
+        ref PlatformerCharacterControl characterControl = ref aspect.CharacterControl.ValueRW;
+        ref PlatformerCharacterStateMachine stateMachine = ref aspect.StateMachine.ValueRW;
+
+        if (characterControl.CrouchPressed)
+        {
+            stateMachine.TransitionToState(CharacterState.Crouched, ref context, ref baseContext, in aspect);
+            return true;
+        }
+
+        if (characterControl.RollHeld)
+        {
+            stateMachine.TransitionToState(CharacterState.Rolling, ref context, ref baseContext, in aspect);
+            return true;
+        }
+
+        if (characterControl.DashPressed)
+        {
+            stateMachine.TransitionToState(CharacterState.Dashing, ref context, ref baseContext, in aspect);
+            return true;
+        }
+
+        if (!characterBody.IsGrounded)
+        {
+            stateMachine.TransitionToState(CharacterState.AirMove, ref context, ref baseContext, in aspect);
+            return true;
+        }
+
+        if (characterControl.ClimbPressed)
+        {
+            if (ClimbingState.CanStartClimbing(ref context, ref baseContext, in aspect))
+            {
+                stateMachine.TransitionToState(CharacterState.Climbing, ref context, ref baseContext, in aspect);
+                return true;
+            }
+        }
+
+        return aspect.DetectGlobalTransitions(ref context, ref baseContext);
     }
 }
 
