@@ -24,6 +24,7 @@ public class PlatformerCharacterAuthoring : MonoBehaviour
     public GameObject RopePrefab;
     public GameObject SwimmingDetectionPoint;
     public GameObject LedgeDetectionPoint;
+    public GameObject WeaponAnimationSocket;
 
     [Header("Debug")]
     public bool DebugStandingGeometry;
@@ -47,6 +48,7 @@ public class PlatformerCharacterAuthoring : MonoBehaviour
             authoring.Character.RopePrefabEntity = GetEntity(authoring.RopePrefab);
             authoring.Character.LocalSwimmingDetectionPoint = authoring.SwimmingDetectionPoint.transform.localPosition;
             authoring.Character.LocalLedgeDetectionPoint = authoring.LedgeDetectionPoint.transform.localPosition;
+            authoring.Character.WeaponAnimationSocketEntity = GetEntity(authoring.WeaponAnimationSocket);
 
             AddComponent(authoring.Character);
             AddComponent(new PlatformerCharacterControl());

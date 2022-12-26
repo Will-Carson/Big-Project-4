@@ -26,7 +26,11 @@ public partial struct PlatformerCharacterInitializationSystem : ISystem
         EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<EndSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
         BufferLookup<LinkedEntityGroup> linkedEntitiesLookup = SystemAPI.GetBufferLookup<LinkedEntityGroup>(true);
 
-        foreach (var (character, stateMachine, entity) in SystemAPI.Query<RefRW<PlatformerCharacterComponent>, RefRW<PlatformerCharacterStateMachine>>().WithNone<PlatformerCharacterInitialized>().WithEntityAccess())
+        foreach (var (character, stateMachine, entity) in SystemAPI.Query<
+            RefRW<PlatformerCharacterComponent>, 
+            RefRW<PlatformerCharacterStateMachine>>()
+            .WithNone<PlatformerCharacterInitialized>()
+            .WithEntityAccess())
         {
             // Make sure the transform system has done a pass on it first
             if (linkedEntitiesLookup.HasBuffer(entity))

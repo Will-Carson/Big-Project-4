@@ -18,6 +18,7 @@ public struct PlatformerCharacterComponent : IComponentData
     public Entity MeshRootEntity;
     public Entity RopePrefabEntity;
     public Entity RollballMeshEntity;
+    public Entity WeaponAnimationSocketEntity;
 
     [Header("Ground movement")]
     public float GroundRunMaxSpeed;

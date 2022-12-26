@@ -577,6 +577,11 @@ public enum StatType
     // Other stats
 }
 
+public struct Health : IComponentData
+{
+    public int CurrentHealth;
+}
+
 public readonly partial struct StatStickAspect : IAspect
 {
     public readonly Entity entity;
