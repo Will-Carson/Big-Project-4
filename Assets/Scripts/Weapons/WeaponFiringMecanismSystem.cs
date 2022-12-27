@@ -26,17 +26,10 @@ public partial struct WeaponFiringMecanismSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        int localNetId = -1;
-        if (SystemAPI.HasSingleton<NetworkIdComponent>())
-        {
-            localNetId = SystemAPI.GetSingleton<NetworkIdComponent>().Value;
-        }
-        
-        StandardWeaponFiringMecanismJob standardMecanismJob = new StandardWeaponFiringMecanismJob
+        var standardMecanismJob = new StandardWeaponFiringMecanismJob
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
-            IsServer = state.WorldUnmanaged.IsServer(), 
-            LocalNetworkId = localNetId,
+            IsServer = state.WorldUnmanaged.IsServer(),
         };
         state.Dependency = standardMecanismJob.Schedule(state.Dependency);
     }
@@ -47,7 +40,6 @@ public partial struct WeaponFiringMecanismSystem : ISystem
     {
         public float DeltaTime;
         public bool IsServer;
-        public int LocalNetworkId;
 
         void Execute(Entity entity, ref StandardWeaponFiringMecanism mecanism, ref WeaponControl weaponControl, in GhostOwnerComponent ghostOwner)
         {

@@ -1033,15 +1033,15 @@ namespace Rival
             groundHit = default;
             distanceToGround = 0f;
             
-            quaternion characterRotation = LocalTransform.ValueRO.Rotation;
-            float3 characterPosition = LocalTransform.ValueRO.Position;
-            KinematicCharacterBody characterBody = CharacterBody.ValueRO;
-            KinematicCharacterProperties characterProperties = CharacterProperties.ValueRO;
-            PhysicsCollider characterPhysicsCollider = PhysicsCollider.ValueRO;
+            var characterRotation = LocalTransform.ValueRO.Rotation;
+            var characterPosition = LocalTransform.ValueRO.Position;
+            var characterBody = CharacterBody.ValueRO;
+            var characterProperties = CharacterProperties.ValueRO;
+            var characterPhysicsCollider = PhysicsCollider.ValueRO;
 
-            ColliderCastInput input = new ColliderCastInput(characterPhysicsCollider.Value, characterPosition, characterPosition + (-characterBody.GroundingUp * groundProbingLength), characterRotation);
+            var input = new ColliderCastInput(characterPhysicsCollider.Value, characterPosition, characterPosition + (-characterBody.GroundingUp * groundProbingLength), characterRotation);
             baseContext.TmpColliderCastHits.Clear();
-            AllHitsCollector<ColliderCastHit> collector = new AllHitsCollector<ColliderCastHit>(1f, ref baseContext.TmpColliderCastHits);
+            var collector = new AllHitsCollector<ColliderCastHit>(1f, ref baseContext.TmpColliderCastHits);
             baseContext.PhysicsWorld.CastCollider(input, ref collector);
 
             if (FilterColliderCastHitsForGroundProbing(in processor, ref context, ref baseContext, ref baseContext.TmpColliderCastHits, -characterBody.GroundingUp, characterProperties.ShouldIgnoreDynamicBodies(), out ColliderCastHit closestHit))
@@ -1073,7 +1073,7 @@ namespace Rival
 
                             for (int i = 0; i < baseContext.TmpColliderCastHits.Length; i++)
                             {
-                                ColliderCastHit tmpHit = baseContext.TmpColliderCastHits[i];
+                                var tmpHit = baseContext.TmpColliderCastHits[i];
 
                                 // Skip if this is our ground hit
                                 if (tmpHit.RigidBodyIndex == groundHit.RigidBodyIndex && 
@@ -1084,7 +1084,7 @@ namespace Rival
                                 float tmpHitDistance = tmpHit.Fraction * groundProbingLength;
                                 if (math.distancesq(tmpHitDistance, distanceToGround) <= Constants.GroundedHitDistanceToleranceSq)
                                 {
-                                    BasicHit tmpClosestGroundedHit = new BasicHit(tmpHit);
+                                    var tmpClosestGroundedHit = new BasicHit(tmpHit);
                                     bool isGroundedOnHit = processor.IsGroundedOnHit(
                                         ref context, 
                                         ref baseContext,
@@ -1111,20 +1111,20 @@ namespace Rival
                 // Enhanced ground distance computing
                 if (characterProperties.EnhancedGroundPrecision && distanceToGround <= 0f)
                 {
-                    RigidBody otherBody = baseContext.PhysicsWorld.Bodies[closestHit.RigidBodyIndex];
+                    var otherBody = baseContext.PhysicsWorld.Bodies[closestHit.RigidBodyIndex];
                     if (otherBody.Collider.AsPtr()->GetLeaf(closestHit.ColliderKey, out ChildCollider leafCollider))
                     {
-                        RigidTransform characterWorldTransform = new RigidTransform(characterRotation, characterPosition);
+                        var characterWorldTransform = new RigidTransform(characterRotation, characterPosition);
                         characterWorldTransform = math.mul(characterWorldTransform, characterPhysicsCollider.ColliderPtr->MassProperties.MassDistribution.Transform);
-                        RigidTransform otherBodyWorldTransform = math.mul(otherBody.WorldFromBody, leafCollider.TransformFromChild);
-                        RigidTransform characterRelativeToOther = math.mul(math.inverse(otherBodyWorldTransform), characterWorldTransform);
+                        var otherBodyWorldTransform = math.mul(otherBody.WorldFromBody, leafCollider.TransformFromChild);
+                        var characterRelativeToOther = math.mul(math.inverse(otherBodyWorldTransform), characterWorldTransform);
 
-                        ColliderDistanceInput correctionInput = new ColliderDistanceInput(characterPhysicsCollider.Value, 1, characterRelativeToOther);
+                        var correctionInput = new ColliderDistanceInput(characterPhysicsCollider.Value, 1, characterRelativeToOther);
                         if (otherBody.Collider.AsPtr()->CalculateDistance(correctionInput, out DistanceHit correctionHit))
                         {
                             if(correctionHit.Distance > 0f)
                             { 
-                                float3 reconstructedHitNormal = math.mul(otherBodyWorldTransform.rot, correctionHit.SurfaceNormal);
+                                var reconstructedHitNormal = math.mul(otherBodyWorldTransform.rot, correctionHit.SurfaceNormal);
                                 if (math.dot(-reconstructedHitNormal, -characterBody.GroundingUp) > 0f)
                                 {
                                     float angleBetweenGroundingDownAndClosestPointOnOther = math.PI * 0.5f - MathUtilities.AngleRadians(-reconstructedHitNormal, -characterBody.GroundingUp);

@@ -315,12 +315,6 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
         PlatformerCharacterControl control,
         uint delay)
     {
-        // Exit early if necessary
-        if (!control.Fire1Pressed && !control.Fire2Pressed && !control.Fire1Released && !control.Fire2Released)
-        {
-            return;
-        }
-
         // Weapon
         if (weaponControlLookup.TryGetComponent(activeWeapon.entity, out var weaponControl))
         {
@@ -328,8 +322,8 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
 
             // Shoot
             weaponControl.Fire1Pressed = control.Fire1Pressed;
-            weaponControl.Fire1Released = control.Fire2Released;
-            weaponControl.Fire2Pressed = control.Fire1Pressed;
+            weaponControl.Fire1Released = control.Fire1Released;
+            weaponControl.Fire2Pressed = control.Fire2Pressed;
             weaponControl.Fire2Released = control.Fire2Released;
 
             // Interp delay
