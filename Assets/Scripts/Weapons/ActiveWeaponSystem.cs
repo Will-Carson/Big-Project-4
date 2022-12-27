@@ -27,7 +27,7 @@ public partial struct ActiveWeaponSystem : ISystem
         {
             ECB = SystemAPI.GetSingletonRW<PostPredictionPreTransformsECBSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged),
             WeaponControlLookup = SystemAPI.GetComponentLookup<WeaponControl>(true),
-            FirstPersonCharacterComponentLookup = SystemAPI.GetComponentLookup<PlatformerCharacterComponent>(true),
+            platformerCharacterComponentLookup = SystemAPI.GetComponentLookup<PlatformerCharacterComponent>(true),
             WeaponSimulationShotOriginOverrideLookup = SystemAPI.GetComponentLookup<WeaponShotSimulationOriginOverride>(false),
             LinkedEntityGroupLookup = SystemAPI.GetBufferLookup<LinkedEntityGroup>(false),
             WeaponShotIgnoredEntityLookup = SystemAPI.GetBufferLookup<WeaponShotIgnoredEntity>(false),
@@ -40,7 +40,7 @@ public partial struct ActiveWeaponSystem : ISystem
     {
         public EntityCommandBuffer ECB;
         [ReadOnly] public ComponentLookup<WeaponControl> WeaponControlLookup;
-        [ReadOnly] public ComponentLookup<PlatformerCharacterComponent> FirstPersonCharacterComponentLookup;
+        [ReadOnly] public ComponentLookup<PlatformerCharacterComponent> platformerCharacterComponentLookup;
         public ComponentLookup<WeaponShotSimulationOriginOverride> WeaponSimulationShotOriginOverrideLookup;
         public BufferLookup<LinkedEntityGroup> LinkedEntityGroupLookup;
         public BufferLookup<WeaponShotIgnoredEntity> WeaponShotIgnoredEntityLookup;
@@ -54,10 +54,10 @@ public partial struct ActiveWeaponSystem : ISystem
                 if (WeaponControlLookup.HasComponent(activeWeapon.entity))
                 {
                     // Setup for characters
-                    if (FirstPersonCharacterComponentLookup.TryGetComponent(entity, out var character))
+                    if (platformerCharacterComponentLookup.TryGetComponent(entity, out var character))
                     {
                         // Make character View entity be the weapon's raycast start point
-                        if (WeaponSimulationShotOriginOverrideLookup.TryGetComponent(activeWeapon.entity, out WeaponShotSimulationOriginOverride shotOriginOverride))
+                        if (WeaponSimulationShotOriginOverrideLookup.TryGetComponent(activeWeapon.entity, out var shotOriginOverride))
                         {
                             shotOriginOverride.Entity = character.MeshRootEntity;
                             WeaponSimulationShotOriginOverrideLookup[activeWeapon.entity] = shotOriginOverride;
@@ -70,11 +70,11 @@ public partial struct ActiveWeaponSystem : ISystem
                         ECB.SetComponent(activeWeapon.entity, new WeaponOwner { Entity = entity });
 
                         // Make weapon linked to the character
-                        DynamicBuffer<LinkedEntityGroup> linkedEntityBuffer = LinkedEntityGroupLookup[entity];
+                        var linkedEntityBuffer = LinkedEntityGroupLookup[entity];
                         linkedEntityBuffer.Add(new LinkedEntityGroup { Value = activeWeapon.entity });
                         
                         // Add character as ignored shot entities
-                        if (WeaponShotIgnoredEntityLookup.TryGetBuffer(activeWeapon.entity, out DynamicBuffer<WeaponShotIgnoredEntity> ignoredEntities))
+                        if (WeaponShotIgnoredEntityLookup.TryGetBuffer(activeWeapon.entity, out var ignoredEntities))
                         {
                             ignoredEntities.Add(new WeaponShotIgnoredEntity { Entity = entity });
                         }

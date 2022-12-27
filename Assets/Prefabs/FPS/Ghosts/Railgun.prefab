@@ -133,7 +133,8 @@ MonoBehaviour:
     RecoilFOVKickSharpness: 150
     RecoilFOVKickRestitutionSharpness: 20
   ShotOrigin: {fileID: 6328546748666097053}
-  ProjectileVisualPrefab: {fileID: 7460990098522836823, guid: 1e149f3ed7b84c2428267a2168c1f9e1, type: 3}
+  ProjectileVisualPrefab: {fileID: 7460990098522836823, guid: 1e149f3ed7b84c2428267a2168c1f9e1,
+    type: 3}
   Range: 1000
   Damage: 1000
   SpreadDegrees: 0

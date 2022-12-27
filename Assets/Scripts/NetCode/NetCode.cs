@@ -73,6 +73,7 @@ public partial struct GoInGameServerSystem : ISystem
         var playerPrefab = PrefabContainer.GetEntityWithId(prefabs, "PlatformerPlayer");
         var characterPrefab = PrefabContainer.GetEntityWithId(prefabs, "PlatformerCharacter");
         var itemPrefab = PrefabContainer.GetEntityWithId(prefabs, "Item");
+        var weaponPrefab = PrefabContainer.GetEntityWithId(prefabs, "Railgun");
         state.EntityManager.GetName(playerPrefab, out var prefabName);
         var worldName = new FixedString32Bytes(state.WorldUnmanaged.Name);
 
@@ -333,6 +334,11 @@ public partial struct GoInGameServerSystem : ISystem
                 commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = abilities });
                 commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = foreign });
             } // Container set up
+
+            // Spawn & assign starting weapon
+            var weaponEntity = commandBuffer.Instantiate(weaponPrefab);
+            commandBuffer.SetComponent(weaponEntity, new GhostOwnerComponent { NetworkId = networkId });
+            commandBuffer.SetComponent(character, new ActiveWeapon { entity = weaponEntity });
         }
         commandBuffer.Playback(state.EntityManager);
     }
