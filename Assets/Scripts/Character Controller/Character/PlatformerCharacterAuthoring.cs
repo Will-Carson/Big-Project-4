@@ -54,6 +54,9 @@ public class PlatformerCharacterAuthoring : MonoBehaviour
             AddComponent(new PlatformerCharacterControl());
             AddComponent(new PlatformerCharacterStateMachine());
             AddComponentObject(new PlatformerCharacterHybridData { MeshPrefab = authoring.MeshPrefab });
+
+            AddComponent(new ActiveWeapon());
+            AddComponent(new CharacterWeaponVisualFeedback());
         }
     }
 

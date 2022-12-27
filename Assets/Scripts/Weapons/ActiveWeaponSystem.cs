@@ -48,33 +48,33 @@ public partial struct ActiveWeaponSystem : ISystem
         void Execute(Entity entity, ref ActiveWeapon activeWeapon)
         {
             // Detect changes in active weapon
-            if (activeWeapon.Entity != activeWeapon.PreviousEntity)
+            if (activeWeapon.entity != activeWeapon.previousEntity)
             {
                 // Setup new weapon
-                if (WeaponControlLookup.HasComponent(activeWeapon.Entity))
+                if (WeaponControlLookup.HasComponent(activeWeapon.entity))
                 {
                     // Setup for characters
                     if (FirstPersonCharacterComponentLookup.TryGetComponent(entity, out var character))
                     {
                         // Make character View entity be the weapon's raycast start point
-                        if (WeaponSimulationShotOriginOverrideLookup.TryGetComponent(activeWeapon.Entity, out WeaponShotSimulationOriginOverride shotOriginOverride))
+                        if (WeaponSimulationShotOriginOverrideLookup.TryGetComponent(activeWeapon.entity, out WeaponShotSimulationOriginOverride shotOriginOverride))
                         {
                             shotOriginOverride.Entity = character.MeshRootEntity;
-                            WeaponSimulationShotOriginOverrideLookup[activeWeapon.Entity] = shotOriginOverride;
+                            WeaponSimulationShotOriginOverrideLookup[activeWeapon.entity] = shotOriginOverride;
                         }
 
                         // Make weapon be child of character's weapon socket 
-                        ECB.AddComponent(activeWeapon.Entity, new Parent { Value = character.WeaponAnimationSocketEntity });
+                        ECB.AddComponent(activeWeapon.entity, new Parent { Value = character.WeaponAnimationSocketEntity });
                         
                         // Remember weapon owner
-                        ECB.SetComponent(activeWeapon.Entity, new WeaponOwner { Entity = entity });
+                        ECB.SetComponent(activeWeapon.entity, new WeaponOwner { Entity = entity });
 
                         // Make weapon linked to the character
                         DynamicBuffer<LinkedEntityGroup> linkedEntityBuffer = LinkedEntityGroupLookup[entity];
-                        linkedEntityBuffer.Add(new LinkedEntityGroup { Value = activeWeapon.Entity });
+                        linkedEntityBuffer.Add(new LinkedEntityGroup { Value = activeWeapon.entity });
                         
                         // Add character as ignored shot entities
-                        if (WeaponShotIgnoredEntityLookup.TryGetBuffer(activeWeapon.Entity, out DynamicBuffer<WeaponShotIgnoredEntity> ignoredEntities))
+                        if (WeaponShotIgnoredEntityLookup.TryGetBuffer(activeWeapon.entity, out DynamicBuffer<WeaponShotIgnoredEntity> ignoredEntities))
                         {
                             ignoredEntities.Add(new WeaponShotIgnoredEntity { Entity = entity });
                         }
@@ -88,7 +88,7 @@ public partial struct ActiveWeaponSystem : ISystem
                 // }
             }
             
-            activeWeapon.PreviousEntity = activeWeapon.Entity;
+            activeWeapon.previousEntity = activeWeapon.entity;
         }
     }
 }

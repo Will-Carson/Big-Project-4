@@ -1,19 +1,15 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.NetCode;
 using UnityEngine;
-using Random = Unity.Mathematics.Random;
 
 [Serializable]
-[GhostComponent()]
+[GhostComponent]
 public struct ActiveWeapon : IComponentData
 {
-    [GhostField()]
-    public Entity Entity;
-    public Entity PreviousEntity;
+    [GhostField]
+    public Entity entity;
+    public Entity previousEntity;
 }
 
 [Serializable]
@@ -125,9 +121,10 @@ public struct WeaponVisualFeedback : IComponentData
 [GhostComponent(OwnerSendType = SendToOwnerType.SendToNonOwner)]
 public struct WeaponControl : IComponentData
 {
-    public bool FirePressed;
-    public bool FireReleased;
-    public bool AimHeld;
+    public bool Fire1Pressed;
+    public bool Fire1Released;
+    public bool Fire2Pressed;
+    public bool Fire2Released;
 }
 
 [Serializable]

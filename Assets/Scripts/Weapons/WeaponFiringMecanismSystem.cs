@@ -55,7 +55,7 @@ public partial struct WeaponFiringMecanismSystem : ISystem
             mecanism.ShotTimer += DeltaTime;
 
             // Detect starting to fire
-            if (weaponControl.FirePressed)
+            if (weaponControl.Fire1Pressed)
             {
                 mecanism.IsFiring = true;
             }
@@ -86,7 +86,7 @@ public partial struct WeaponFiringMecanismSystem : ISystem
             }
 
             // Detect stopping fire
-            if (!mecanism.Automatic || weaponControl.FireReleased)
+            if (!mecanism.Automatic || weaponControl.Fire1Released)
             {
                 mecanism.IsFiring = false;
             }

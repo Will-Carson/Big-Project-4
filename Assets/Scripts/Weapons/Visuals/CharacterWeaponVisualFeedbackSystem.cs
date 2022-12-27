@@ -55,7 +55,7 @@ public partial struct CharacterWeaponVisualFeedbackSystem : ISystem
             bool isAiming = false;
             float characterMaxSpeed = characterBody.IsGrounded ? character.GroundRunMaxSpeed : character.AirMaxSpeed;
 
-            if (WeaponVisualFeedbackLookup.TryGetComponent(activeWeapon.Entity, out WeaponVisualFeedback weaponFeedback))
+            if (WeaponVisualFeedbackLookup.TryGetComponent(activeWeapon.entity, out WeaponVisualFeedback weaponFeedback))
             {
                 float characterVelocityRatio = math.length(characterBody.RelativeVelocity) / characterMaxSpeed;
 

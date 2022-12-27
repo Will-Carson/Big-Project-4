@@ -48,6 +48,16 @@ public struct GroundMoveState : IPlatformerCharacterState
                 float3 targetVelocity = moveVectorOnPlane * chosenMaxSpeed;
                 CharacterControlUtilities.StandardGroundMove_Interpolated(ref characterBody.RelativeVelocity, targetVelocity, chosenSharpness, deltaTime, characterBody.GroundingUp, characterBody.GroundHit.Normal);
             }
+
+            // Weapon
+            PlatformerCharacterAspect.HandleWeaponSubstate(
+                context.EndFrameECB,
+                context.ChunkIndex,
+                aspect.ActiveWeapon.ValueRO,
+                context.WeaponControlLookup,
+                context.InterpolationDelayLookup,
+                characterControl,
+                0);
             
             // Jumping
             if (characterControl.JumpPressed || 

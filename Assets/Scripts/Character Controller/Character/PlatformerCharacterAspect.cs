@@ -1,21 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
-using Unity.Physics.Authoring;
-using Unity.Physics.Extensions;
-using Unity.Physics.Systems;
-using Unity.Transforms;
 using Rival;
-using UnityEngine;
-using UnityEngine.SocialPlatforms;
 using CapsuleCollider = Unity.Physics.CapsuleCollider;
 using Material = Unity.Physics.Material;
+using Unity.NetCode;
 
 public struct PlatformerCharacterUpdateContext
 {
@@ -23,6 +13,8 @@ public struct PlatformerCharacterUpdateContext
     public EntityCommandBuffer.ParallelWriter EndFrameECB;
     [ReadOnly] public ComponentLookup<CharacterFrictionModifier> CharacterFrictionModifierLookup;
     [ReadOnly] public BufferLookup<LinkedEntityGroup> LinkedEntityGroupLookup;
+    [ReadOnly] public ComponentLookup<WeaponControl> WeaponControlLookup;
+    [ReadOnly] public ComponentLookup<InterpolationDelay> InterpolationDelayLookup;
 
     public void OnIterateEntity(int chunkIndex)
     {
@@ -33,6 +25,8 @@ public struct PlatformerCharacterUpdateContext
     {
         CharacterFrictionModifierLookup = state.GetComponentLookup<CharacterFrictionModifier>(true);
         LinkedEntityGroupLookup = state.GetBufferLookup<LinkedEntityGroup>(true);
+        WeaponControlLookup = state.GetComponentLookup<WeaponControl>(true);
+        InterpolationDelayLookup = state.GetComponentLookup<InterpolationDelay>(true);
     }
 
     public void OnSystemUpdate(ref SystemState state, EntityCommandBuffer endFrameECB)
@@ -40,6 +34,8 @@ public struct PlatformerCharacterUpdateContext
         EndFrameECB = endFrameECB.AsParallelWriter();
         CharacterFrictionModifierLookup.Update(ref state);
         LinkedEntityGroupLookup.Update(ref state);
+        WeaponControlLookup.Update(ref state);
+        InterpolationDelayLookup.Update(ref state);
     }
 }
 
@@ -53,6 +49,7 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
 
     public readonly DynamicBuffer<StatContainer> StatContainer;
     public readonly DynamicBuffer<ResourceContainer> ResourceContainer;
+    public readonly RefRW<ActiveWeapon> ActiveWeapon;
 
     public void PhysicsUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext)
     {
@@ -309,6 +306,41 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
         moveVector = (math.mul(cameraRotation, math.right()) * inputs.Move.x) + (math.mul(cameraRotation, math.forward()) * inputs.Move.y);
     }
     
+    public static void HandleWeaponSubstate(
+        EntityCommandBuffer.ParallelWriter commandBuffer,
+        int chunkIndex,
+        ActiveWeapon activeWeapon,
+        ComponentLookup<WeaponControl> weaponControlLookup,
+        ComponentLookup<InterpolationDelay> interpolationDelayLookup,
+        PlatformerCharacterControl control,
+        uint delay)
+    {
+        // Exit early if necessary
+        if (!control.Fire1Pressed && !control.Fire2Pressed && !control.Fire1Released && !control.Fire2Released)
+        {
+            return;
+        }
+
+        // Weapon
+        if (weaponControlLookup.TryGetComponent(activeWeapon.entity, out var weaponControl))
+        {
+            var interpolationDelay = interpolationDelayLookup[activeWeapon.entity];
+
+            // Shoot
+            weaponControl.Fire1Pressed = control.Fire1Pressed;
+            weaponControl.Fire1Released = control.Fire2Released;
+            weaponControl.Fire2Pressed = control.Fire1Pressed;
+            weaponControl.Fire2Released = control.Fire2Released;
+
+            // Interp delay
+            //interpolationDelay.Value = commandDataInterpolationDelayLookup[owningPlayer.entity].Delay;
+            interpolationDelay.Value = delay;
+
+            commandBuffer.SetComponent(chunkIndex, activeWeapon.entity, weaponControl);
+            commandBuffer.SetComponent(chunkIndex, activeWeapon.entity, interpolationDelay);
+        }
+    }
+
     #region Character Processor Callbacks
     public void UpdateGroundingUp(
         ref PlatformerCharacterUpdateContext context,
