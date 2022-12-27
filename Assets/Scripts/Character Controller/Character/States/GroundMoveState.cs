@@ -22,11 +22,11 @@ public struct GroundMoveState : IPlatformerCharacterState
 
     public void OnStatePhysicsUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
-        float deltaTime = baseContext.Time.DeltaTime;
-        float elapsedTime = (float)baseContext.Time.ElapsedTime;
-        ref KinematicCharacterBody characterBody = ref aspect.CharacterAspect.CharacterBody.ValueRW;
-        ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
-        ref PlatformerCharacterControl characterControl = ref aspect.CharacterControl.ValueRW;
+        var deltaTime = baseContext.Time.DeltaTime;
+        var elapsedTime = (float)baseContext.Time.ElapsedTime;
+        ref var characterBody = ref aspect.CharacterAspect.CharacterBody.ValueRW;
+        ref var character = ref aspect.Character.ValueRW;
+        ref var characterControl = ref aspect.CharacterControl.ValueRW;
         
         aspect.HandlePhysicsUpdatePhase1(ref context, ref baseContext, true, true);
 
@@ -48,16 +48,6 @@ public struct GroundMoveState : IPlatformerCharacterState
                 float3 targetVelocity = moveVectorOnPlane * chosenMaxSpeed;
                 CharacterControlUtilities.StandardGroundMove_Interpolated(ref characterBody.RelativeVelocity, targetVelocity, chosenSharpness, deltaTime, characterBody.GroundingUp, characterBody.GroundHit.Normal);
             }
-
-            // Weapon
-            PlatformerCharacterAspect.HandleWeaponSubstate(
-                context.EndFrameECB,
-                context.ChunkIndex,
-                aspect.ActiveWeapon.ValueRO,
-                context.WeaponControlLookup,
-                context.InterpolationDelayLookup,
-                characterControl,
-                0);
             
             // Jumping
             if (characterControl.JumpPressed || 
@@ -75,18 +65,28 @@ public struct GroundMoveState : IPlatformerCharacterState
 
     public void OnStateVariableUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
-        float deltaTime = baseContext.Time.DeltaTime;
-        ref KinematicCharacterBody characterBody = ref aspect.CharacterAspect.CharacterBody.ValueRW;
-        ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
-        ref PlatformerCharacterControl characterControl = ref aspect.CharacterControl.ValueRW;
-        ref quaternion characterRotation = ref aspect.CharacterAspect.LocalTransform.ValueRW.Rotation;
-        CustomGravity customGravity = aspect.CustomGravity.ValueRO;
+        var deltaTime = baseContext.Time.DeltaTime;
+        ref var characterBody = ref aspect.CharacterAspect.CharacterBody.ValueRW;
+        ref var character = ref aspect.Character.ValueRW;
+        ref var characterControl = ref aspect.CharacterControl.ValueRW;
+        ref var characterRotation = ref aspect.CharacterAspect.LocalTransform.ValueRW.Rotation;
+        var customGravity = aspect.CustomGravity.ValueRO;
         
         if (math.lengthsq(characterControl.MoveVector) > 0f)
         {
-            CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, deltaTime, math.normalizesafe(characterControl.MoveVector), MathUtilities.GetUpFromRotation(characterRotation), character.AirRotationSharpness);
+            //CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, deltaTime, math.normalizesafe(characterControl.MoveVector), MathUtilities.GetUpFromRotation(characterRotation), character.AirRotationSharpness);
         }
-        
+
+        // Weapon
+        PlatformerCharacterAspect.HandleWeaponSubstate(
+            context.EndFrameECB,
+            context.ChunkIndex,
+            aspect.ActiveWeapon.ValueRO,
+            context.WeaponControlLookup,
+            context.InterpolationDelayLookup,
+            characterControl,
+            0);
+
         character.IsOnStickySurface = PhysicsUtilities.HasPhysicsTag(in baseContext.PhysicsWorld, characterBody.GroundHit.RigidBodyIndex, character.StickySurfaceTag);
         if (character.IsOnStickySurface)
         {
