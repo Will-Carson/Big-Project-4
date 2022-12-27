@@ -61,12 +61,10 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
     {
         public bool IsServer;
         public NetworkTime NetworkTime;
-        public PhysicsWorld PhysicsWorld;
+        [ReadOnly] public PhysicsWorld PhysicsWorld;
         public PhysicsWorldHistorySingleton PhysicsWorldHistory;
-        [ReadOnly]
-        public ComponentLookup<LocalToWorld> LocalToWorldLookup;
-        [ReadOnly]
-        public ComponentLookup<StoredKinematicCharacterData> StoredKinematicCharacterDataLookup;
+        [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorldLookup;
+        [ReadOnly] public ComponentLookup<StoredKinematicCharacterData> StoredKinematicCharacterDataLookup;
         public ComponentLookup<Health> HealthLookup;
         public NativeList<RaycastHit> Hits;
 
