@@ -94,7 +94,8 @@ public struct AirMoveState : IPlatformerCharacterState
         ref quaternion characterRotation = ref aspect.CharacterAspect.LocalTransform.ValueRW.Rotation;
         CustomGravity customGravity = aspect.CustomGravity.ValueRO;
 
-        CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, deltaTime, math.normalizesafe(characterControl.MoveVector), MathUtilities.GetUpFromRotation(characterRotation), character.AirRotationSharpness);
+        CharacterControlUtilities.SlerpRotationTowardsDirection(ref characterRotation, deltaTime, math.normalizesafe(characterControl.LookVector), character.AirRotationSharpness);
+
         CharacterControlUtilities.SlerpCharacterUpTowardsDirection(ref characterRotation, deltaTime, math.normalizesafe(-customGravity.Gravity), character.UpOrientationAdaptationSharpness);
     }
 

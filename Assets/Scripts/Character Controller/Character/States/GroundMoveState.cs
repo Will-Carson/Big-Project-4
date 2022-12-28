@@ -27,8 +27,17 @@ public struct GroundMoveState : IPlatformerCharacterState
         ref var characterBody = ref aspect.CharacterAspect.CharacterBody.ValueRW;
         ref var character = ref aspect.Character.ValueRW;
         ref var characterControl = ref aspect.CharacterControl.ValueRW;
-        
+        var characterRotation = aspect.CharacterAspect.LocalTransform.ValueRO.Rotation;
+
         aspect.HandlePhysicsUpdatePhase1(ref context, ref baseContext, true, true);
+
+        var weaponTransform = aspect.CharacterAspect.LocalTransform.ValueRO;
+        CharacterControlUtilities.SlerpRotationTowardsDirection(ref weaponTransform.Rotation, deltaTime, math.normalizesafe(characterControl.LookVector), float.MaxValue);
+
+        weaponTransform.Position += math.mul(characterRotation, new float3(1, .5f, .5f));
+
+        var weaponEntity = aspect.ActiveWeapon.ValueRO.entity;
+        context.EndFrameECB.SetComponent(context.ChunkIndex, weaponEntity, weaponTransform);
 
         if (characterBody.IsGrounded)
         {

@@ -23,7 +23,7 @@ public partial struct ActiveWeaponSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        ActiveWeaponSetupJob setupJob = new ActiveWeaponSetupJob
+        var setupJob = new ActiveWeaponSetupJob
         {
             ECB = SystemAPI.GetSingletonRW<PostPredictionPreTransformsECBSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged),
             WeaponControlLookup = SystemAPI.GetComponentLookup<WeaponControl>(true),
@@ -56,16 +56,6 @@ public partial struct ActiveWeaponSystem : ISystem
                     // Setup for characters
                     if (platformerCharacterComponentLookup.TryGetComponent(entity, out var character))
                     {
-                        // Make character View entity be the weapon's raycast start point
-                        if (WeaponSimulationShotOriginOverrideLookup.TryGetComponent(activeWeapon.entity, out var shotOriginOverride))
-                        {
-                            shotOriginOverride.Entity = character.MeshRootEntity;
-                            WeaponSimulationShotOriginOverrideLookup[activeWeapon.entity] = shotOriginOverride;
-                        }
-
-                        // Make weapon be child of character's weapon socket 
-                        ECB.AddComponent(activeWeapon.entity, new Parent { Value = character.WeaponAnimationSocketEntity });
-                        
                         // Remember weapon owner
                         ECB.SetComponent(activeWeapon.entity, new WeaponOwner { Entity = entity });
 
@@ -91,4 +81,5 @@ public partial struct ActiveWeaponSystem : ISystem
             activeWeapon.previousEntity = activeWeapon.entity;
         }
     }
+
 }
