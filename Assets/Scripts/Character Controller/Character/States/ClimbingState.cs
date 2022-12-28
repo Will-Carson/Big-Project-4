@@ -129,21 +129,23 @@ public struct ClimbingState : IPlatformerCharacterState
         calculateUpFromGravity = true;
     }
 
-    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion cameraRotation, out float3 moveVector)
+    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
-        float3 cameraFwd = math.mul(cameraRotation, math.forward());
-        float3 cameraRight = math.mul(cameraRotation, math.right());
-        float3 cameraUp = math.mul(cameraRotation, math.up());
+        moveVector = new float3();
+
+        //float3 cameraFwd = math.mul(cameraRotation, math.forward());
+        //float3 cameraRight = math.mul(cameraRotation, math.right());
+        //float3 cameraUp = math.mul(cameraRotation, math.up());
         
-        // Only use input if the camera is pointing towards the normal
-        if (math.dot(LastKnownClimbNormal, cameraFwd) < -0.05f)
-        {
-            moveVector = (cameraRight * inputs.Move.x) + (cameraUp * inputs.Move.y);
-        }
-        else
-        {
-            moveVector = (cameraRight * inputs.Move.x) + (cameraFwd * inputs.Move.y);
-        }
+        //// Only use input if the camera is pointing towards the normal
+        //if (math.dot(LastKnownClimbNormal, cameraFwd) < -0.05f)
+        //{
+        //    moveVector = (cameraRight * inputs.Move.x) + (cameraUp * inputs.Move.y);
+        //}
+        //else
+        //{
+        //    moveVector = (cameraRight * inputs.Move.x) + (cameraFwd * inputs.Move.y);
+        //}
     }
 
     public bool DetectTransitions(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)

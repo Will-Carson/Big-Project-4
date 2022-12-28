@@ -264,6 +264,7 @@ public struct PlatformerCharacterComponent : IComponentData
 public struct PlatformerCharacterControl : IComponentData
 {
     public float3 MoveVector;
+    public float3 LookVector;
     
     public bool JumpHeld;
     public bool RollHeld;

@@ -96,8 +96,8 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
 
             if (camera.ControlledCamera != Entity.Null)
             {
-                var rotation = SystemAPI.GetComponent<LocalTransform>(camera.ControlledCamera).Rotation;
-                inputs.LookDirection = rotation;
+                var forward = SystemAPI.GetComponent<LocalTransform>(camera.ControlledCamera).Forward();
+                inputs.Look = forward;
             }
 
             if (defaultActionsMap.Jump.WasPressedThisFrame())
@@ -180,9 +180,11 @@ public partial struct PlatformerPlayerFixedStepControlSystem : ISystem
                 var characterControl = SystemAPI.GetComponent<PlatformerCharacterControl>(player.ControlledCharacter);
                 var stateMachine = SystemAPI.GetComponent<PlatformerCharacterStateMachine>(player.ControlledCharacter);
 
-                var lookDirection = playerInputs.ValueRW.LookDirection;
+                var lookDirection = playerInputs.ValueRW.Look;
 
-                stateMachine.GetMoveVectorFromPlayerInput(stateMachine.CurrentState, in playerInputs.ValueRO, lookDirection, out characterControl.MoveVector);
+                stateMachine.GetMoveVectorFromPlayerInput(stateMachine.CurrentState, in playerInputs.ValueRO, quaternion.LookRotationSafe(lookDirection, new float3(0, 1, 0)), out characterControl.MoveVector);
+
+                characterControl.LookVector = lookDirection;
                 
                 characterControl.JumpHeld = playerInputs.ValueRW.JumpHeld;
                 characterControl.RollHeld = playerInputs.ValueRW.RollHeld;

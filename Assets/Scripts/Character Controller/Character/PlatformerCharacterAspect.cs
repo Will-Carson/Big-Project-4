@@ -301,11 +301,11 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
         };
     }
 
-    public static void GetCommonMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion cameraRotation, out float3 moveVector)
+    public static void GetCommonMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
-        moveVector = (math.mul(cameraRotation, math.right()) * inputs.Move.x) + (math.mul(cameraRotation, math.forward()) * inputs.Move.y);
+        moveVector = (math.mul(lookRotation, math.right()) * inputs.Move.x) + (math.mul(lookRotation, math.forward()) * inputs.Move.y);
     }
-    
+
     public static void HandleWeaponSubstate(
         EntityCommandBuffer.ParallelWriter commandBuffer,
         int chunkIndex,

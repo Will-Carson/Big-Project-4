@@ -23,7 +23,7 @@ public struct ControlledCameraComponent : IComponentData
 public struct PlatformerPlayerInputs : IInputComponentData
 {
     public float2 Move;
-    public quaternion LookDirection;
+    public float3 Look;
     
     public bool SprintHeld;
     public bool RollHeld;

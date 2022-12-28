@@ -283,53 +283,53 @@ public struct PlatformerCharacterStateMachine : IComponentData
         }
     }
 
-    public void GetMoveVectorFromPlayerInput(CharacterState state, in PlatformerPlayerInputs inputs, quaternion cameraRotation, out float3 moveVector)
+    public void GetMoveVectorFromPlayerInput(CharacterState state, in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
         moveVector = default;
 
         switch (state)
         {
             case CharacterState.GroundMove:
-                GroundMoveState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                GroundMoveState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.Crouched:
-                CrouchedState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                CrouchedState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.AirMove:
-                AirMoveState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                AirMoveState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.WallRun:
-                WallRunState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                WallRunState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.Rolling:
-                RollingState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                RollingState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.LedgeGrab:
-                LedgeGrabState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                LedgeGrabState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.LedgeStandingUp:
-                LedgeStandingUpState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                LedgeStandingUpState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.Dashing:
-                DashingState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                DashingState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.Swimming:
-                SwimmingState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                SwimmingState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.Climbing:
-                ClimbingState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                ClimbingState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.FlyingNoCollisions:
-                FlyingNoCollisionsState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                FlyingNoCollisionsState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.RopeSwing:
-                RopeSwingState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                RopeSwingState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.Stunned:
-                StunnedState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                StunnedState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
             case CharacterState.Dead:
-                DeadState.GetMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+                DeadState.GetMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
                 break;
         }
     }
@@ -343,7 +343,7 @@ public struct StunnedState : IPlatformerCharacterState
         calculateUpFromGravity = false;
     }
 
-    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion cameraRotation, out float3 moveVector)
+    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
         moveVector = new float3();
     }
@@ -377,7 +377,7 @@ public struct DeadState : IPlatformerCharacterState
         calculateUpFromGravity = false;
     }
 
-    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion cameraRotation, out float3 moveVector)
+    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
         moveVector = new float3();
     }

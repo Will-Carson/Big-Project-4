@@ -101,22 +101,24 @@ public struct SwimmingState : IPlatformerCharacterState
         calculateUpFromGravity = true;
     }
 
-    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion cameraRotation, out float3 moveVector)
+    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
-        float3 cameraFwd = math.mul(cameraRotation, math.forward());
-        float3 cameraRight = math.mul(cameraRotation, math.right());
-        float3 cameraUp = math.mul(cameraRotation, math.up());
+        moveVector = new float3();
+
+        //float3 cameraFwd = math.mul(cameraRotation, math.forward());
+        //float3 cameraRight = math.mul(cameraRotation, math.right());
+        //float3 cameraUp = math.mul(cameraRotation, math.up());
         
-        moveVector = (cameraRight * inputs.Move.x) + (cameraFwd * inputs.Move.y);
-        if (inputs.JumpHeld)
-        {
-            moveVector += cameraUp;
-        }
-        if (inputs.RollHeld)
-        {
-            moveVector -= cameraUp;
-        }
-        moveVector = MathUtilities.ClampToMaxLength(moveVector, 1f);
+        //moveVector = (cameraRight * inputs.Move.x) + (cameraFwd * inputs.Move.y);
+        //if (inputs.JumpHeld)
+        //{
+        //    moveVector += cameraUp;
+        //}
+        //if (inputs.RollHeld)
+        //{
+        //    moveVector -= cameraUp;
+        //}
+        //moveVector = MathUtilities.ClampToMaxLength(moveVector, 1f);
     }
 
     public void PreMovementUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)

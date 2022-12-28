@@ -39,7 +39,7 @@ public struct GroundMoveState : IPlatformerCharacterState
                 float chosenMaxSpeed = character.IsSprinting ? character.GroundSprintMaxSpeed : character.GroundRunMaxSpeed;
 
                 float chosenSharpness = character.GroundedMovementSharpness;
-                if (context.CharacterFrictionModifierLookup.TryGetComponent(characterBody.GroundHit.Entity, out CharacterFrictionModifier frictionModifier))
+                if (context.CharacterFrictionModifierLookup.TryGetComponent(characterBody.GroundHit.Entity, out var frictionModifier))
                 {
                     chosenSharpness *= frictionModifier.Friction;
                 }
@@ -71,10 +71,11 @@ public struct GroundMoveState : IPlatformerCharacterState
         ref var characterControl = ref aspect.CharacterControl.ValueRW;
         ref var characterRotation = ref aspect.CharacterAspect.LocalTransform.ValueRW.Rotation;
         var customGravity = aspect.CustomGravity.ValueRO;
-        
+
+        CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, deltaTime, math.normalizesafe(characterControl.LookVector), MathUtilities.GetUpFromRotation(characterRotation), character.AirRotationSharpness);
         if (math.lengthsq(characterControl.MoveVector) > 0f)
         {
-            CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, deltaTime, math.normalizesafe(characterControl.MoveVector), MathUtilities.GetUpFromRotation(characterRotation), character.AirRotationSharpness);
+            CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, deltaTime, math.normalizesafe(characterControl.LookVector), MathUtilities.GetUpFromRotation(characterRotation), character.AirRotationSharpness);
         }
 
         // Weapon
@@ -104,9 +105,9 @@ public struct GroundMoveState : IPlatformerCharacterState
         calculateUpFromGravity = !character.IsOnStickySurface;
     }
 
-    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion cameraRotation, out float3 moveVector)
+    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
-        PlatformerCharacterAspect.GetCommonMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+        PlatformerCharacterAspect.GetCommonMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
     }
 
     public bool DetectTransitions(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)

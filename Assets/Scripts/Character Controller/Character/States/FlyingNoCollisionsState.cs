@@ -62,10 +62,10 @@ public struct FlyingNoCollisionsState : IPlatformerCharacterState
         calculateUpFromGravity = false;
     }
 
-    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion cameraRotation, out float3 moveVector)
+    public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
-        PlatformerCharacterAspect.GetCommonMoveVectorFromPlayerInput(in inputs, cameraRotation, out moveVector);
+        PlatformerCharacterAspect.GetCommonMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);
         float verticalInput = (inputs.JumpHeld ? 1f : 0f) + (inputs.RollHeld ? -1f : 0f);
-        moveVector = MathUtilities.ClampToMaxLength(moveVector + (math.mul(cameraRotation, math.up()) * verticalInput), 1f);
+        //moveVector = MathUtilities.ClampToMaxLength(moveVector + (math.mul(cameraRotation, math.up()) * verticalInput), 1f);
     }
 }
