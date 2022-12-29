@@ -71,11 +71,12 @@ public static class WeaponUtilities
         in ComponentLookup<StoredKinematicCharacterData> StoredKinematicCharacterDataLookup,
         out bool hitFound,
         out RaycastHit closestValidHit,
-        out StandardRaycastWeaponShotVisualsData shotVisualsData)
+        ref DynamicBuffer<StandardRaycastWeaponShotVFXRequest> shotVisualsRequests,
+        bool IsServer,
+        bool IsFirstTimeFullyPredictingTick)
     {
         hitFound = default;
         closestValidHit = default;
-        shotVisualsData = default;
         
         // In a FPS game, it is often desirable for the weapon shot raycast to start from the camera (screen center) rather than from the actual barrel of the weapon mesh.
         // This is because it will precisely match the crosshair at the center of the screen.
@@ -114,6 +115,7 @@ public static class WeaponUtilities
             }
     
             // Shot visuals
+            if (!IsServer && IsFirstTimeFullyPredictingTick)
             {
                 LocalToWorld shotVisualOriginLtW = LocalToWorldLookup[weapon.ShotOrigin];
     
@@ -122,17 +124,20 @@ public static class WeaponUtilities
                 {
                     visualOriginToSimulationHit = closestValidHit.Position - shotVisualOriginLtW.Position;
                 }
-    
-                shotVisualsData = new StandardRaycastWeaponShotVisualsData
+
+                shotVisualsRequests.Add(new StandardRaycastWeaponShotVFXRequest
                 {
-                    VisualOrigin = shotVisualOriginLtW.Position,
-                    SimulationOrigin = shotSimulationOriginLtW.Position,
-                    SimulationDirection = finalShotSimulationDirection,
-                    SimulationUp = shotSimulationOriginLtW.Up,
-                    SimulationHitDistance = hitDistance,
-                    Hit = closestValidHit,
-                    VisualOriginToHit = visualOriginToSimulationHit,
-                };
+                    ShotVisualsData = new StandardRaycastWeaponShotVisualsData
+                    {
+                        VisualOrigin = shotVisualOriginLtW.Position,
+                        SimulationOrigin = shotSimulationOriginLtW.Position,
+                        SimulationDirection = finalShotSimulationDirection,
+                        SimulationUp = shotSimulationOriginLtW.Up,
+                        SimulationHitDistance = hitDistance,
+                        Hit = closestValidHit,
+                        VisualOriginToHit = visualOriginToSimulationHit,
+                    }
+                });
             }
         }
     }

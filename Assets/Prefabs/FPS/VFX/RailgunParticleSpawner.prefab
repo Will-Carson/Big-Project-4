@@ -30,7 +30,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7161354016620288126
 MonoBehaviour:
@@ -44,15 +44,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b04c9747610a04641bafcf0889611033, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ParticlePrefab: {fileID: 4119794003107191237, guid: 614240a489604344191c37fc1d1664b6, type: 3}
+  ParticlePrefab: {fileID: 4119794003107191237, guid: 614240a489604344191c37fc1d1664b6,
+    type: 3}
   ParticleSpawner:
-    ParticleCount: 45
+    ParticleCount: 5
     ParticleLifetimeMinMax:
       x: 0.2
       y: 0.35
     ParticleScaleMinMax:
-      x: 1
-      y: 3
+      x: 0.5
+      y: 1
     ParticleSpeedMinMax:
-      x: 15
-      y: 30
+      x: 5
+      y: 15

@@ -32,7 +32,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6588425196650519112
 MeshFilter:
@@ -98,4 +98,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Lifetime: 0.15
   Width: 3
-  HitVisualPrefab: {fileID: 7161354016620288120, guid: 482524c52fb698c47ab2f17b3535ce14, type: 3}
+  HitVisualPrefab: {fileID: 7161354016620288120, guid: 482524c52fb698c47ab2f17b3535ce14,
+    type: 3}

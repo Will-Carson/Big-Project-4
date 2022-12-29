@@ -92,7 +92,9 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
                     in StoredKinematicCharacterDataLookup,
                     out bool hitFound,
                     out RaycastHit closestValidHit,
-                    out StandardRaycastWeaponShotVisualsData shotVisualsData);
+                    ref shotVFXRequestsBuffer,
+                    IsServer,
+                    NetworkTime.IsFirstTimeFullyPredictingTick);
 
                 // Damage
                 if (IsServer && hitFound)
@@ -102,12 +104,6 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
                         health.CurrentHealth -= weapon.Damage;
                         HealthLookup[closestValidHit.Entity] = health;
                     }
-                }
-
-                // Shot visuals request
-                if (!IsServer && NetworkTime.IsFirstTimeFullyPredictingTick)
-                {
-                    shotVFXRequestsBuffer.Add(new StandardRaycastWeaponShotVFXRequest { ShotVisualsData = shotVisualsData});
                 }
                 
                 // Recoil & FOV kick
@@ -215,9 +211,10 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
                         in StoredKinematicCharacterDataLookup,
                         out bool hitFound,
                         out RaycastHit closestValidHit,
-                        out StandardRaycastWeaponShotVisualsData shotVisualsData);
+                        ref shotVFXRequestsBuffer,
+                        false,
+                        true);
 
-                    shotVFXRequestsBuffer.Add(new StandardRaycastWeaponShotVFXRequest { ShotVisualsData = shotVisualsData });
                     weaponFeedback.ShotFeedbackRequests++;
                 }
             }
