@@ -19,18 +19,18 @@ public struct AirMoveState : IPlatformerCharacterState
     {
         float deltaTime = baseContext.Time.DeltaTime;
         float elapsedTime = (float)baseContext.Time.ElapsedTime;
-        ref KinematicCharacterBody characterBody = ref aspect.CharacterAspect.CharacterBody.ValueRW;
-        ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
-        ref PlatformerCharacterControl characterControl = ref aspect.CharacterControl.ValueRW;
-        CustomGravity customGravity = aspect.CustomGravity.ValueRO;
+        ref var characterBody = ref aspect.CharacterAspect.CharacterBody.ValueRW;
+        ref var character = ref aspect.Character.ValueRW;
+        ref var characterControl = ref aspect.CharacterControl.ValueRW;
+        var customGravity = aspect.CustomGravity.ValueRO;
         
         aspect.HandlePhysicsUpdatePhase1(ref context, ref baseContext, true, true);
 
         // Move
-        float3 airAcceleration = characterControl.MoveVector * character.AirAcceleration;
+        var airAcceleration = characterControl.MoveVector * character.AirAcceleration;
         if (math.lengthsq(airAcceleration) > 0f)
         {
-            float3 tmpVelocity = characterBody.RelativeVelocity;
+            var tmpVelocity = characterBody.RelativeVelocity;
             CharacterControlUtilities.StandardAirMove(ref characterBody.RelativeVelocity, airAcceleration, character.AirMaxSpeed, characterBody.GroundingUp, deltaTime, false);
 
             // Cancel air acceleration from input if we would hit a non-grounded surface (prevents air-climbing slopes at high air accelerations)
@@ -76,7 +76,7 @@ public struct AirMoveState : IPlatformerCharacterState
         }
         
         // Gravity
-        CharacterControlUtilities.AccelerateVelocity(ref characterBody.RelativeVelocity, new float3(0, -5, 0), deltaTime);
+        CharacterControlUtilities.AccelerateVelocity(ref characterBody.RelativeVelocity, customGravity.Gravity, deltaTime);
 
         // Drag
         CharacterControlUtilities.ApplyDragToVelocity(ref characterBody.RelativeVelocity, deltaTime, character.AirDrag);

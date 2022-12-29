@@ -1,8 +1,10 @@
+using Rival;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
 using UnityEngine;
@@ -82,4 +84,44 @@ public partial struct ActiveWeaponSystem : ISystem
         }
     }
 
+}
+
+[UpdateInGroup(typeof(PredictedFixedStepSimulationSystemGroup))]
+[UpdateBefore(typeof(PlatformerCharacterPhysicsUpdateSystem))]
+[BurstCompile]
+public partial class WeaponMovementSystem : SystemBase
+{
+    protected override void OnUpdate()
+    {
+        var deltaTime = SystemAPI.Time.DeltaTime;
+        var localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(false);
+
+        Entities
+        .ForEach((
+        Entity entity,
+        in WeaponOwner owner) =>
+        {
+            var transform = localTransformLookup[entity];
+            if (owner.Entity == Entity.Null)
+            {
+                return;
+            }
+
+            var characterControl = SystemAPI.GetComponent<PlatformerCharacterControl>(owner.Entity);
+            var weaponSocketEntity = SystemAPI.GetComponent<PlatformerCharacterComponent>(owner.Entity).WeaponAnimationSocketEntity;
+            var weaponTransform = SystemAPI.GetComponent<LocalTransform>(owner.Entity);
+
+            CharacterControlUtilities.SlerpRotationTowardsDirection(ref weaponTransform.Rotation, deltaTime, math.normalizesafe(characterControl.LookVector), float.MaxValue);
+
+            weaponTransform.Position += math.mul(weaponTransform.Rotation, new float3(1, .5f, .5f));
+            transform = new LocalTransform
+            {
+                Position = weaponTransform.Position,
+                Rotation = weaponTransform.Rotation,
+                Scale = weaponTransform.Scale
+            };
+            localTransformLookup[entity] = transform;
+        })
+        .Run();
+    }
 }
