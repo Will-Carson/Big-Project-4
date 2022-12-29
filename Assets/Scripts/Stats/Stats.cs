@@ -491,6 +491,12 @@ public struct ResourceContainer : IBufferElementData
             maxStat.value,
             minStat.value);
     }
+
+    public void ModifyCurrent(int change)
+    {
+        currentValue -= change;
+        Clamp();
+    }
 }
 
 public struct StatRequirementContainer : IBufferElementData
@@ -575,11 +581,6 @@ public enum StatType
     Health,
 
     // Other stats
-}
-
-public struct Health : IComponentData
-{
-    public int CurrentHealth;
 }
 
 public readonly partial struct StatStickAspect : IAspect

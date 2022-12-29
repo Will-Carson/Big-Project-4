@@ -317,7 +317,7 @@ MonoBehaviour:
     WallRunJumpSpeed: 12
     JumpHeldAcceleration: 75
     MaxHeldJumpTime: 0.1
-    MaxUngroundedJumps: 1
+    MaxUngroundedJumps: 0
     JumpAfterUngroundedGraceTime: 0.1
     JumpBeforeGroundedGraceTime: 0.1
     LedgeMoveSpeed: 3

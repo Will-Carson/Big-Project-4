@@ -49,7 +49,7 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
             PhysicsWorldHistory = SystemAPI.GetSingleton<PhysicsWorldHistorySingleton>(),
             LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
             StoredKinematicCharacterDataLookup = SystemAPI.GetComponentLookup<StoredKinematicCharacterData>(true),
-            HealthLookup = SystemAPI.GetComponentLookup<Health>(false),
+            EffectBufferLookup = SystemAPI.GetBufferLookup<EffectBuffer>(false),
             Hits = _hits,
         };
         predictionJob.Schedule();
@@ -65,7 +65,7 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
         public PhysicsWorldHistorySingleton PhysicsWorldHistory;
         [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorldLookup;
         [ReadOnly] public ComponentLookup<StoredKinematicCharacterData> StoredKinematicCharacterDataLookup;
-        public ComponentLookup<Health> HealthLookup;
+        public BufferLookup<EffectBuffer> EffectBufferLookup;
         public NativeList<RaycastHit> Hits;
 
         void Execute(
@@ -99,10 +99,10 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
                 // Damage
                 if (IsServer && hitFound)
                 {
-                    if (HealthLookup.TryGetComponent(closestValidHit.Entity, out Health health))
+                    if (EffectBufferLookup.TryGetBuffer(closestValidHit.Entity, out var targetEffectBuffer))
                     {
-                        health.CurrentHealth -= weapon.Damage;
-                        HealthLookup[closestValidHit.Entity] = health;
+                        // Apply effect from weapon
+                        // TODO
                     }
                 }
                 
