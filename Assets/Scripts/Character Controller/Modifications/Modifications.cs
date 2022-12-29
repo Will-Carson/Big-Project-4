@@ -361,10 +361,6 @@ public struct FiringState : IPlatformerCharacterState
 
     public void OnStateEnter(CharacterState previousState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
-        // Build state data
-        weaponEntity = aspect.CurrentWeaponContainer.ValueRO.entity;
-        //remainingCastTime = context.CastTimeComponentLookup[weaponEntity].castTime;
-
         ref var character = ref aspect.Character.ValueRW;
         aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
     }

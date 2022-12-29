@@ -24,8 +24,6 @@ public struct PlatformerCharacterUpdateContext
     [ReadOnly] public ComponentLookup<CharacterFrictionModifier> CharacterFrictionModifierLookup;
     [ReadOnly] public BufferLookup<LinkedEntityGroup> LinkedEntityGroupLookup;
 
-    [ReadOnly] public ComponentLookup<CastTimeComponent> CastTimeComponentLookup;
-
     public void OnIterateEntity(int chunkIndex)
     {
         ChunkIndex = chunkIndex;
@@ -35,8 +33,6 @@ public struct PlatformerCharacterUpdateContext
     {
         CharacterFrictionModifierLookup = state.GetComponentLookup<CharacterFrictionModifier>(true);
         LinkedEntityGroupLookup = state.GetBufferLookup<LinkedEntityGroup>(true);
-
-        CastTimeComponentLookup = state.GetComponentLookup<CastTimeComponent>(true);
     }
 
     public void OnSystemUpdate(ref SystemState state, EntityCommandBuffer endFrameECB)
@@ -44,8 +40,6 @@ public struct PlatformerCharacterUpdateContext
         EndFrameECB = endFrameECB.AsParallelWriter();
         CharacterFrictionModifierLookup.Update(ref state);
         LinkedEntityGroupLookup.Update(ref state);
-
-        CastTimeComponentLookup.Update(ref state);
     }
 }
 
@@ -56,10 +50,6 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
     public readonly RefRW<PlatformerCharacterControl> CharacterControl;
     public readonly RefRW<PlatformerCharacterStateMachine> StateMachine;
     public readonly RefRW<CustomGravity> CustomGravity;
-
-    public readonly DynamicBuffer<StatContainer> StatContainer;
-    public readonly DynamicBuffer<ResourceContainer> ResourceContainer;
-    public readonly RefRW<CurrentWeaponContainer> CurrentWeaponContainer;
 
     public void PhysicsUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext)
     {
@@ -127,16 +117,6 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
     {
         ref var stateMachine = ref StateMachine.ValueRW;
         ref var characterControl = ref CharacterControl.ValueRW;
-
-        // If health is 0, transition to "dead" state.
-        for (var i = 0; i < ResourceContainer.Length; i++)
-        {
-            var resource = ResourceContainer[i];
-            if (resource.maxStat.stat == StatType.Health || resource.currentValue == 0)
-            {
-                stateMachine.TransitionToState(CharacterState.Dead, ref context, ref baseContext, in this);
-            }
-        }
 
         if (stateMachine.CurrentState != CharacterState.Swimming && stateMachine.CurrentState != CharacterState.FlyingNoCollisions)
         {
