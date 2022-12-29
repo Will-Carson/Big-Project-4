@@ -444,7 +444,7 @@ public partial class @PlatformerInputActions : IInputActionCollection2, IDisposa
                 {
                     ""name"": """",
                     ""id"": ""3a29aeca-fc43-48a3-be6d-2909349b8efc"",
-                    ""path"": ""<Mouse>/leftButton"",
+                    ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -455,7 +455,7 @@ public partial class @PlatformerInputActions : IInputActionCollection2, IDisposa
                 {
                     ""name"": """",
                     ""id"": ""56346cb4-5a7d-4372-9722-b0e5d3b38bee"",
-                    ""path"": ""<Mouse>/rightButton"",
+                    ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
