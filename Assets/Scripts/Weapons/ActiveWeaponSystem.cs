@@ -107,6 +107,12 @@ public partial class WeaponMovementSystem : SystemBase
                 return;
             }
 
+            var state = SystemAPI.GetComponent<PlatformerCharacterStateMachine>(owner.Entity).CurrentState;
+            if (state == CharacterState.Climbing || state == CharacterState.Stunned || state == CharacterState.Dead)
+            {
+                return;
+            }
+
             var characterControl = SystemAPI.GetComponent<PlatformerCharacterControl>(owner.Entity);
             var weaponSocketEntity = SystemAPI.GetComponent<PlatformerCharacterComponent>(owner.Entity).WeaponAnimationSocketEntity;
             var weaponTransform = SystemAPI.GetComponent<LocalTransform>(owner.Entity);

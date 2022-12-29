@@ -39,7 +39,12 @@ public partial struct LazerShotVisualsSystem : ISystem
         public float ElapsedTime;
         public EntityCommandBuffer ECB;
         
-        void Execute(Entity entity, ref LazerShotVisuals shotVisuals, ref LocalTransform localTransform, ref PostTransformScale postTransformScale, in StandardRaycastWeaponShotVisualsData shotData)
+        void Execute(
+            Entity entity, 
+            ref LazerShotVisuals shotVisuals, 
+            ref LocalTransform localTransform, 
+            ref PostTransformScale postTransformScale, 
+            in StandardRaycastWeaponShotVisualsData shotData)
         {
             if (!shotVisuals.HasInitialized)
             {

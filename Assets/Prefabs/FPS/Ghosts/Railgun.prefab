@@ -113,8 +113,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FiringMecanism:
-    AutoFire: 0
-    FiringRate: 1.5
+    AutoFire: 1
+    FiringRate: 10
   VisualFeedback:
     WeaponBobHAmount: 0.08
     WeaponBobVAmount: 0.06
@@ -138,7 +138,7 @@ MonoBehaviour:
   Range: 1000
   Damage: 1000
   SpreadDegrees: 0
-  ProjectilesCount: 1
+  ProjectilesCount: 5
   HitCollisionFilter:
     Category00: 1
     Category01: 1
