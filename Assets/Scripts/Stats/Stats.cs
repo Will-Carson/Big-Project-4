@@ -4,8 +4,8 @@
 /// an important foundation for just about any modern game, and a complex RPG is
 /// probably the hardest test for this type of system.
 /// 
-/// The goal of this stat system is maintainability, CPU performance, and network 
-/// performance.
+/// The goal of this stat system is maintainability, CPU performance, network 
+/// performance, and versatility
 /// 
 /// The versatility of stats is important. This means two things:
 /// 1. Stats must be able to be derived from any place; Auras, talent trees,
@@ -24,6 +24,14 @@
 /// interaction with the ability systems. Some stats effect movement speed. Perhaps
 /// the movement speed stat should write to a MovementSpeed component that actually
 /// governs movement speed. It really depends on the case.
+/// 
+/// TODO Currently this implementation uses a "full rebuild" strategy for stat
+/// calculation. That is, when an entities stats change the stat buffer is cleared
+/// and completely rebuilt. It would be good to test this vs a partial rebuild
+/// implementation that simply adds or removes stats from a statstick when it is
+/// added or removed.
+/// 
+/// TODO Theory craft a use for components that have Native containers on them.
 
 using Unity.Entities;
 using Unity.Collections;
@@ -41,8 +49,8 @@ public partial struct StatStickEquipper : ISystem
     private BufferLookup<StatRequirementContainer> statStickRequirementLookup;
 
     [BurstCompile]
-    public void OnCreate(ref SystemState state) 
-    { 
+    public void OnCreate(ref SystemState state)
+    {
         equippedToLookup = state.GetBufferLookup<EquippedTo>();
         statStickRequirementLookup = state.GetBufferLookup<StatRequirementContainer>(true);
     }
@@ -68,7 +76,7 @@ public partial struct StatStickEquipper : ISystem
             for (var i = 0; i < requests.Length; i++)
             {
                 var req = requests[i];
-                
+
                 if (!equippedToLookup.HasBuffer(req.statStick))
                 {
                     // Throw error? This should not happen.
@@ -111,7 +119,7 @@ public partial struct StatStickEquipper : ISystem
                         for (var j = 0; j < requirementsBuffer.Length; j++)
                         {
                             var requirement = requirementsBuffer[j].requirement;
-                            
+
                             for (var k = 0; k < stats.Length; k++)
                             {
                                 var stat = stats[k].stat;
@@ -225,7 +233,7 @@ public partial struct StatTotaller : ISystem
             for (var i = 0; i < keyArray.Length; i++)
             {
                 var key = keyArray[i];
-                stats.Add(new StatData { stat = (StatType)key, value = statTotals[key]});
+                stats.Add(new StatData { stat = (StatType)key, value = statTotals[key] });
             }
 
             // Dispose of Native* types
@@ -353,7 +361,7 @@ public partial struct StatToResourceSystem : ISystem
         statsLookup.Update(ref state);
 
         foreach (var (tag, resources, entity) in SystemAPI.Query<
-            StatRecalculationTag, 
+            StatRecalculationTag,
             DynamicBuffer<ResourceContainer>>()
             .WithEntityAccess())
         {
@@ -397,7 +405,7 @@ public partial struct StatRecalculationTagCleanUpSystem : ISystem
     private BufferLookup<EquippedTo> equippedToLookup;
 
     [BurstCompile]
-    public void OnCreate(ref SystemState state) 
+    public void OnCreate(ref SystemState state)
     {
         equippedToLookup = state.GetBufferLookup<EquippedTo>();
 
@@ -537,7 +545,7 @@ public struct StatData
         this.value = value;
     }
 
-    public static StatData operator+ (StatData a, StatData b)
+    public static StatData operator +(StatData a, StatData b)
     {
         if (a.stat == b.stat) return new StatData();
 
