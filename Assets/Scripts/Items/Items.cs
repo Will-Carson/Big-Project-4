@@ -85,7 +85,7 @@ public static class BaseItemDefinitions
             equipStatStickRequestsBuffer.Add(new EquipStatStickRequest
             {
                 unequip = false,
-                statStick = baseStatsStatStickEntity
+                entity = baseStatsStatStickEntity
             });
 
             // Add it back to the dictionary

@@ -77,19 +77,19 @@ public partial struct StatStickEquipper : ISystem
             {
                 var req = requests[i];
 
-                if (!equippedToLookup.HasBuffer(req.statStick))
+                if (!equippedToLookup.HasBuffer(req.entity))
                 {
                     // Throw error? This should not happen.
                     continue;
                 }
-                var statStickEquippedToBuffer = equippedToLookup[req.statStick];
+                var statStickEquippedToBuffer = equippedToLookup[req.entity];
 
                 if (req.unequip)
                 {
                     for (var j = 0; j < statSticks.Length; j++)
                     {
-                        var statStick = statSticks[j].statStick;
-                        if (statStick == req.statStick)
+                        var statStick = statSticks[j].entity;
+                        if (statStick == req.entity)
                         {
                             statSticks.RemoveAtSwapBack(j);
 
@@ -114,7 +114,7 @@ public partial struct StatStickEquipper : ISystem
                     var requirementsMet = true;
 
                     // Check if this stat stick can be equipped. If the stat stick has no requirements, skip this step
-                    if (statStickRequirementLookup.TryGetBuffer(req.statStick, out var requirementsBuffer))
+                    if (statStickRequirementLookup.TryGetBuffer(req.entity, out var requirementsBuffer))
                     {
                         for (var j = 0; j < requirementsBuffer.Length; j++)
                         {
@@ -138,7 +138,7 @@ public partial struct StatStickEquipper : ISystem
                     if (!requirementsMet) continue;
 
                     // Equip the statstick
-                    statSticks.Add(new StatStickContainer { statStick = req.statStick });
+                    statSticks.Add(new StatStickContainer { entity = req.entity });
 
                     // Add to the EquippedTo buffer on the stat stick
                     statStickEquippedToBuffer.Add(new EquippedTo { entity = entity });
@@ -159,7 +159,7 @@ public partial struct StatStickEquipper : ISystem
 
 public struct EquipStatStickRequest : IBufferElementData
 {
-    public Entity statStick;
+    public Entity entity;
     public bool unequip;
 }
 
@@ -207,9 +207,9 @@ public partial struct StatTotaller : ISystem
             {
                 var statStick = statSticks[i];
 
-                if (!statsLookup.HasBuffer(statStick.statStick)) return;
+                if (!statsLookup.HasBuffer(statStick.entity)) return;
 
-                var statStickStats = statsLookup[statStick.statStick];
+                var statStickStats = statsLookup[statStick.entity];
 
                 for (var j = 0; j < statStickStats.Length; j++)
                 {
@@ -245,7 +245,7 @@ public partial struct StatTotaller : ISystem
 
 public struct StatStickContainer : IBufferElementData
 {
-    public Entity statStick;
+    public Entity entity;
 }
 
 public struct EquippedTo : IBufferElementData
@@ -332,64 +332,11 @@ public struct DerivedStat : IBufferElementData
     public StatData toStat;
 }
 
-/// <summary>
-/// Updates the min and max value of resources when the corresponding stats update.
-/// Must be run inside of the StatRecalculationSystemGroup.
-/// </summary>
-[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(StatRecalculationSystemGroup))]
-[UpdateAfter(typeof(DerivedStatHandlerSystem))]
-[BurstCompile]
-public partial struct StatToResourceSystem : ISystem
+[UpdateBefore(typeof(StatRecalculationTagCleanUpSystem))]
+public class CustomStatHandlingSystemGroup : ComponentSystemGroup
 {
-    private BufferLookup<StatContainer> statsLookup;
 
-    [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-        statsLookup = state.GetBufferLookup<StatContainer>(true);
-
-        state.RequireAnyForUpdate(state.GetEntityQuery(typeof(StatRecalculationTag)));
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
-
-    [BurstCompile]
-    public void OnUpdate(ref SystemState state)
-    {
-        statsLookup.Update(ref state);
-
-        foreach (var (tag, resources, entity) in SystemAPI.Query<
-            StatRecalculationTag,
-            DynamicBuffer<ResourceContainer>>()
-            .WithEntityAccess())
-        {
-            if (!statsLookup.HasBuffer(entity)) return;
-
-            var stats = statsLookup[entity];
-
-            for (var i = 0; i < stats.Length; i++)
-            {
-                var stat = stats[i].stat;
-                for (var j = 0; j < resources.Length; j++)
-                {
-                    var resource = resources[j];
-                    if (stat.stat == resource.minStat.stat)
-                    {
-                        resource.minStat.value = stat.value;
-                    }
-                    if (stat.stat == resource.maxStat.stat)
-                    {
-                        resource.maxStat.value = stat.value;
-                    }
-                    resource.Clamp();
-                    resources.RemoveAt(j);
-                    resources.Add(resource);
-                }
-            }
-        }
-    }
 }
 
 /// <summary>
@@ -398,7 +345,7 @@ public partial struct StatToResourceSystem : ISystem
 /// Updates AFTER the StatRecalculationSystemGroup.
 /// </summary>
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
-[UpdateAfter(typeof(StatRecalculationSystemGroup))]
+[UpdateInGroup(typeof(StatRecalculationSystemGroup), OrderLast = true)]
 [BurstCompile]
 public partial struct StatRecalculationTagCleanUpSystem : ISystem
 {
@@ -477,34 +424,6 @@ public struct StatContainer : IBufferElementData
     }
 
     public static implicit operator StatContainer(StatData d) => new StatContainer { stat = d };
-}
-
-/// <summary>
-/// Defines what stat decides the min/max of a resource as well as its current value
-/// </summary>
-[GhostComponent]
-public struct ResourceContainer : IBufferElementData
-{
-    [GhostField]
-    public StatData minStat;
-    [GhostField]
-    public StatData maxStat;
-    [GhostField]
-    public int currentValue;
-
-    public void Clamp()
-    {
-        currentValue = math.clamp(
-            currentValue,
-            maxStat.value,
-            minStat.value);
-    }
-
-    public void ModifyCurrent(int change)
-    {
-        currentValue -= change;
-        Clamp();
-    }
 }
 
 public struct StatRequirementContainer : IBufferElementData
@@ -613,7 +532,6 @@ public readonly partial struct StatEntityAspect : IAspect
 {
     public readonly Entity entity;
     public readonly DynamicBuffer<StatContainer> stats;
-    public readonly DynamicBuffer<ResourceContainer> resources;
     public readonly DynamicBuffer<DerivedStat> derivedStats;
     public readonly DynamicBuffer<StatStickContainer> statSticks;
     public readonly DynamicBuffer<EquipStatStickRequest> equipRequests;

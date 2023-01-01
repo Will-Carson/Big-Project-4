@@ -13,7 +13,6 @@ public class PlayerAuthoring : MonoBehaviour
 
             // Stat stuff
             AddBuffer<StatContainer>();
-            AddBuffer<ResourceContainer>();
             AddBuffer<DerivedStat>();
             AddBuffer<StatStickContainer>();
             AddBuffer<EquipStatStickRequest>();

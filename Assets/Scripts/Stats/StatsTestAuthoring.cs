@@ -21,7 +21,7 @@ public class StatsTestAuthoring : MonoBehaviour
             //baseStatStickStats.Add(new StatContainer { stat = new StatData { type = StatType.Strength, value = 100 } });
 
             var equipStatSticks = AddBuffer<EquipStatStickRequest>();
-            equipStatSticks.Add(new EquipStatStickRequest { unequip = false, statStick = extraStatStickEntity });
+            equipStatSticks.Add(new EquipStatStickRequest { unequip = false, entity = extraStatStickEntity });
             //equipStatSticks.Add(new EquipStatStickRequest { equip = true, statStick = baseStatStickEntity });
 
             var derivedStats = AddBuffer<DerivedStat>();
@@ -32,12 +32,6 @@ public class StatsTestAuthoring : MonoBehaviour
             });
 
             AddBuffer<StatContainer>();
-            var resources = AddBuffer<ResourceContainer>();
-            resources.Add(new ResourceContainer
-            {
-                currentValue = 120,
-                maxStat = new StatData { stat = StatType.Health }
-            });
 
             AddComponent<StatRecalculationTag>();
         }

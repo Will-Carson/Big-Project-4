@@ -126,14 +126,14 @@ public partial class ServerContainerSystem : SystemBase
                 commandBuffer.AppendToBuffer(selectedContainerEntity, new EquipStatStickRequest
                 {
                     unequip = false,
-                    statStick = heldItem
+                    entity = heldItem
                 });
 
                 // Unequip the old item
                 commandBuffer.AppendToBuffer(selectedContainerEntity, new EquipStatStickRequest
                 {
                     unequip = true,
-                    statStick = selectedSlotItem
+                    entity = selectedSlotItem
                 });
             }
         })

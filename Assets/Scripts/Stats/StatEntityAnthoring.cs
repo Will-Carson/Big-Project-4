@@ -24,12 +24,11 @@ public class StatEntityAnthoring : MonoBehaviour
             var equipTo = AddBuffer<EquipStatStickRequest>();
             equipTo.Add(new EquipStatStickRequest
             {
-                statStick = baseStatStick,
+                entity = baseStatStick,
                 unequip = false
             });
 
             AddBuffer<StatContainer>();
-            AddBuffer<ResourceContainer>();
             AddBuffer<DerivedStat>();
             AddBuffer<StatStickContainer>();
             AddComponent<StatRecalculationTag>();

@@ -48,7 +48,6 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
     public readonly RefRW<CustomGravity> CustomGravity;
 
     public readonly DynamicBuffer<StatContainer> StatContainer;
-    public readonly DynamicBuffer<ResourceContainer> ResourceContainer;
     public readonly RefRW<ActiveWeapon> ActiveWeapon;
 
     public void PhysicsUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext)
@@ -119,14 +118,7 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
         ref var characterControl = ref CharacterControl.ValueRW;
 
         // If health is 0, transition to "dead" state.
-        for (var i = 0; i < ResourceContainer.Length; i++)
-        {
-            var resource = ResourceContainer[i];
-            if (resource.maxStat.stat == StatType.Health || resource.currentValue == 0)
-            {
-                stateMachine.TransitionToState(CharacterState.Dead, ref context, ref baseContext, in this);
-            }
-        }
+        
 
         if (stateMachine.CurrentState != CharacterState.Swimming && stateMachine.CurrentState != CharacterState.FlyingNoCollisions)
         {

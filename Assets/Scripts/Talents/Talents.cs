@@ -329,7 +329,7 @@ public partial class TalentServerSystem : SystemBase
                     commandBuffer.AppendToBuffer(targetEntity, new EquipStatStickRequest
                     {
                         unequip = rpc.deallocate,
-                        statStick = talentEntity
+                        entity = talentEntity
                     });
                 }
             }
