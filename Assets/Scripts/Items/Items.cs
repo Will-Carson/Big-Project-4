@@ -45,11 +45,11 @@ public static class BaseItemDefinitions
             tags = new ItemTag[] { ItemTag.Armor, ItemTag.Body },
             grants = new StatRange[]
             {
-                new StatRange { stat = StatType.Strength, min = 3, max = 5 },
+                new StatRange { stat = StatType.AdditionalStrength, min = 3, max = 5 },
             },
             requirements = new StatRequirement[]
             {
-                new StatRequirement { stat = StatType.Strength, min = 10, max = int.MaxValue },
+                new StatRequirement { stat = StatType.AdditionalStrength, min = 10, max = int.MaxValue },
             },
         },
     };
@@ -108,7 +108,7 @@ public static class AffixDefinitions
             tags = new ItemTag[] { ItemTag.Armor, ItemTag.Jewellery },
             grants = new StatRange[]
             {
-                new StatRange { stat = StatType.Strength, min = 5, max = 8 },
+                new StatRange { stat = StatType.AdditionalStrength, min = 5, max = 8 },
             },
         },
     };

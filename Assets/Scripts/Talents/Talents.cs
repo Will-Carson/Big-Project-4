@@ -39,7 +39,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { stat = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Physique
         new TalentAuthoring
@@ -55,7 +55,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { stat = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Reason
         new TalentAuthoring
@@ -71,7 +71,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { stat = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Dexterity
         new TalentAuthoring
@@ -87,7 +87,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { stat = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Perception
         new TalentAuthoring
@@ -103,7 +103,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { stat = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Melee
         new TalentAuthoring
@@ -119,7 +119,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { stat = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Ranged
         new TalentAuthoring
@@ -135,7 +135,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { stat = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Engineering
         new TalentAuthoring
@@ -151,7 +151,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { stat = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Mysticism
         new TalentAuthoring
@@ -167,7 +167,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { stat = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Medicine
         new TalentAuthoring
@@ -183,7 +183,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { stat = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Defense
 
@@ -201,7 +201,7 @@ public static class TalentDefinitions
             },
             grants = new StatData[]
             {
-                new StatData { stat = StatType.Strength, value = 10 },
+                new StatData { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Technique
     };

@@ -37,7 +37,6 @@ using Unity.Entities;
 using Unity.Collections;
 using Unity.NetCode;
 using Unity.Burst;
-using Unity.Mathematics;
 using System;
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
@@ -475,39 +474,6 @@ public struct StatData
     {
         return $"{stat} : {value}";
     }
-}
-
-public enum StatType
-{
-    None,
-
-    // Meta stats. Must be at the top since they can grant anything. 
-    Level,
-    TalentPoint,
-
-    // Talents. Talents must be early since 
-    TalentPhysique,
-    TalentReason,
-    TalentDexterity,
-    TalentPerception,
-    TalentMelee,
-    TalentRanged,
-    TalentEngineering,
-    TalentMysticism,
-    TalentMedicine,
-    TalentDefense,
-
-    TalentTechnique,
-
-    // Base stats
-    Strength,
-    Intelligence,
-    Nimbleness,
-
-    // Resources
-    Health,
-
-    // Other stats
 }
 
 public readonly partial struct StatStickAspect : IAspect
