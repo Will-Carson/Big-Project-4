@@ -1,6 +1,7 @@
 using Unity.Collections;
 using Unity.Entities;
 using System.Linq;
+using System;
 
 /// <summary>
 /// Some stats fit into categories; For instance, IncreasedDamage, IncreasedFireDamage, and
@@ -415,41 +416,28 @@ public static class StatDefinitions
         StatToCombinedStatCategory.Dispose();
     }
 
-    public static void TotalStatsWithFlavor(NativeHashMap<int, int> stats, NativeArray<StatFlavorFlag> inputFlavorFlags, ref NativeHashMap<int, int> results)
+    public static void TotalStatsWithFlavor(in DynamicBuffer<StatContainer> stats, StatFlavorFlag inputFlavorFlags, ref NativeHashMap<int, int> results)
     {
         /// Iterate over stat keys, 
         /// iterate over matches.
         /// Get the matching tags from the StatMatchesTags dictionary.
         /// If every tag from the StatMatchesTags dictionary is in the matches array, add the value to the results dictionary
         /// based on the StatGrantsTags dictionary.
-
-        var statKeys = stats.GetKeyArray(Allocator.Temp);
-        for (var i = 0; i < statKeys.Length; i++)
+        for (var i = 0; i < stats.Length; i++)
         {
-            var stat = statKeys[i];
+            var stat = (int)stats[i].stat.stat;
 
             /// Iterate over the stats StatMatchesTags
-            /// if the input StatMatchesTags does not contain one of that stats StatMatchesTags
-            /// i.e., if the stat applies to Fire attacks and the input StatMatchesTags are for Ice attacks,
+            /// if the input StatFlavorFlag does not contain one of that stats StatFlavorFlag
+            /// i.e., if the stat applies to Fire attacks and the input StatFlavorFlag are for Ice attacks,
             /// we will skip this stat. Otherwise we will add it to the results.
-
             if (!StatToStatFlavorFlags.TryGetValue(stat, out var statFlavorFlags))
             {
                 continue;
             }
 
-            var isValid = true;
-            for (var j = 0; j < inputFlavorFlags.Length; j++)
-            {
-                var inputFlavorFlag = inputFlavorFlags[j];
-
-                if ((statFlavorFlags & inputFlavorFlag) == 0)
-                {
-                    isValid = false;
-                    break;
-                }
-            }
-            if (!isValid)
+            /// If every '1' flag in the stats flavor flags is present in the input flavor flags, then proceed. 
+            if ((statFlavorFlags & inputFlavorFlags) != statFlavorFlags)
             {
                 continue;
             }
@@ -459,7 +447,7 @@ public static class StatDefinitions
                 continue;
             }
 
-            results.Add((int)grants, stats[stat]);
+            results.Add((int)grants, stats[i].stat.value);
         }
     }
 }
@@ -487,30 +475,30 @@ public struct StatAuthoring
     public CombinedStatCategory grants;
 }
 
-
+[Flags] 
 public enum StatFlavorFlag
 {
-    Uninitialized = 0,
+    Uninitialized       = 0,
 
-    General = 1 << 0,
+    General             = 1 << 0,
 
-    WeaponsBallistic = 1 << 1,
-    WeaponsEnergy = 1 << 2,
-    WeaponsAutomatic = 1 << 3,
-    WeaponsRifle = 1 << 4,
-    WeaponsShotgun = 1 << 5,
-    WeaponsBeam = 1 << 6,
+    WeaponsBallistic    = 1 << 1,
+    WeaponsEnergy       = 1 << 2,
+    WeaponsAutomatic    = 1 << 3,
+    WeaponsRifle        = 1 << 4,
+    WeaponsShotgun      = 1 << 5,
+    WeaponsBeam         = 1 << 6,
 
-    Weapons1H = 1 << 7,
-    Weapons2H = 1 << 8,
+    Weapons1H           = 1 << 7,
+    Weapons2H           = 1 << 8,
 
-    Physical = 1 << 9,
-    Thermal = 1 << 10,
-    Cryo = 1 << 11,
-    Electricity = 1 << 12,
-    Chaos = 1 << 13,
+    Physical            = 1 << 9,
+    Thermal             = 1 << 10,
+    Cryo                = 1 << 11,
+    Electricity         = 1 << 12,
+    Chaos               = 1 << 13,
 
-    OverTime = 1 << 14,
+    OverTime            = 1 << 14,
 }
 
 public enum CombinedStatCategory
