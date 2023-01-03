@@ -73,11 +73,8 @@ public static class BaseItemDefinitions
             {
                 baseStatsBuffer.Add(new StatContainer
                 {
-                    stat = new StatData
-                    {
-                        stat = stat.stat,
-                        value = stat.max
-                    }
+                    stat = stat.stat,
+                    value = stat.max
                 });
             }
 
@@ -132,11 +129,8 @@ public static class AffixDefinitions
                 var grantedStat = affix.grants[j];
                 statBuffer.Add(new StatContainer
                 {
-                    stat = new StatData
-                    {
-                        stat = grantedStat.stat,
-                        value = grantedStat.max
-                    }
+                    stat = grantedStat.stat,
+                    value = grantedStat.max
                 });
             }
 

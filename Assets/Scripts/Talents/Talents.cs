@@ -18,7 +18,7 @@ public struct TalentAuthoring
     public StatRequirement[] requires;
 
     // Stats granted by allocating a talent
-    public StatData[] grants;
+    public StatContainer[] grants;
 }
 
 public static class TalentDefinitions
@@ -37,9 +37,9 @@ public static class TalentDefinitions
             {
                 // No special requirements
             },
-            grants = new StatData[]
+            grants = new StatContainer[]
             {
-                new StatData { stat = StatType.AdditionalStrength, value = 10 },
+                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Physique
         new TalentAuthoring
@@ -53,9 +53,9 @@ public static class TalentDefinitions
             {
                 // No special requirements
             },
-            grants = new StatData[]
+            grants = new StatContainer[]
             {
-                new StatData { stat = StatType.AdditionalStrength, value = 10 },
+                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Reason
         new TalentAuthoring
@@ -69,9 +69,9 @@ public static class TalentDefinitions
             {
                 // No special requirements
             },
-            grants = new StatData[]
+            grants = new StatContainer[]
             {
-                new StatData { stat = StatType.AdditionalStrength, value = 10 },
+                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Dexterity
         new TalentAuthoring
@@ -85,9 +85,9 @@ public static class TalentDefinitions
             {
                 // No special requirements
             },
-            grants = new StatData[]
+            grants = new StatContainer[]
             {
-                new StatData { stat = StatType.AdditionalStrength, value = 10 },
+                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Perception
         new TalentAuthoring
@@ -101,9 +101,9 @@ public static class TalentDefinitions
             {
                 // No special requirements
             },
-            grants = new StatData[]
+            grants = new StatContainer[]
             {
-                new StatData { stat = StatType.AdditionalStrength, value = 10 },
+                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Melee
         new TalentAuthoring
@@ -117,9 +117,9 @@ public static class TalentDefinitions
             {
                 // No special requirements
             },
-            grants = new StatData[]
+            grants = new StatContainer[]
             {
-                new StatData { stat = StatType.AdditionalStrength, value = 10 },
+                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Ranged
         new TalentAuthoring
@@ -133,9 +133,9 @@ public static class TalentDefinitions
             {
                 // No special requirements
             },
-            grants = new StatData[]
+            grants = new StatContainer[]
             {
-                new StatData { stat = StatType.AdditionalStrength, value = 10 },
+                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Engineering
         new TalentAuthoring
@@ -149,9 +149,9 @@ public static class TalentDefinitions
             {
                 // No special requirements
             },
-            grants = new StatData[]
+            grants = new StatContainer[]
             {
-                new StatData { stat = StatType.AdditionalStrength, value = 10 },
+                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Mysticism
         new TalentAuthoring
@@ -165,9 +165,9 @@ public static class TalentDefinitions
             {
                 // No special requirements
             },
-            grants = new StatData[]
+            grants = new StatContainer[]
             {
-                new StatData { stat = StatType.AdditionalStrength, value = 10 },
+                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Medicine
         new TalentAuthoring
@@ -181,9 +181,9 @@ public static class TalentDefinitions
             {
                 // No special requirements
             },
-            grants = new StatData[]
+            grants = new StatContainer[]
             {
-                new StatData { stat = StatType.AdditionalStrength, value = 10 },
+                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Defense
 
@@ -199,16 +199,15 @@ public static class TalentDefinitions
             {
                 // No special requirements
             },
-            grants = new StatData[]
+            grants = new StatContainer[]
             {
-                new StatData { stat = StatType.AdditionalStrength, value = 10 },
+                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
             },
         }, // Technique
     };
 
     public static void CreateTalentsAsEntities(EntityManager em)
     {
-        var entities = new Entity[Talents.Length];
         for (var i = 0; i < Talents.Length; i++)
         {
             var talent = Talents[i];
@@ -267,19 +266,13 @@ public static class TalentDefinitions
             /// the regular granted stats.
             statsBuffer.Add(new StatContainer
             {
-                stat = new StatData
-                {
-                    stat = talent.stat,
-                    value = 1,
-                }
+                stat = talent.stat,
+                value = 1,
             });
             statsBuffer.Add(new StatContainer
             {
-                stat = new StatData
-                {
-                    stat = StatType.TalentPoint,
-                    value = -talent.pointCost
-                }
+                stat = StatType.TalentPoint,
+                value = -talent.pointCost
             });
             foreach (var grants in talent.grants)
             {

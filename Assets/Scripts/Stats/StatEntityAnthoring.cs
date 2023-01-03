@@ -5,7 +5,7 @@ public class StatEntityAnthoring : MonoBehaviour
 {
     public StatContainer[] baseStats = new StatContainer[]
     {
-        new StatContainer { stat = new StatData { stat = StatType.AdditionalLife, value = 100 } },
+        new StatContainer { stat = StatType.AdditionalLife, value = 100 },
     };
 
     class Baker : Baker<StatEntityAnthoring>

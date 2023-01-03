@@ -121,8 +121,8 @@ public partial struct StatStickEquipper : ISystem
 
                             for (var k = 0; k < stats.Length; k++)
                             {
-                                var stat = stats[k].stat;
-                                if (requirement.stat == stat.stat && !requirement.IsInRange(stat))
+                                var stat = stats[k];
+                                if (requirement.stat == stat.stat && !requirement.IsValueInRange(stat.value))
                                 {
                                     requirementsMet = false;
                                     break;
@@ -212,7 +212,7 @@ public partial struct StatTotaller : ISystem
 
                 for (var j = 0; j < statStickStats.Length; j++)
                 {
-                    var statStickStat = statStickStats[j].stat;
+                    var statStickStat = statStickStats[j];
                     var statKey = (int)statStickStat.stat;
                     var statValue = statStickStat.value;
 
@@ -232,7 +232,7 @@ public partial struct StatTotaller : ISystem
             for (var i = 0; i < keyArray.Length; i++)
             {
                 var key = keyArray[i];
-                stats.Add(new StatData { stat = (StatType)key, value = statTotals[key] });
+                stats.Add(new StatContainer((StatType)key, statTotals[key]));
             }
 
             // Dispose of Native* types
@@ -286,7 +286,7 @@ public partial struct DerivedStatHandlerSystem : ISystem
             {
                 for (var i = 0; i < j; i++)
                 {
-                    if (derivedStats[i].toStat.stat > derivedStats[i + 1].toStat.stat)
+                    if (derivedStats[i].toStat > derivedStats[i + 1].toStat)
                     {
                         var derivedStat1 = derivedStats[i];
                         var derivedStat2 = derivedStats[i + 1];
@@ -315,9 +315,9 @@ public partial struct DerivedStatHandlerSystem : ISystem
                 for (var j = 0; j < stats.Length; j++)
                 {
                     var stat = stats[j].stat;
-                    if (derivedStat.fromStat.stat != stat.stat) continue;
+                    if (derivedStat.fromStat != stat) continue;
 
-                    var statToAdd = new StatData(derivedStat.toStat.stat, (stat.value / derivedStat.fromStat.value) * derivedStat.toStat.value);
+                    var statToAdd = new StatContainer(derivedStat.toStat, (stats[j].value / derivedStat.fromValue) * derivedStat.toValue);
                     StatContainer.Add(stats, statToAdd); // Does this need to be "ref stats"?
                 }
             }
@@ -327,8 +327,62 @@ public partial struct DerivedStatHandlerSystem : ISystem
 
 public struct DerivedStat : IBufferElementData
 {
-    public StatData fromStat;
-    public StatData toStat;
+    public StatType fromStat;
+    public int fromValue;
+    public StatType toStat;
+    public int toValue;
+}
+
+[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+[UpdateInGroup(typeof(StatRecalculationSystemGroup))]
+[UpdateAfter(typeof(DerivedStatHandlerSystem))]
+public partial class CombinedStatCalculationSystem : SystemBase
+{
+    protected override void OnUpdate()
+    {
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+
+        // Build StatContainers on CombinedStatResultContainers.
+        Entities
+        .WithAll<StatRecalculationTag>()
+        .ForEach((
+        Entity entity,
+        in DynamicBuffer<CombinedStatResultsContainer> combinedStatResults,
+        in DynamicBuffer<StatContainer> stats) =>
+        {
+            for (var i = 0; i < combinedStatResults.Length; i++)
+            {
+                var combinedStatResult = combinedStatResults[i];
+
+                var combinedStatBuffer = commandBuffer.AddBuffer<StatContainer>(combinedStatResult.entity);
+
+                var statResults = new NativeHashMap<int, int>(100, Allocator.Temp);
+                StatDefinitions.TotalStatsWithFlavor(stats, combinedStatResult.statFlavorFlags, ref statResults);
+
+                var statResultsEnum = statResults.GetEnumerator();
+
+                while (statResultsEnum.MoveNext())
+                {
+                    var current = statResultsEnum.Current;
+                    combinedStatBuffer.Add(
+                        new StatContainer
+                        {
+                            stat = (StatType)current.Key,
+                            value = current.Value,
+                        });
+                }
+
+                statResults.Dispose();
+            }
+        })
+        .Run();
+    }
+}
+
+public struct CombinedStatResultsContainer : IBufferElementData
+{
+    public StatFlavorFlag statFlavorFlags;
+    public Entity entity;
 }
 
 [UpdateInGroup(typeof(StatRecalculationSystemGroup))]
@@ -402,14 +456,22 @@ public struct StatRecalculationTag : IComponentData { }
 public struct StatContainer : IBufferElementData
 {
     [GhostField]
-    public StatData stat;
+    public StatType stat;
+    [GhostField]
+    public int value;
 
-    public static void Add(DynamicBuffer<StatContainer> stats, StatData statToAdd)
+    public StatContainer(StatType stat, int value)
+    {
+        this.stat = stat;
+        this.value = value;
+    }
+
+    public static void Add(DynamicBuffer<StatContainer> stats, StatContainer statToAdd)
     {
         var hasStat = false;
         for (var i = 0; i < stats.Length; i++)
         {
-            var stat = stats[i].stat;
+            var stat = stats[i];
             if (stat.stat == statToAdd.stat)
             {
                 hasStat = true;
@@ -422,7 +484,17 @@ public struct StatContainer : IBufferElementData
         }
     }
 
-    public static implicit operator StatContainer(StatData d) => new StatContainer { stat = d };
+    public static StatContainer operator +(StatContainer a, StatContainer b)
+    {
+        if (a.stat == b.stat) return new StatContainer();
+
+        return new StatContainer { stat = a.stat, value = a.value + b.value };
+    }
+
+    public override string ToString()
+    {
+        return $"{stat} : {value}";
+    }
 }
 
 public struct StatRequirementContainer : IBufferElementData
@@ -436,43 +508,14 @@ public struct StatRequirement
     public int min;
     public int max;
 
-    public bool IsInRange(StatData stat)
+    public bool IsValueInRange(int value)
     {
-        if (this.stat != stat.stat) return false;
-        return stat.value >= min && stat.value <= max;
+        return value >= min && value <= max;
     }
 
     public override string ToString()
     {
         return $"{stat} : {min}, {max}";
-    }
-}
-
-/// <summary>
-/// Matches a stat and a value
-/// </summary>
-[Serializable]
-public struct StatData
-{
-    public StatType stat;
-    public int value;
-
-    public StatData(StatType stat, int value)
-    {
-        this.stat = stat;
-        this.value = value;
-    }
-
-    public static StatData operator +(StatData a, StatData b)
-    {
-        if (a.stat == b.stat) return new StatData();
-
-        return new StatData { stat = a.stat, value = a.value + b.value };
-    }
-
-    public override string ToString()
-    {
-        return $"{stat} : {value}";
     }
 }
 

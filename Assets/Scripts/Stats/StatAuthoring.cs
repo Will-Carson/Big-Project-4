@@ -1,6 +1,5 @@
 using Unity.Collections;
 using Unity.Entities;
-using System.Linq;
 using System;
 
 /// <summary>
@@ -26,394 +25,394 @@ public static class StatDefinitions
         // Projectile bounces
         new StatAuthoring
         {
-            stat = StatType.AdditionalBounceWithBallisticProjectile,
-            matches = StatFlavorFlag.WeaponsBallistic,
-            grants = CombinedStatCategory.AdditionalProjectileBounce,
+            stat = StatType.AdditionalProjectileBounceWithBallisticWeapons,
+            flags = StatFlavorFlag.WeaponsBallistic,
+            combinedStat = StatType.AdditionalProjectileBounce,
         },
 
         // Projectile penetration
         new StatAuthoring
         {
             stat = StatType.AdditionalProjectilePenetration,
-            matches = StatFlavorFlag.General,
-            grants = CombinedStatCategory.IncreasedProjectileSpread,
+            flags = StatFlavorFlag.General,
+            combinedStat = StatType.IncreasedProjectileSpread,
         },
 
         // Projectile spread
         new StatAuthoring
         {
             stat = StatType.IncreasedProjectileSpread,
-            matches = StatFlavorFlag.General,
-            grants = CombinedStatCategory.IncreasedProjectileSpread,
+            flags = StatFlavorFlag.General,
+            combinedStat = StatType.IncreasedProjectileSpread,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedProjectileSpreadWith1HWeapons,
-            matches = StatFlavorFlag.Weapons1H,
-            grants = CombinedStatCategory.IncreasedProjectileSpread,
+            flags = StatFlavorFlag.Weapons1H,
+            combinedStat = StatType.IncreasedProjectileSpread,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedProjectileSpreadWith2HWeapons,
-            matches = StatFlavorFlag.Weapons2H,
-            grants = CombinedStatCategory.IncreasedProjectileSpread,
+            flags = StatFlavorFlag.Weapons2H,
+            combinedStat = StatType.IncreasedProjectileSpread,
         },
 
         // Attack speed
         new StatAuthoring
         {
             stat = StatType.IncreasedAttackSpeed,
-            matches = StatFlavorFlag.General,
-            grants = CombinedStatCategory.IncreasedAttackSpeed,
+            flags = StatFlavorFlag.General,
+            combinedStat = StatType.IncreasedAttackSpeed,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedAttackSpeedWith1HWeapons,
-            matches = StatFlavorFlag.Weapons1H,
-            grants = CombinedStatCategory.IncreasedAttackSpeed,
+            flags = StatFlavorFlag.Weapons1H,
+            combinedStat = StatType.IncreasedAttackSpeed,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedAttackSpeedWith2HWeapons,
-            matches = StatFlavorFlag.Weapons2H,
-            grants = CombinedStatCategory.IncreasedAttackSpeed,
+            flags = StatFlavorFlag.Weapons2H,
+            combinedStat = StatType.IncreasedAttackSpeed,
         },
 
         // Damage
         new StatAuthoring
         {
             stat = StatType.IncreasedDamage,
-            matches = StatFlavorFlag.General,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.General,
+            combinedStat = StatType.IncreasedDamage,
         },
         new StatAuthoring
         {
             stat = StatType.MoreDamage,
-            matches = StatFlavorFlag.General,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.General,
+            combinedStat = StatType.MoreDamage,
         },
 
         // Added elemental damage
         new StatAuthoring
         {
             stat = StatType.AdditionalPhysicalDamage,
-            matches = StatFlavorFlag.Physical,
-            grants = CombinedStatCategory.AdditionalDamage,
+            flags = StatFlavorFlag.Physical,
+            combinedStat = StatType.AdditionalDamage,
         },
         new StatAuthoring
         {
             stat = StatType.AdditionalThermalDamage,
-            matches = StatFlavorFlag.Thermal,
-            grants = CombinedStatCategory.AdditionalDamage,
+            flags = StatFlavorFlag.Thermal,
+            combinedStat = StatType.AdditionalDamage,
         },
         new StatAuthoring
         {
             stat = StatType.AdditionalCryoDamage,
-            matches = StatFlavorFlag.Cryo,
-            grants = CombinedStatCategory.AdditionalDamage,
+            flags = StatFlavorFlag.Cryo,
+            combinedStat = StatType.AdditionalDamage,
         },
         new StatAuthoring
         {
             stat = StatType.AdditionalElectricityDamage,
-            matches = StatFlavorFlag.Electricity,
-            grants = CombinedStatCategory.AdditionalDamage,
+            flags = StatFlavorFlag.Electricity,
+            combinedStat = StatType.AdditionalDamage,
         },
         new StatAuthoring
         {
             stat = StatType.AdditionalChaosDamage,
-            matches = StatFlavorFlag.Chaos,
-            grants = CombinedStatCategory.AdditionalDamage,
+            flags = StatFlavorFlag.Chaos,
+            combinedStat = StatType.AdditionalDamage,
         },
 
         // Increased elemental damage
         new StatAuthoring
         {
             stat = StatType.IncreasedPhysicalDamage,
-            matches = StatFlavorFlag.Physical,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.Physical,
+            combinedStat = StatType.IncreasedDamage,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedThermalDamage,
-            matches = StatFlavorFlag.Thermal,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.Thermal,
+            combinedStat = StatType.IncreasedDamage,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedCryoDamage,
-            matches = StatFlavorFlag.Cryo,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.Cryo,
+            combinedStat = StatType.IncreasedDamage,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedElectricityDamage,
-            matches = StatFlavorFlag.Electricity,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.Electricity,
+            combinedStat = StatType.IncreasedDamage,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedChaosDamage,
-            matches = StatFlavorFlag.Chaos,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.Chaos,
+            combinedStat = StatType.IncreasedDamage,
         },
 
         // More elemental damage
         new StatAuthoring
         {
             stat = StatType.MorePhysicalDamage,
-            matches = StatFlavorFlag.Physical,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.Physical,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.MoreThermalDamage,
-            matches = StatFlavorFlag.Thermal,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.Thermal,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.MoreCryoDamage,
-            matches = StatFlavorFlag.Cryo,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.Cryo,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.MoreElectricityDamage,
-            matches = StatFlavorFlag.Electricity,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.Electricity,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.MoreChaosDamage,
-            matches = StatFlavorFlag.Chaos,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.Chaos,
+            combinedStat = StatType.MoreDamage,
         },
 
         // Increased damage over time
         new StatAuthoring
         {
             stat = StatType.IncreasedPhysicalDamageOverTime,
-            matches = StatFlavorFlag.Physical | StatFlavorFlag.OverTime,
-            grants = CombinedStatCategory.IncreasedDamageOverTime,
+            flags = StatFlavorFlag.Physical | StatFlavorFlag.OverTime,
+            combinedStat = StatType.IncreasedDamageOverTime,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedThermalDamageOverTime,
-            matches = StatFlavorFlag.Thermal | StatFlavorFlag.OverTime,
-            grants = CombinedStatCategory.IncreasedDamageOverTime,
+            flags = StatFlavorFlag.Thermal | StatFlavorFlag.OverTime,
+            combinedStat = StatType.IncreasedDamageOverTime,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedCryoDamageOverTime,
-            matches = StatFlavorFlag.Cryo | StatFlavorFlag.OverTime,
-            grants = CombinedStatCategory.IncreasedDamageOverTime,
+            flags = StatFlavorFlag.Cryo | StatFlavorFlag.OverTime,
+            combinedStat = StatType.IncreasedDamageOverTime,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedElectricityDamageOverTime,
-            matches = StatFlavorFlag.Electricity | StatFlavorFlag.OverTime,
-            grants = CombinedStatCategory.IncreasedDamageOverTime,
+            flags = StatFlavorFlag.Electricity | StatFlavorFlag.OverTime,
+            combinedStat = StatType.IncreasedDamageOverTime,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedChaosDamageOverTime,
-            matches = StatFlavorFlag.Chaos | StatFlavorFlag.OverTime,
-            grants = CombinedStatCategory.IncreasedDamageOverTime,
+            flags = StatFlavorFlag.Chaos | StatFlavorFlag.OverTime,
+            combinedStat = StatType.IncreasedDamageOverTime,
         },
 
         // More damage over time
         new StatAuthoring
         {
             stat = StatType.MorePhysicalDamageOverTime,
-            matches = StatFlavorFlag.Physical | StatFlavorFlag.OverTime,
-            grants = CombinedStatCategory.MoreDamageOverTime,
+            flags = StatFlavorFlag.Physical | StatFlavorFlag.OverTime,
+            combinedStat = StatType.MoreDamageOverTime,
         },
         new StatAuthoring
         {
             stat = StatType.MoreThermalDamageOverTime,
-            matches = StatFlavorFlag.Thermal | StatFlavorFlag.OverTime,
-            grants = CombinedStatCategory.MoreDamageOverTime,
+            flags = StatFlavorFlag.Thermal | StatFlavorFlag.OverTime,
+            combinedStat = StatType.MoreDamageOverTime,
         },
         new StatAuthoring
         {
             stat = StatType.MoreCryoDamageOverTime,
-            matches = StatFlavorFlag.Cryo | StatFlavorFlag.OverTime,
-            grants = CombinedStatCategory.MoreDamageOverTime,
+            flags = StatFlavorFlag.Cryo | StatFlavorFlag.OverTime,
+            combinedStat = StatType.MoreDamageOverTime,
         },
         new StatAuthoring
         {
             stat = StatType.MoreElectricityDamageOverTime,
-            matches = StatFlavorFlag.Electricity | StatFlavorFlag.OverTime,
-            grants = CombinedStatCategory.MoreDamageOverTime,
+            flags = StatFlavorFlag.Electricity | StatFlavorFlag.OverTime,
+            combinedStat = StatType.MoreDamageOverTime,
         },
         new StatAuthoring
         {
             stat = StatType.MoreChaosDamageOverTime,
-            matches = StatFlavorFlag.Chaos | StatFlavorFlag.OverTime,
-            grants = CombinedStatCategory.MoreDamageOverTime,
+            flags = StatFlavorFlag.Chaos | StatFlavorFlag.OverTime,
+            combinedStat = StatType.MoreDamageOverTime,
         },
 
         // Damage by 1h/2h
         new StatAuthoring
         {
             stat = StatType.Increased1HWeaponDamage,
-            matches = StatFlavorFlag.Weapons1H,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.Weapons1H,
+            combinedStat = StatType.IncreasedDamage,
         },
         new StatAuthoring
         {
             stat = StatType.Increased2HWeaponDamage,
-            matches = StatFlavorFlag.Weapons2H,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.Weapons2H,
+            combinedStat = StatType.IncreasedDamage,
         },
         new StatAuthoring
         {
             stat = StatType.More1HWeaponDamage,
-            matches = StatFlavorFlag.Weapons1H,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.Weapons1H,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.More2HWeaponDamage,
-            matches = StatFlavorFlag.Weapons2H,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.Weapons2H,
+            combinedStat = StatType.MoreDamage,
         },
 
         // Damage by weapon type
         new StatAuthoring
         {
             stat = StatType.IncreasedEnergyWeaponDamage,
-            matches = StatFlavorFlag.WeaponsEnergy,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.WeaponsEnergy,
+            combinedStat = StatType.IncreasedDamage,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedBallisticWeaponDamage,
-            matches = StatFlavorFlag.WeaponsBallistic,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.WeaponsBallistic,
+            combinedStat = StatType.IncreasedDamage,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedAutomaticDamage,
-            matches = StatFlavorFlag.WeaponsAutomatic,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.WeaponsAutomatic,
+            combinedStat = StatType.IncreasedDamage,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedShotgunDamage,
-            matches = StatFlavorFlag.WeaponsShotgun,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.WeaponsShotgun,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedRifleDamage,
-            matches = StatFlavorFlag.WeaponsRifle,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.WeaponsRifle,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedBeamDamage,
-            matches = StatFlavorFlag.WeaponsBeam,
-            grants = CombinedStatCategory.IncreasedDamage,
+            flags = StatFlavorFlag.WeaponsBeam,
+            combinedStat = StatType.IncreasedDamage,
         },
         new StatAuthoring
         {
             stat = StatType.MoreEnergyWeaponDamage,
-            matches = StatFlavorFlag.WeaponsEnergy,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.WeaponsEnergy,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.MoreBallisticWeaponDamage,
-            matches = StatFlavorFlag.WeaponsBallistic,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.WeaponsBallistic,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.MoreAutomaticDamage,
-            matches = StatFlavorFlag.WeaponsAutomatic,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.WeaponsAutomatic,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.MoreShotgunDamage,
-            matches = StatFlavorFlag.WeaponsShotgun,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.WeaponsShotgun,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.MoreRifleDamage,
-            matches = StatFlavorFlag.WeaponsRifle,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.WeaponsRifle,
+            combinedStat = StatType.MoreDamage,
         },
         new StatAuthoring
         {
             stat = StatType.MoreBeamDamage,
-            matches = StatFlavorFlag.WeaponsBeam,
-            grants = CombinedStatCategory.MoreDamage,
+            flags = StatFlavorFlag.WeaponsBeam,
+            combinedStat = StatType.MoreDamage,
         },
 
         // Critical strikes
         new StatAuthoring
         {
             stat = StatType.BaseCriticalStrikeChance1TenthPercent,
-            matches = StatFlavorFlag.General,
-            grants = CombinedStatCategory.BaseCriticalStrikeChance1TenthPercent,
+            flags = StatFlavorFlag.General,
+            combinedStat = StatType.BaseCriticalStrikeChance1TenthPercent,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedCriticalStrikeChance,
-            matches = StatFlavorFlag.General,
-            grants = CombinedStatCategory.IncreasedCriticalStrikeChance,
+            flags = StatFlavorFlag.General,
+            combinedStat = StatType.IncreasedCriticalStrikeChance,
         },
         new StatAuthoring
         {
             stat = StatType.MoreCriticalStrikeChance,
-            matches = StatFlavorFlag.General,
-            grants = CombinedStatCategory.MoreCriticalStrikeChance,
+            flags = StatFlavorFlag.General,
+            combinedStat = StatType.MoreCriticalStrikeChance,
         },
         new StatAuthoring
         {
             stat = StatType.IncreasedCriticalStrikeDamageMultiplier,
-            matches = StatFlavorFlag.General,
-            grants = CombinedStatCategory.IncreasedCriticalStrikeDamageMultiplier,
+            flags = StatFlavorFlag.General,
+            combinedStat = StatType.IncreasedCriticalStrikeDamageMultiplier,
         },
         new StatAuthoring
         {
             stat = StatType.MoreCriticalStrikeDamageMultiplier,
-            matches = StatFlavorFlag.General,
-            grants = CombinedStatCategory.MoreCriticalStrikeDamageMultiplier,
+            flags = StatFlavorFlag.General,
+            combinedStat = StatType.MoreCriticalStrikeDamageMultiplier,
         },
 
         new StatAuthoring
         {
             stat = StatType.IncreasedCriticalStrikeChanceWith2HWeapons,
-            matches = StatFlavorFlag.Weapons2H,
-            grants = CombinedStatCategory.IncreasedCriticalStrikeChance,
+            flags = StatFlavorFlag.Weapons2H,
+            combinedStat = StatType.IncreasedCriticalStrikeChance,
         },
     };
 
     public static NativeHashMap<int, StatFlavorFlag> StatToStatFlavorFlags;
-    public static NativeHashMap<int, CombinedStatCategory> StatToCombinedStatCategory;
+    public static NativeHashMap<int, StatType> StatToStatType;
 
     public static void Initialize()
     {
-        StatToStatFlavorFlags = new NativeHashMap<int, StatFlavorFlag>(100, Allocator.Persistent);
-        StatToCombinedStatCategory = new NativeHashMap<int, CombinedStatCategory>(100, Allocator.Persistent);
+        StatToStatFlavorFlags = new NativeHashMap<int, StatFlavorFlag>(StatAuthorings.Length, Allocator.Persistent);
+        StatToStatType = new NativeHashMap<int, StatType>(StatAuthorings.Length, Allocator.Persistent);
 
         for (var i = 0; i < StatAuthorings.Length; i++)
         {
             var statAuthoring = StatAuthorings[i];
 
-            StatToStatFlavorFlags.Add((int)statAuthoring.stat, statAuthoring.matches);
-            StatToCombinedStatCategory.Add((int)statAuthoring.stat, statAuthoring.grants);
+            StatToStatFlavorFlags.Add((int)statAuthoring.stat, statAuthoring.flags);
+            StatToStatType.Add((int)statAuthoring.stat, statAuthoring.combinedStat);
         }
     }
 
     public static void OnDestroy()
     {
         StatToStatFlavorFlags.Dispose();
-        StatToCombinedStatCategory.Dispose();
+        StatToStatType.Dispose();
     }
 
     public static void TotalStatsWithFlavor(in DynamicBuffer<StatContainer> stats, StatFlavorFlag inputFlavorFlags, ref NativeHashMap<int, int> results)
@@ -425,7 +424,7 @@ public static class StatDefinitions
         /// based on the StatGrantsTags dictionary.
         for (var i = 0; i < stats.Length; i++)
         {
-            var stat = (int)stats[i].stat.stat;
+            var stat = (int)stats[i].stat;
 
             /// Iterate over the stats StatMatchesTags
             /// if the input StatFlavorFlag does not contain one of that stats StatFlavorFlag
@@ -442,12 +441,20 @@ public static class StatDefinitions
                 continue;
             }
 
-            if (!StatToCombinedStatCategory.TryGetValue(stat, out var grants))
+            if (!StatToStatType.TryGetValue(stat, out var grants))
             {
                 continue;
             }
 
-            results.Add((int)grants, stats[i].stat.value);
+            // Combine the stat into the hashmap.
+            if (results.TryGetValue((int)grants, out var value))
+            {
+                results[(int)grants] = value + stats[i].value;
+            }
+            else
+            {
+                results.Add((int)grants, stats[i].value);
+            }
         }
     }
 }
@@ -471,8 +478,8 @@ public partial class StatSetupSystem : SystemBase
 public struct StatAuthoring
 {
     public StatType stat;
-    public StatFlavorFlag matches;
-    public CombinedStatCategory grants;
+    public StatFlavorFlag flags;
+    public StatType combinedStat;
 }
 
 [Flags] 
@@ -499,31 +506,6 @@ public enum StatFlavorFlag
     Chaos               = 1 << 13,
 
     OverTime            = 1 << 14,
-}
-
-public enum CombinedStatCategory
-{
-    Uninitialized,
-
-    AdditionalDamage,
-    IncreasedDamage,
-    MoreDamage,
-
-    IncreasedDamageOverTime,
-    MoreDamageOverTime,
-
-    AdditionalProjectile,
-
-    AdditionalProjectileBounce,
-
-    IncreasedProjectileSpread,
-    IncreasedAttackSpeed,
-
-    BaseCriticalStrikeChance1TenthPercent,
-    IncreasedCriticalStrikeChance,
-    MoreCriticalStrikeChance,
-    IncreasedCriticalStrikeDamageMultiplier,
-    MoreCriticalStrikeDamageMultiplier,
 }
 
 public enum StatType
@@ -619,7 +601,8 @@ public enum StatType
     IncreasedCharacterSize,
 
     // Bounce
-    AdditionalBounceWithBallisticProjectile,
+    AdditionalProjectileBounce,
+    AdditionalProjectileBounceWithBallisticWeapons,
 
     // Pierce
     AdditionalProjectilePenetration,
@@ -636,6 +619,7 @@ public enum StatType
     IncreasedAttackSpeedWith2HWeapons,
 
     // Damage
+    AdditionalDamage,
     IncreasedDamage,
     MoreDamage,
 
