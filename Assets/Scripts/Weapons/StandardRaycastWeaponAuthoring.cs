@@ -40,6 +40,7 @@ public class StandardRaycastWeaponAuthoring : MonoBehaviour
             });
             AddComponent<InterpolationDelay>();
             AddBuffer<StandardRaycastWeaponShotVFXRequest>();
+            AddBuffer<EffectBuffer>();
         }
     }
 }

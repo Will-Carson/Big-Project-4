@@ -1,4 +1,24 @@
 using Unity.Entities;
+using Unity.Mathematics;
+
+[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+[UpdateInGroup(typeof(CustomStatHandlingSystemGroup))]
+public partial class BuildWeaponEffectsSystem : SystemBase
+{
+    protected override void OnUpdate()
+    {
+        Entities
+        .WithAll<StatRecalculationTag>()
+        .ForEach((
+        Entity entity, 
+        ref DynamicBuffer<EffectBuffer> effects) =>
+        {
+
+        })
+        .Run();
+    }
+}
+
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 public partial class EffectSystem : SystemBase
@@ -10,33 +30,50 @@ public partial class EffectSystem : SystemBase
         Entities
         .ForEach((
         Entity entity,
-        ref DynamicBuffer<EffectBuffer> effects,
-        ref DynamicBuffer<EquipStatStickRequest> equipStatStickRequests) =>
+        ref DynamicBuffer<ApplyEffectToEntityBuffer> applyToEntityBuffer,
+        in DamageHealthEffect damageEffect) =>
         {
-            for (var i = 0; i < effects.Length; i++)
-            {
-                var effect = effects[i];
+            /// 
 
-                // Process resource effects
-                if (damageResourceEffectLookup.TryGetComponent(effect.effectEntity, out var damageResourceEffect))
-                {
-                    
-                }
+            applyToEntityBuffer.Clear();
+        })
+        .Run();
 
-                // Process stat effects
-                // TODO
-            }
+        Entities
+        .ForEach((
+        Entity entity,
+        ref DynamicBuffer<ApplyEffectAtPositionBuffer> applyAtPositionBuffer,
+        in CastEffectEffect castEffect) =>
+        {
+            /// 
+
+            applyAtPositionBuffer.Clear();
         })
         .Run();
     }
 }
 
+public struct CastEffectEffect : IComponentData
+{
+    public Entity entity;
+}
+
 public struct EffectBuffer : IBufferElementData
 {
-    public Entity effectEntity;
+    public Entity entity;
 }
 
 public struct DamageHealthEffect : IComponentData
 {
     public int damageValue;
+}
+
+public struct ApplyEffectToEntityBuffer : IBufferElementData
+{
+    public Entity entity;
+}
+
+public struct ApplyEffectAtPositionBuffer : IBufferElementData
+{
+    public float3 position;
 }

@@ -49,8 +49,10 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
             PhysicsWorldHistory = SystemAPI.GetSingleton<PhysicsWorldHistorySingleton>(),
             LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
             StoredKinematicCharacterDataLookup = SystemAPI.GetComponentLookup<StoredKinematicCharacterData>(true),
-            EffectBufferLookup = SystemAPI.GetBufferLookup<EffectBuffer>(false),
             Hits = _hits,
+
+            applyEffectToEntityBufferLookup = SystemAPI.GetBufferLookup<ApplyEffectToEntityBuffer>(false),
+            applyEffectAtPositionBufferLookup = SystemAPI.GetBufferLookup<ApplyEffectAtPositionBuffer>(false),
         };
         predictionJob.Schedule();
     }
@@ -65,8 +67,10 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
         public PhysicsWorldHistorySingleton PhysicsWorldHistory;
         [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorldLookup;
         [ReadOnly] public ComponentLookup<StoredKinematicCharacterData> StoredKinematicCharacterDataLookup;
-        public BufferLookup<EffectBuffer> EffectBufferLookup;
         public NativeList<RaycastHit> Hits;
+
+        public BufferLookup<ApplyEffectToEntityBuffer> applyEffectToEntityBufferLookup;
+        public BufferLookup<ApplyEffectAtPositionBuffer> applyEffectAtPositionBufferLookup;
 
         void Execute(
             Entity entity, 
@@ -76,7 +80,8 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
             in InterpolationDelay interpolationDelay,
             in StandardWeaponFiringMecanism mecanism, 
             in WeaponShotSimulationOriginOverride shotSimulationOriginOverride, 
-            in DynamicBuffer<WeaponShotIgnoredEntity> ignoredEntities)
+            in DynamicBuffer<WeaponShotIgnoredEntity> ignoredEntities,
+            in DynamicBuffer<EffectBuffer> effectBuffer)
         {
             PhysicsWorldHistory.GetCollisionWorldFromTick(NetworkTime.ServerTick, interpolationDelay.Value, ref PhysicsWorld, out var collisionWorld);
             
@@ -99,10 +104,23 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
                 // Damage
                 if (IsServer && hitFound)
                 {
-                    if (EffectBufferLookup.TryGetBuffer(closestValidHit.Entity, out var targetEffectBuffer))
+                    /// The weapon will have an associated buffer of effects
+                    /// Effects are entities with a buffer of entities / positions that the effect might be applied to
+                    /// This avoids making new entities any time we want to apply an effect
+
+                    for (var j = 0; j < effectBuffer.Length; j++)
                     {
-                        // Apply effect from weapon
-                        // TODO
+                        var effect = effectBuffer[j];
+
+                        if (applyEffectToEntityBufferLookup.TryGetBuffer(effect.entity, out var applyToEntityBuffer))
+                        {
+                            applyToEntityBuffer.Add(new ApplyEffectToEntityBuffer { entity = closestValidHit.Entity });
+                        }
+
+                        if (applyEffectAtPositionBufferLookup.TryGetBuffer(effect.entity, out var applyAtPositionBuffer))
+                        {
+                            applyAtPositionBuffer.Add(new ApplyEffectAtPositionBuffer { position = closestValidHit.Position });
+                        }
                     }
                 }
                 

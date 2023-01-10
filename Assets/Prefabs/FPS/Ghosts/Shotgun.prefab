@@ -36,7 +36,7 @@ Transform:
   m_Children:
   - {fileID: 3510221286250963479}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3510221285191686768
 MeshFilter:
@@ -113,7 +113,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FiringMecanism:
-    AutoFire: 0
+    AutoFire: 1
     FiringRate: 2
   VisualFeedback:
     WeaponBobHAmount: 0.08
@@ -137,7 +137,7 @@ MonoBehaviour:
     type: 3}
   Range: 1000
   Damage: 1000
-  SpreadDegrees: 30
+  SpreadDegrees: 15
   ProjectilesCount: 10
   HitCollisionFilter:
     Category00: 1

@@ -11,7 +11,7 @@ using Random = Unity.Mathematics.Random;
 using RaycastHit = Unity.Physics.RaycastHit;
 
 [Serializable]
-[GhostComponent()]
+[GhostComponent]
 public struct StandardRaycastWeapon : IComponentData, IEnableableComponent
 {
     public Entity ShotOrigin;
@@ -24,9 +24,9 @@ public struct StandardRaycastWeapon : IComponentData, IEnableableComponent
     public CollisionFilter HitCollisionFilter;
 
     // Calculation data
-    [GhostField()]
+    [GhostField]
     public Random Random;
-    [GhostField()]
+    [GhostField]
     public uint RemoteShotsCount;
     public uint LastRemoteShotsCount;
 }
