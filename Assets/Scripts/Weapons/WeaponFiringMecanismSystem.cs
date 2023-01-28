@@ -15,7 +15,7 @@ public partial struct WeaponFiringMecanismSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)
-    { 
+    {
         state.RequireForUpdate(SystemAPI.QueryBuilder().WithAll<StandardWeaponFiringMecanism, WeaponControl>().Build());
     }
 
@@ -55,17 +55,17 @@ public partial struct WeaponFiringMecanismSystem : ISystem
             // Handle firing
             if (mecanism.FiringRate > 0f)
             {
-                float delayBetweenShots = 1f / mecanism.FiringRate;
-                
+                var delayBetweenShots = 1f / mecanism.FiringRate;
+
                 // Clamp shot timer in order to shoot at most the maximum amount of shots that can be shot in one frame based on the firing rate.
                 // This also prevents needlessly dirtying the timer ghostfield (saves bandwidth).
-                mecanism.ShotTimer = math.clamp(mecanism.ShotTimer, 0f, math.max(delayBetweenShots + 0.01f ,DeltaTime)); 
-                
+                mecanism.ShotTimer = math.clamp(mecanism.ShotTimer, 0f, math.max(delayBetweenShots + 0.01f, DeltaTime));
+
                 // This loop is done to allow firing rates that would trigger more than one shot per tick
                 while (mecanism.IsFiring && mecanism.ShotTimer > delayBetweenShots)
                 {
                     mecanism.ShotsToFire++;
-                    
+
                     // Consume shoot time
                     mecanism.ShotTimer -= delayBetweenShots;
 
