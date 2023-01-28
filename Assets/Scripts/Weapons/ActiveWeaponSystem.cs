@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
+using Unity.Physics.Systems;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderFirst = true)]
@@ -84,7 +85,7 @@ public partial struct ActiveWeaponSystem : ISystem
 }
 
 [UpdateInGroup(typeof(PredictedFixedStepSimulationSystemGroup))]
-[UpdateBefore(typeof(PlatformerCharacterPhysicsUpdateSystem))]
+[UpdateAfter(typeof(PhysicsSystemGroup))]
 [BurstCompile]
 public partial class WeaponMovementSystem : SystemBase
 {
@@ -117,13 +118,13 @@ public partial class WeaponMovementSystem : SystemBase
             CharacterControlUtilities.SlerpRotationTowardsDirection(ref weaponTransform.Rotation, deltaTime, math.normalizesafe(characterControl.LookVector), float.MaxValue);
 
             weaponTransform.Position += math.mul(weaponTransform.Rotation, new float3(1, .5f, .5f));
-            transform = new LocalTransform
-            {
-                Position = weaponTransform.Position,
-                Rotation = weaponTransform.Rotation,
-                Scale = weaponTransform.Scale
-            };
-            localTransformLookup[entity] = transform;
+            //transform = new LocalTransform
+            //{
+            //    Position = weaponTransform.Position,
+            //    Rotation = weaponTransform.Rotation,
+            //    Scale = weaponTransform.Scale
+            //};
+            localTransformLookup[entity] = weaponTransform;
         })
         .Run();
     }

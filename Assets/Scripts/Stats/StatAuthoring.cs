@@ -392,13 +392,12 @@ public static class StatDefinitions
         },
     };
 
-    public static NativeHashMap<int, StatFlavorFlag> StatToStatFlavorFlags;
-    public static NativeHashMap<int, StatType> StatToStatType;
-
+    public static readonly NativeHashMap<int, StatFlavorFlag> StatToStatFlavorFlags = new NativeHashMap<int, StatFlavorFlag>(StatAuthorings.Length, Allocator.Persistent);
+    public static readonly NativeHashMap<int, StatType> StatToStatType = new NativeHashMap<int, StatType>(StatAuthorings.Length, Allocator.Persistent);
+    private static bool initialized = false;
     public static void Initialize()
     {
-        StatToStatFlavorFlags = new NativeHashMap<int, StatFlavorFlag>(StatAuthorings.Length, Allocator.Persistent);
-        StatToStatType = new NativeHashMap<int, StatType>(StatAuthorings.Length, Allocator.Persistent);
+        if (initialized) return;
 
         for (var i = 0; i < StatAuthorings.Length; i++)
         {
@@ -407,12 +406,19 @@ public static class StatDefinitions
             StatToStatFlavorFlags.Add((int)statAuthoring.stat, statAuthoring.flags);
             StatToStatType.Add((int)statAuthoring.stat, statAuthoring.combinedStat);
         }
+
+        initialized = true;
     }
 
+    private static bool destroyed = false;
     public static void OnDestroy()
     {
+        if (destroyed) return;
+
         StatToStatFlavorFlags.Dispose();
         StatToStatType.Dispose();
+
+        destroyed = true;
     }
 
     public static void TotalStatsWithFlavor(in DynamicBuffer<StatContainer> stats, StatFlavorFlag inputFlavorFlags, ref NativeHashMap<int, int> results)

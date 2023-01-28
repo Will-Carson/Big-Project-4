@@ -65,12 +65,12 @@ public partial class FrontendHUDSystem : SystemBase
             Enabled = false;
             return;
         }
-        if (!TryGetSingletonEntity<NetworkStreamConnection>(out var connectionEntity))
+        if (!SystemAPI.TryGetSingletonEntity<NetworkStreamConnection>(out var connectionEntity))
             UIBehaviour.ConnectionStatus = "Not connected";
         else if (!EntityManager.HasComponent<NetworkIdComponent>(connectionEntity))
         {
             var connection = EntityManager.GetComponentData<NetworkStreamConnection>(connectionEntity);
-            UIBehaviour.ConnectionStatus = $"Connecting to {GetSingletonRW<NetworkStreamDriver>().ValueRO.GetRemoteEndPoint(connection).Address}";
+            UIBehaviour.ConnectionStatus = $"Connecting to { SystemAPI.GetSingletonRW<NetworkStreamDriver>().ValueRO.GetRemoteEndPoint(connection).Address }";
         }
         else
             UIBehaviour.ConnectionStatus = "";

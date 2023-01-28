@@ -175,7 +175,8 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
         
         StandardRaycastWeaponRemoteShotsJob remoteShotsJob = new StandardRaycastWeaponRemoteShotsJob
         {
-            LocalNetId = localNetId, 
+            LocalNetId = localNetId,
+            NetworkTime = SystemAPI.GetSingleton<NetworkTime>(),
             CollisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld,
             LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
             StoredKinematicCharacterDataLookup = SystemAPI.GetComponentLookup<StoredKinematicCharacterData>(true),
@@ -195,6 +196,7 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
     public partial struct StandardRaycastWeaponRemoteShotsJob : IJobEntity
     {
         public int LocalNetId;
+        public NetworkTime NetworkTime;
         public CollisionWorld CollisionWorld;
         [ReadOnly]
         public ComponentLookup<LocalToWorld> LocalToWorldLookup;
@@ -231,7 +233,7 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
                         out RaycastHit closestValidHit,
                         ref shotVFXRequestsBuffer,
                         false,
-                        true);
+                        NetworkTime.IsFirstTimeFullyPredictingTick);
 
                     weaponFeedback.ShotFeedbackRequests++;
                 }

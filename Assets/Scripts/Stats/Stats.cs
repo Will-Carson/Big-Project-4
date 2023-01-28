@@ -385,6 +385,7 @@ public struct CombinedStatResultsContainer : IBufferElementData
     public Entity entity;
 }
 
+[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(StatRecalculationSystemGroup))]
 [UpdateBefore(typeof(StatRecalculationTagCleanUpSystem))]
 public class CustomStatHandlingSystemGroup : ComponentSystemGroup

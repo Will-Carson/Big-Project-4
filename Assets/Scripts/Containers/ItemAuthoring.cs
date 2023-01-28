@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ItemAuthoring : MonoBehaviour
 {
-    class Baker : Baker<ItemAuthoring>
+    class ItemAuthoringBaker : Baker<ItemAuthoring>
     {
         public override void Bake(ItemAuthoring authoring)
         {
