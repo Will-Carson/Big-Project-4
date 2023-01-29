@@ -35,6 +35,11 @@ public struct StandardRaycastWeapon : IComponentData, IEnableableComponent
 public struct StandardRaycastWeaponShotVFXRequest : IBufferElementData
 {
     public StandardRaycastWeaponShotVisualsData ShotVisualsData;
+
+    public StandardRaycastWeaponShotVFXRequest(StandardRaycastWeaponShotVisualsData data)
+    {
+        ShotVisualsData = data;
+    }
 }
 
 [Serializable]

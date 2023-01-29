@@ -113,7 +113,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FiringMecanism:
-    AutoFire: 1
+    AutoFire: 0
     FiringRate: 2
   VisualFeedback:
     WeaponBobHAmount: 0.08

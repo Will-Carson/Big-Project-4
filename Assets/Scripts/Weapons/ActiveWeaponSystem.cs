@@ -117,13 +117,7 @@ public partial class WeaponMovementSystem : SystemBase
 
             CharacterControlUtilities.SlerpRotationTowardsDirection(ref weaponTransform.Rotation, deltaTime, math.normalizesafe(characterControl.LookVector), float.MaxValue);
 
-            weaponTransform.Position += math.mul(weaponTransform.Rotation, new float3(1, .5f, .5f));
-            //transform = new LocalTransform
-            //{
-            //    Position = weaponTransform.Position,
-            //    Rotation = weaponTransform.Rotation,
-            //    Scale = weaponTransform.Scale
-            //};
+            weaponTransform.Position += math.mul(weaponTransform.Rotation, new float3(.5f, 1, 1));
             localTransformLookup[entity] = weaponTransform;
         })
         .Run();

@@ -167,13 +167,13 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        int localNetId = -1;
+        var localNetId = -1;
         if (SystemAPI.HasSingleton<NetworkIdComponent>())
         {
             localNetId = SystemAPI.GetSingleton<NetworkIdComponent>().Value;
         }
         
-        StandardRaycastWeaponRemoteShotsJob remoteShotsJob = new StandardRaycastWeaponRemoteShotsJob
+        var remoteShotsJob = new StandardRaycastWeaponRemoteShotsJob
         {
             LocalNetId = localNetId,
             NetworkTime = SystemAPI.GetSingleton<NetworkTime>(),
@@ -184,7 +184,7 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
         };
         remoteShotsJob.Schedule();
 
-        StandardRaycastWeaponShotVisualsJob visualsJob = new StandardRaycastWeaponShotVisualsJob
+        var visualsJob = new StandardRaycastWeaponShotVisualsJob
         {
             ECB = SystemAPI.GetSingletonRW<PostPredictionPreTransformsECBSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged),
             CharacterWeaponVisualFeedbackLookup = SystemAPI.GetComponentLookup<CharacterWeaponVisualFeedback>(false),

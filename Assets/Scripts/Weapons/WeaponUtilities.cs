@@ -113,9 +113,13 @@ public static class WeaponUtilities
                 hitDistance = closestValidHit.Fraction * weapon.Range;
                 hitFound = true;
             }
+
+            // No need to do visuals on resimulated ticks
+            if (IsFirstTimeFullyPredictingTick)
+                return;
     
             // Shot visuals
-            if (!IsServer && IsFirstTimeFullyPredictingTick)
+            if (!IsServer)
             {
                 var shotVisualOriginLtW = LocalToWorldLookup[weapon.ShotOrigin];
     
@@ -125,19 +129,18 @@ public static class WeaponUtilities
                     visualOriginToSimulationHit = closestValidHit.Position - shotVisualOriginLtW.Position;
                 }
 
-                shotVisualsRequests.Add(new StandardRaycastWeaponShotVFXRequest
-                {
-                    ShotVisualsData = new StandardRaycastWeaponShotVisualsData
-                    {
-                        VisualOrigin = shotVisualOriginLtW.Position,
-                        SimulationOrigin = shotSimulationOriginLtW.Position,
-                        SimulationDirection = finalShotSimulationDirection,
-                        SimulationUp = shotSimulationOriginLtW.Up,
-                        SimulationHitDistance = hitDistance,
-                        Hit = closestValidHit,
-                        VisualOriginToHit = visualOriginToSimulationHit,
-                    }
-                });
+                shotVisualsRequests.Add(new StandardRaycastWeaponShotVFXRequest(
+                    new StandardRaycastWeaponShotVisualsData
+                        {
+                            VisualOrigin = shotVisualOriginLtW.Position,
+                            SimulationOrigin = shotSimulationOriginLtW.Position,
+                            SimulationDirection = finalShotSimulationDirection,
+                            SimulationUp = shotSimulationOriginLtW.Up,
+                            SimulationHitDistance = hitDistance,
+                            Hit = closestValidHit,
+                            VisualOriginToHit = visualOriginToSimulationHit,
+                        })
+                    );
             }
         }
     }
