@@ -19,7 +19,7 @@ public struct SwimmingState : IPlatformerCharacterState
         ref KinematicCharacterProperties characterProperties = ref aspect.CharacterAspect.CharacterProperties.ValueRW;
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
 
-        aspect.SetCapsuleGeometry(character.SwimmingGeometry.ToCapsuleGeometry());
+        //aspect.SetCapsuleGeometry(character.SwimmingGeometry.ToCapsuleGeometry());
 
         characterProperties.SnapToGround = false;
         characterBody.IsGrounded = false;

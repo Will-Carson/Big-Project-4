@@ -10,7 +10,7 @@ public struct CrouchedState : IPlatformerCharacterState
     {
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
 
-        aspect.SetCapsuleGeometry(character.CrouchingGeometry.ToCapsuleGeometry());
+        //aspect.SetCapsuleGeometry(character.CrouchingGeometry.ToCapsuleGeometry());
     }
 
     public void OnStateExit(CharacterState nextState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)

@@ -18,7 +18,7 @@ public struct ClimbingState : IPlatformerCharacterState
         ref KinematicCharacterProperties characterProperties = ref aspect.CharacterAspect.CharacterProperties.ValueRW;
         ref quaternion characterRotation = ref aspect.CharacterAspect.LocalTransform.ValueRW.Rotation;
         
-        aspect.SetCapsuleGeometry(character.ClimbingGeometry.ToCapsuleGeometry());
+        //aspect.SetCapsuleGeometry(character.ClimbingGeometry.ToCapsuleGeometry());
 
         characterProperties.EvaluateGrounding = false;
         characterProperties.DetectMovementCollisions = false;
@@ -177,9 +177,9 @@ public struct ClimbingState : IPlatformerCharacterState
     {
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
         
-        aspect.SetCapsuleGeometry(character.ClimbingGeometry.ToCapsuleGeometry());
+        //aspect.SetCapsuleGeometry(character.ClimbingGeometry.ToCapsuleGeometry());
         bool canStart = ClimbingDetection(ref context, ref baseContext, in aspect, false, out float3 avgClimbingSurfaceNormal, out DistanceHit closestClimbableHit, out DistanceHit closestUnclimbableHit);
-        aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
+        //aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
 
         return canStart;
     }

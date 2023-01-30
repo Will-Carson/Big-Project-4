@@ -9,7 +9,7 @@ public struct AirMoveState : IPlatformerCharacterState
     {
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
         
-        aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
+        //aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
     }
 
     public void OnStateExit(CharacterState nextState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)

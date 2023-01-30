@@ -9,7 +9,7 @@ public struct GroundMoveState : IPlatformerCharacterState
     public void OnStateEnter(CharacterState previousState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
-        aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
+        //aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
     }
 
     public void OnStateExit(CharacterState nextState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)

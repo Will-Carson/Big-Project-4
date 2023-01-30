@@ -12,7 +12,7 @@ public struct FlyingNoCollisionsState : IPlatformerCharacterState
         ref KinematicCharacterProperties characterProperties = ref aspect.CharacterAspect.CharacterProperties.ValueRW;
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
         
-        aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
+        //aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
         
         aspect.SetCollisionResponse(CollisionResponsePolicy.None);
         characterProperties.EvaluateGrounding = false;

@@ -13,7 +13,7 @@ public struct RollingState : IPlatformerCharacterState
         ref KinematicCharacterProperties characterProperties = ref aspect.CharacterAspect.CharacterProperties.ValueRW;
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
         
-        aspect.SetCapsuleGeometry(character.RollingGeometry.ToCapsuleGeometry());
+        //aspect.SetCapsuleGeometry(character.RollingGeometry.ToCapsuleGeometry());
         characterProperties.EvaluateGrounding = false;
         characterBody.IsGrounded = false;
 

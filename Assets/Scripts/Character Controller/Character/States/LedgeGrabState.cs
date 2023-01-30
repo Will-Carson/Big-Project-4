@@ -17,7 +17,7 @@ public struct LedgeGrabState : IPlatformerCharacterState
         ref KinematicCharacterProperties characterProperties = ref aspect.CharacterAspect.CharacterProperties.ValueRW;
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
         
-        aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
+        //aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
         
         characterProperties.EvaluateGrounding = false;
         characterProperties.DetectMovementCollisions = false;

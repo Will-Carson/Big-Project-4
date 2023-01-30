@@ -18,7 +18,7 @@ public struct DashingState : IPlatformerCharacterState
         ref quaternion characterRotation = ref aspect.CharacterAspect.LocalTransform.ValueRW.Rotation;
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
         
-        aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
+        //aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
         
         _dashStartTime = elapsedTime;
         characterProperties.EvaluateGrounding = false;
