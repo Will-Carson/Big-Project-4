@@ -117,7 +117,7 @@ public static class WeaponUtilities
             // No need to do visuals on resimulated ticks
             if (IsFirstTimeFullyPredictingTick)
                 return;
-    
+
             // Shot visuals
             if (!IsServer)
             {

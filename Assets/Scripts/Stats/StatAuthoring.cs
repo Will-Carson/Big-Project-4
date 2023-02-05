@@ -18,9 +18,11 @@ using System;
 /// "Rifle/Fire" damage. It cannot accept "Rifle/Ice" damage, or "Pistol/Fire" damage or any
 /// other variant. 
 /// </summary>
-public static class StatDefinitions
+
+[UpdateInGroup(typeof(InitializationSystemGroup))]
+public partial class StatDefinitions : SystemBase
 {
-    public static StatAuthoring[] StatAuthorings = new StatAuthoring[]
+    public StatAuthoring[] StatAuthorings = new StatAuthoring[]
     {
         // Projectile bounces
         new StatAuthoring
@@ -392,93 +394,87 @@ public static class StatDefinitions
         },
     };
 
-    public static readonly NativeHashMap<int, StatFlavorFlag> StatToStatFlavorFlags = new NativeHashMap<int, StatFlavorFlag>(StatAuthorings.Length, Allocator.Persistent);
-    public static readonly NativeHashMap<int, StatType> StatToStatType = new NativeHashMap<int, StatType>(StatAuthorings.Length, Allocator.Persistent);
-    private static bool initialized = false;
-    public static void Initialize()
-    {
-        if (initialized) return;
-
-        for (var i = 0; i < StatAuthorings.Length; i++)
-        {
-            var statAuthoring = StatAuthorings[i];
-
-            StatToStatFlavorFlags.Add((int)statAuthoring.stat, statAuthoring.flags);
-            StatToStatType.Add((int)statAuthoring.stat, statAuthoring.combinedStat);
-        }
-
-        initialized = true;
-    }
-
-    private static bool destroyed = false;
-    public static void OnDestroy()
-    {
-        if (destroyed) return;
-
-        StatToStatFlavorFlags.Dispose();
-        StatToStatType.Dispose();
-
-        destroyed = true;
-    }
-
-    public static void TotalStatsWithFlavor(in DynamicBuffer<StatContainer> stats, StatFlavorFlag inputFlavorFlags, ref NativeHashMap<int, int> results)
-    {
-        /// Iterate over stat keys, 
-        /// iterate over matches.
-        /// Get the matching tags from the StatMatchesTags dictionary.
-        /// If every tag from the StatMatchesTags dictionary is in the matches array, add the value to the results dictionary
-        /// based on the StatGrantsTags dictionary.
-        for (var i = 0; i < stats.Length; i++)
-        {
-            var stat = (int)stats[i].stat;
-
-            /// Iterate over the stats StatMatchesTags
-            /// if the input StatFlavorFlag does not contain one of that stats StatFlavorFlag
-            /// i.e., if the stat applies to Fire attacks and the input StatFlavorFlag are for Ice attacks,
-            /// we will skip this stat. Otherwise we will add it to the results.
-            if (!StatToStatFlavorFlags.TryGetValue(stat, out var statFlavorFlags))
-            {
-                continue;
-            }
-
-            /// If every '1' flag in the stats flavor flags is present in the input flavor flags, then proceed. 
-            if ((statFlavorFlags & inputFlavorFlags) != statFlavorFlags)
-            {
-                continue;
-            }
-
-            if (!StatToStatType.TryGetValue(stat, out var grants))
-            {
-                continue;
-            }
-
-            // Combine the stat into the hashmap.
-            if (results.TryGetValue((int)grants, out var value))
-            {
-                results[(int)grants] = value + stats[i].value;
-            }
-            else
-            {
-                results.Add((int)grants, stats[i].value);
-            }
-        }
-    }
-}
-
-[UpdateInGroup(typeof(InitializationSystemGroup))]
-public partial class StatSetupSystem : SystemBase
-{
     protected override void OnCreate()
     {
-        StatDefinitions.Initialize();
+        var singletonEntity = World.EntityManager.CreateEntity();
+        World.EntityManager.AddComponentData(singletonEntity, new Singleton(StatAuthorings));
     }
 
     protected override void OnDestroy()
     {
-        StatDefinitions.OnDestroy();
+        SystemAPI.GetSingleton<Singleton>().OnDestroy();
     }
 
     protected override void OnUpdate() { }
+
+    public struct Singleton : IComponentData
+    {
+        public NativeHashMap<int, StatFlavorFlag> StatToStatFlavorFlags;
+        public NativeHashMap<int, StatType> StatToStatType;
+
+        public Singleton(StatAuthoring[] StatAuthorings)
+        {
+            StatToStatFlavorFlags = new NativeHashMap<int, StatFlavorFlag>(StatAuthorings.Length, Allocator.Persistent);
+            StatToStatType = new NativeHashMap<int, StatType>(StatAuthorings.Length, Allocator.Persistent);
+
+            for (var i = 0; i < StatAuthorings.Length; i++)
+            {
+                var statAuthoring = StatAuthorings[i];
+
+                StatToStatFlavorFlags.Add((int)statAuthoring.stat, statAuthoring.flags);
+                StatToStatType.Add((int)statAuthoring.stat, statAuthoring.combinedStat);
+            }
+        }
+
+        public void OnDestroy()
+        {
+            StatToStatFlavorFlags.Dispose();
+            StatToStatType.Dispose();
+        }
+
+        public void TotalStatsWithFlavor(in DynamicBuffer<StatContainer> stats, StatFlavorFlag inputFlavorFlags, ref NativeHashMap<int, int> results)
+        {
+            /// Iterate over stat keys, 
+            /// iterate over matches.
+            /// Get the matching tags from the StatMatchesTags dictionary.
+            /// If every tag from the StatMatchesTags dictionary is in the matches array, add the value to the results dictionary
+            /// based on the StatGrantsTags dictionary.
+            for (var i = 0; i < stats.Length; i++)
+            {
+                var stat = (int)stats[i].stat;
+
+                /// Iterate over the stats StatMatchesTags
+                /// if the input StatFlavorFlag does not contain one of that stats StatFlavorFlag
+                /// i.e., if the stat applies to Fire attacks and the input StatFlavorFlag are for Ice attacks,
+                /// we will skip this stat. Otherwise we will add it to the results.
+                if (!StatToStatFlavorFlags.TryGetValue(stat, out var statFlavorFlags))
+                {
+                    continue;
+                }
+
+                /// If every '1' flag in the stats flavor flags is present in the input flavor flags, then proceed. 
+                if ((statFlavorFlags & inputFlavorFlags) != statFlavorFlags)
+                {
+                    continue;
+                }
+
+                if (!StatToStatType.TryGetValue(stat, out var grants))
+                {
+                    continue;
+                }
+
+                // Combine the stat into the hashmap.
+                if (results.TryGetValue((int)grants, out var value))
+                {
+                    results[(int)grants] = value + stats[i].value;
+                }
+                else
+                {
+                    results.Add((int)grants, stats[i].value);
+                }
+            }
+        }
+    }
 }
 
 public struct StatAuthoring
@@ -488,30 +484,30 @@ public struct StatAuthoring
     public StatType combinedStat;
 }
 
-[Flags] 
+[Flags]
 public enum StatFlavorFlag
 {
-    Uninitialized       = 0,
+    Uninitialized = 0,
 
-    General             = 1 << 0,
+    General = 1 << 0,
 
-    WeaponsBallistic    = 1 << 1,
-    WeaponsEnergy       = 1 << 2,
-    WeaponsAutomatic    = 1 << 3,
-    WeaponsRifle        = 1 << 4,
-    WeaponsShotgun      = 1 << 5,
-    WeaponsBeam         = 1 << 6,
+    WeaponsBallistic = 1 << 1,
+    WeaponsEnergy = 1 << 2,
+    WeaponsAutomatic = 1 << 3,
+    WeaponsRifle = 1 << 4,
+    WeaponsShotgun = 1 << 5,
+    WeaponsBeam = 1 << 6,
 
-    Weapons1H           = 1 << 7,
-    Weapons2H           = 1 << 8,
+    Weapons1H = 1 << 7,
+    Weapons2H = 1 << 8,
 
-    Physical            = 1 << 9,
-    Thermal             = 1 << 10,
-    Cryo                = 1 << 11,
-    Electricity         = 1 << 12,
-    Chaos               = 1 << 13,
+    Physical = 1 << 9,
+    Thermal = 1 << 10,
+    Cryo = 1 << 11,
+    Electricity = 1 << 12,
+    Chaos = 1 << 13,
 
-    OverTime            = 1 << 14,
+    OverTime = 1 << 14,
 }
 
 public enum StatType

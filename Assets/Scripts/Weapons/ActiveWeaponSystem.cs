@@ -84,8 +84,6 @@ public partial struct ActiveWeaponSystem : ISystem
 
 }
 
-[UpdateInGroup(typeof(PredictedFixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(PhysicsSystemGroup))]
 [BurstCompile]
 public partial class WeaponMovementSystem : SystemBase
 {
@@ -113,12 +111,14 @@ public partial class WeaponMovementSystem : SystemBase
 
             var characterControl = SystemAPI.GetComponent<PlatformerCharacterControl>(owner.Entity);
             var weaponSocketEntity = SystemAPI.GetComponent<PlatformerCharacterComponent>(owner.Entity).WeaponAnimationSocketEntity;
-            var weaponTransform = SystemAPI.GetComponent<LocalTransform>(owner.Entity);
+            var characterTransform = SystemAPI.GetComponent<LocalTransform>(owner.Entity);
 
-            CharacterControlUtilities.SlerpRotationTowardsDirection(ref weaponTransform.Rotation, deltaTime, math.normalizesafe(characterControl.LookVector), float.MaxValue);
+            CharacterControlUtilities.SlerpRotationTowardsDirection(ref transform.Rotation, deltaTime, math.normalizesafe(characterControl.LookVector), float.MaxValue);
 
-            weaponTransform.Position += math.mul(weaponTransform.Rotation, new float3(.5f, 1, 1));
-            localTransformLookup[entity] = weaponTransform;
+            var targetPosition = characterTransform.Position + math.mul(characterTransform.Rotation, new float3(.5f, 1, 1));
+            transform.Position = math.lerp(transform.Position, targetPosition, 1);
+
+            localTransformLookup[entity] = transform;
         })
         .Run();
     }

@@ -13,6 +13,7 @@ public struct PlatformerCharacterUpdateContext
     public EntityCommandBuffer.ParallelWriter EndFrameECB;
     [ReadOnly] public ComponentLookup<CharacterFrictionModifier> CharacterFrictionModifierLookup;
     [ReadOnly] public BufferLookup<LinkedEntityGroup> LinkedEntityGroupLookup;
+    [ReadOnly] public ComponentLookup<WeaponVisualFeedback> WeaponVisualFeedbackLookup;
     [ReadOnly] public ComponentLookup<WeaponControl> WeaponControlLookup;
     [ReadOnly] public ComponentLookup<InterpolationDelay> InterpolationDelayLookup;
 
@@ -25,6 +26,7 @@ public struct PlatformerCharacterUpdateContext
     {
         CharacterFrictionModifierLookup = state.GetComponentLookup<CharacterFrictionModifier>(true);
         LinkedEntityGroupLookup = state.GetBufferLookup<LinkedEntityGroup>(true);
+        WeaponVisualFeedbackLookup = state.GetComponentLookup<WeaponVisualFeedback>(true);
         WeaponControlLookup = state.GetComponentLookup<WeaponControl>(true);
         InterpolationDelayLookup = state.GetComponentLookup<InterpolationDelay>(true);
     }
@@ -34,6 +36,7 @@ public struct PlatformerCharacterUpdateContext
         EndFrameECB = endFrameECB.AsParallelWriter();
         CharacterFrictionModifierLookup.Update(ref state);
         LinkedEntityGroupLookup.Update(ref state);
+        WeaponVisualFeedbackLookup.Update(ref state);
         WeaponControlLookup.Update(ref state);
         InterpolationDelayLookup.Update(ref state);
     }

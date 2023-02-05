@@ -263,8 +263,6 @@ public partial struct DerivedStatHandlerSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         derivedStatsLookup = state.GetBufferLookup<DerivedStat>(true);
-
-        state.RequireAnyForUpdate(state.GetEntityQuery(typeof(StatRecalculationTag)));
     }
 
     [BurstCompile]
@@ -341,6 +339,7 @@ public partial class CombinedStatCalculationSystem : SystemBase
     protected override void OnUpdate()
     {
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+        var statDefinitions = SystemAPI.GetSingleton<StatDefinitions.Singleton>();
 
         // Build StatContainers on CombinedStatResultContainers.
         Entities
@@ -357,7 +356,7 @@ public partial class CombinedStatCalculationSystem : SystemBase
                 var combinedStatBuffer = commandBuffer.AddBuffer<StatContainer>(combinedStatResult.entity);
 
                 var statResults = new NativeHashMap<int, int>(100, Allocator.Temp);
-                StatDefinitions.TotalStatsWithFlavor(stats, combinedStatResult.statFlavorFlags, ref statResults);
+                statDefinitions.TotalStatsWithFlavor(stats, combinedStatResult.statFlavorFlags, ref statResults);
 
                 var statResultsEnum = statResults.GetEnumerator();
 
@@ -409,8 +408,6 @@ public partial struct StatRecalculationTagCleanUpSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         equippedToLookup = state.GetBufferLookup<EquippedTo>();
-
-        state.RequireAnyForUpdate(state.GetEntityQuery(typeof(StatRecalculationTag)));
     }
 
     [BurstCompile]

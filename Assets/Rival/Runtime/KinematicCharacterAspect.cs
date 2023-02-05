@@ -1042,6 +1042,13 @@ namespace Rival
             var input = new ColliderCastInput(characterPhysicsCollider.Value, characterPosition, characterPosition + (-characterBody.GroundingUp * groundProbingLength), characterRotation);
             baseContext.TmpColliderCastHits.Clear();
             var collector = new AllHitsCollector<ColliderCastHit>(1f, ref baseContext.TmpColliderCastHits);
+
+            if (!characterPhysicsCollider.IsValid)
+            {
+                UnityEngine.Debug.LogWarning("Character physics collider is not valid.");
+                return;
+            }
+
             baseContext.PhysicsWorld.CastCollider(input, ref collector);
 
             if (FilterColliderCastHitsForGroundProbing(in processor, ref context, ref baseContext, ref baseContext.TmpColliderCastHits, -characterBody.GroundingUp, characterProperties.ShouldIgnoreDynamicBodies(), out ColliderCastHit closestHit))
