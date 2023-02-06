@@ -56,6 +56,8 @@ public class PlatformerCharacterAuthoring : MonoBehaviour
 
             AddComponent(new ActiveWeapon());
             AddComponent(new CharacterWeaponVisualFeedback());
+
+            AddComponent(new Health { currentHealth = 10000, maxHealth = 10000 });
         }
     }
 

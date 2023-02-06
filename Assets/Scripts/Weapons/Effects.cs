@@ -25,7 +25,7 @@ public partial class EffectSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        var damageResourceEffectLookup = SystemAPI.GetComponentLookup<DamageHealthEffect>();
+        var healthLookup = SystemAPI.GetComponentLookup<Health>();
 
         Entities
         .ForEach((
@@ -34,6 +34,17 @@ public partial class EffectSystem : SystemBase
         in DamageHealthEffect damageEffect) =>
         {
             /// 
+
+            for (var i = 0; i < applyToEntityBuffer.Length; i++)
+            {
+                var targetEntity = applyToEntityBuffer[i].entity;
+
+                if (healthLookup.TryGetComponent(targetEntity, out var targetHealth))
+                {
+                    targetHealth.currentHealth -= damageEffect.damageValue;
+                    healthLookup[targetEntity] = targetHealth;
+                }
+            }
 
             applyToEntityBuffer.Clear();
         })
@@ -76,4 +87,10 @@ public struct ApplyEffectToEntityBuffer : IBufferElementData
 public struct ApplyEffectAtPositionBuffer : IBufferElementData
 {
     public float3 position;
+}
+
+public struct Health : IComponentData
+{
+    public int maxHealth;
+    public int currentHealth;
 }

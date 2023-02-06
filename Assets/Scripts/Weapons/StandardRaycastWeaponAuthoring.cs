@@ -40,7 +40,16 @@ public class StandardRaycastWeaponAuthoring : MonoBehaviour
             });
             AddComponent<InterpolationDelay>();
             AddBuffer<StandardRaycastWeaponShotVFXRequest>();
-            AddBuffer<EffectBuffer>();
+
+            var damageEffectEntity = CreateAdditionalEntity();
+            AddComponent(damageEffectEntity, new DamageHealthEffect { damageValue = authoring.Damage });
+            AddBuffer<ApplyEffectToEntityBuffer>(damageEffectEntity);
+
+            var effects = AddBuffer<EffectBuffer>();
+            effects.Add(new EffectBuffer
+            {
+                entity = damageEffectEntity
+            });
         }
     }
 }

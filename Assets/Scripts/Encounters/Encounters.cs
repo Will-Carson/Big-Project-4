@@ -42,7 +42,7 @@ public struct PlatformerMonsterInputs : IComponentData
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 public partial class MonsterSpawningSystem : SystemBase
 {
-    int maxMonsters = 10;
+    int maxMonsters = 1;
     Random random;
 
     protected override void OnCreate()
@@ -54,7 +54,7 @@ public partial class MonsterSpawningSystem : SystemBase
     {
         var monsterQuery = GetEntityQuery(typeof(PlatformerMonster));
 
-        if (monsterQuery.CalculateEntityCount() > maxMonsters)
+        if (monsterQuery.CalculateEntityCount() >= maxMonsters)
         {
             return;
         }
@@ -72,7 +72,9 @@ public partial class MonsterSpawningSystem : SystemBase
         var spawnPosition = new float3(1, 0, 0);
         spawnPosition = math.mul(random.NextQuaternionRotation(), spawnPosition);
         spawnPosition *= random.NextFloat(0, 40);
+        spawnPosition.y = 0;
 
         commandBuffer.SetComponent(characterInstance, LocalTransform.FromPosition(spawnPosition));
+        commandBuffer.SetComponent(monsterInstance, new PlatformerMonster { ControlledCharacter = characterInstance });
     }
 }

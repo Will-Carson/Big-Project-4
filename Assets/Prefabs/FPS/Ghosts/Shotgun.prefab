@@ -137,7 +137,7 @@ MonoBehaviour:
     type: 3}
   Range: 1000
   Damage: 1000
-  SpreadDegrees: 8
+  SpreadDegrees: 5
   ProjectilesCount: 10
   HitCollisionFilter:
     Category00: 1

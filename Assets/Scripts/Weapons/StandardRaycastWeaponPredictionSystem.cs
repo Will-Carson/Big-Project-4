@@ -18,6 +18,7 @@ using RaycastHit = Unity.Physics.RaycastHit;
 public partial struct StandardRaycastWeaponPredictionSystem : ISystem
 {
     private NativeList<RaycastHit> _hits;
+    private NativeList<RaycastHit> _validHits;
     
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -27,15 +28,14 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
         state.RequireForUpdate(SystemAPI.QueryBuilder().WithAll<StandardRaycastWeapon, StandardWeaponFiringMecanism>().Build());
 
         _hits = new NativeList<RaycastHit>(Allocator.Persistent);
+        _validHits = new NativeList<RaycastHit>(Allocator.Persistent);
     }
 
     [BurstCompile]
     public void OnDestroy(ref SystemState state)
     {
-        if (_hits.IsCreated)
-        {
-            _hits.Dispose();
-        }
+        _hits.Dispose();
+        _validHits.Dispose();
     }
 
     [BurstCompile]
@@ -43,13 +43,16 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
     {
         StandardRaycastWeaponPredictionJob predictionJob = new StandardRaycastWeaponPredictionJob
         {
+            commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged),
             IsServer = state.WorldUnmanaged.IsServer(), 
+            
             NetworkTime = SystemAPI.GetSingleton<NetworkTime>(),
             PhysicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld,
             PhysicsWorldHistory = SystemAPI.GetSingleton<PhysicsWorldHistorySingleton>(),
             LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
             StoredKinematicCharacterDataLookup = SystemAPI.GetComponentLookup<StoredKinematicCharacterData>(true),
             Hits = _hits,
+            validHits = _validHits,
 
             applyEffectToEntityBufferLookup = SystemAPI.GetBufferLookup<ApplyEffectToEntityBuffer>(false),
             applyEffectAtPositionBufferLookup = SystemAPI.GetBufferLookup<ApplyEffectAtPositionBuffer>(false),
@@ -61,6 +64,7 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
     [WithAll(typeof(Simulate))]
     public partial struct StandardRaycastWeaponPredictionJob : IJobEntity
     {
+        public EntityCommandBuffer commandBuffer;
         public bool IsServer;
         public NetworkTime NetworkTime;
         [ReadOnly] public PhysicsWorld PhysicsWorld;
@@ -68,6 +72,7 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
         [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorldLookup;
         [ReadOnly] public ComponentLookup<StoredKinematicCharacterData> StoredKinematicCharacterDataLookup;
         public NativeList<RaycastHit> Hits;
+        public NativeList<RaycastHit> validHits;
 
         public BufferLookup<ApplyEffectToEntityBuffer> applyEffectToEntityBufferLookup;
         public BufferLookup<ApplyEffectAtPositionBuffer> applyEffectAtPositionBufferLookup;
@@ -85,53 +90,64 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
         {
             PhysicsWorldHistory.GetCollisionWorldFromTick(NetworkTime.ServerTick, interpolationDelay.Value, ref PhysicsWorld, out var collisionWorld);
             
+            /// Here we loop based on the ShotsToFire, which causes our damage effect to only apply once because we're not looping over the shots.
+            /// We need to separate out the functionality here so that we can calculate individual shots in ComputeShotDetails.
             for (int i = 0; i < mecanism.ShotsToFire; i++)
             {
-                WeaponUtilities.ComputeShotDetails(
-                    ref weapon, 
-                    in shotSimulationOriginOverride,
-                    in ignoredEntities,
-                    ref Hits,
-                    in collisionWorld,
-                    in LocalToWorldLookup,
-                    in StoredKinematicCharacterDataLookup,
-                    out bool hitFound,
-                    out RaycastHit closestValidHit,
-                    ref shotVFXRequestsBuffer,
-                    IsServer,
-                    NetworkTime.IsFirstTimeFullyPredictingTick);
-
-                // Damage
-                if (IsServer && hitFound)
+                for (var shot = 0; shot < weapon.ProjectilesCount; shot++)
                 {
-                    /// The weapon will have an associated buffer of effects
-                    /// Effects are entities with a buffer of entities / positions that the effect might be applied to
-                    /// This avoids making new entities any time we want to apply an effect
+                    WeaponUtilities.ComputeShotDetails(
+                        ref weapon,
+                        in shotSimulationOriginOverride,
+                        in ignoredEntities,
+                        ref Hits,
+                        ref validHits,
+                        in collisionWorld,
+                        in LocalToWorldLookup,
+                        in StoredKinematicCharacterDataLookup,
+                        ref shotVFXRequestsBuffer,
+                        IsServer,
+                        NetworkTime.IsFirstTimeFullyPredictingTick);
 
-                    for (var j = 0; j < effectBuffer.Length; j++)
+                    // Damage
+                    if (IsServer && Hits.Length > 0)
                     {
-                        var effect = effectBuffer[j];
-
-                        if (applyEffectToEntityBufferLookup.TryGetBuffer(effect.entity, out var applyToEntityBuffer))
+                        /// The weapon will have an associated buffer of effects
+                        /// Effects are entities with a buffer of entities / positions that the effect might be applied to
+                        /// This avoids making new entities any time we want to apply an effect
+                        
+                        for (var k = 0; k < Hits.Length; k++)
                         {
-                            applyToEntityBuffer.Add(new ApplyEffectToEntityBuffer { entity = closestValidHit.Entity });
-                        }
+                            var hitEntity = Hits[k].Entity;
 
-                        if (applyEffectAtPositionBufferLookup.TryGetBuffer(effect.entity, out var applyAtPositionBuffer))
-                        {
-                            applyAtPositionBuffer.Add(new ApplyEffectAtPositionBuffer { position = closestValidHit.Position });
+                            if (hitEntity == Entity.Null) continue;
+
+                            for (var j = 0; j < effectBuffer.Length; j++)
+                            {
+                                var effect = effectBuffer[j];
+
+                                if (applyEffectToEntityBufferLookup.TryGetBuffer(effect.entity, out var applyToEntityBuffer))
+                                {
+                                    commandBuffer.AppendToBuffer(effect.entity, new ApplyEffectToEntityBuffer { entity = hitEntity });
+                                }
+
+                                if (applyEffectAtPositionBufferLookup.TryGetBuffer(effect.entity, out var applyAtPositionBuffer))
+                                {
+                                    commandBuffer.AppendToBuffer(effect.entity, new ApplyEffectAtPositionBuffer { position = Hits[k].Position });
+                                }
+                            }
                         }
                     }
-                }
-                
-                // Recoil & FOV kick
-                if (IsServer)
-                {
-                    weapon.RemoteShotsCount++;
-                }
-                else if (NetworkTime.IsFirstTimeFullyPredictingTick)
-                {
-                    weaponFeedback.ShotFeedbackRequests++;
+
+                    // Recoil & FOV kick
+                    if (IsServer)
+                    {
+                        weapon.RemoteShotsCount++;
+                    }
+                    else if (NetworkTime.IsFirstTimeFullyPredictingTick)
+                    {
+                        weaponFeedback.ShotFeedbackRequests++;
+                    }
                 }
             }
         }
@@ -144,7 +160,8 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
 public partial struct StandardRaycastWeaponVisualsSystem : ISystem
 {
     private NativeList<RaycastHit> _hits;
-    
+    private NativeList<RaycastHit> _validHits;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
@@ -153,15 +170,14 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
         state.RequireForUpdate(SystemAPI.QueryBuilder().WithAll<StandardRaycastWeapon, StandardWeaponFiringMecanism>().Build());
 
         _hits = new NativeList<RaycastHit>(Allocator.Persistent);
+        _validHits = new NativeList<RaycastHit>(Allocator.Persistent);
     }
 
     [BurstCompile]
     public void OnDestroy(ref SystemState state)
     {
-        if (_hits.IsCreated)
-        {
-            _hits.Dispose();
-        }
+        _hits.Dispose();
+        _validHits.Dispose();
     }
 
     [BurstCompile]
@@ -181,6 +197,7 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
             LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
             StoredKinematicCharacterDataLookup = SystemAPI.GetComponentLookup<StoredKinematicCharacterData>(true),
             Hits = _hits,
+            validHits = _validHits,
         };
         remoteShotsJob.Schedule();
 
@@ -203,6 +220,7 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
         [ReadOnly]
         public ComponentLookup<StoredKinematicCharacterData> StoredKinematicCharacterDataLookup;
         public NativeList<RaycastHit> Hits;
+        public NativeList<RaycastHit> validHits;
 
         void Execute(
             Entity entity, 
@@ -221,16 +239,15 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
 
                 for (int i = 0; i < shotsToProcess; i++)
                 {
-                    WeaponUtilities.ComputeShotDetails(
+                    WeaponUtilities.ComputeMultishotDetails(
                         ref weapon,
                         in shotSimulationOriginOverride,
                         in ignoredEntities,
                         ref Hits,
+                        ref validHits,
                         in CollisionWorld,
                         in LocalToWorldLookup,
                         in StoredKinematicCharacterDataLookup,
-                        out bool hitFound,
-                        out RaycastHit closestValidHit,
                         ref shotVFXRequestsBuffer,
                         false,
                         NetworkTime.IsFirstTimeFullyPredictingTick);
