@@ -73,7 +73,7 @@ public partial struct GoInGameServerSystem : ISystem
         var playerPrefab = PrefabContainer.GetEntityWithId(prefabs, "PlatformerPlayer");
         var characterPrefab = PrefabContainer.GetEntityWithId(prefabs, "PlatformerCharacter");
         var itemPrefab = PrefabContainer.GetEntityWithId(prefabs, "Item");
-        var weaponPrefab = PrefabContainer.GetEntityWithId(prefabs, "Shotgun");
+        var weaponPrefab = PrefabContainer.GetEntityWithId(prefabs, "BeamGun");
         state.EntityManager.GetName(playerPrefab, out var prefabName);
         var worldName = new FixedString32Bytes(state.WorldUnmanaged.Name);
 

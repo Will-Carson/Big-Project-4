@@ -135,9 +135,11 @@ MonoBehaviour:
   ShotOrigin: {fileID: 3510221286250963476}
   ProjectileVisualPrefab: {fileID: 7460990098522836823, guid: 1e149f3ed7b84c2428267a2168c1f9e1,
     type: 3}
+  CastOnHitEffect: {fileID: 7977147725320133136, guid: 98f0aaa9a34b7cc4a939f7f54935c2a0,
+    type: 3}
   Range: 1000
   Damage: 1000
-  SpreadDegrees: 5
+  SpreadDegrees: 10
   ProjectilesCount: 10
   HitCollisionFilter:
     Category00: 1

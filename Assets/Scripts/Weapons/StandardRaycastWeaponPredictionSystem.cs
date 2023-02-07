@@ -43,7 +43,6 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
     {
         StandardRaycastWeaponPredictionJob predictionJob = new StandardRaycastWeaponPredictionJob
         {
-            commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged),
             IsServer = state.WorldUnmanaged.IsServer(), 
             
             NetworkTime = SystemAPI.GetSingleton<NetworkTime>(),
@@ -64,7 +63,6 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
     [WithAll(typeof(Simulate))]
     public partial struct StandardRaycastWeaponPredictionJob : IJobEntity
     {
-        public EntityCommandBuffer commandBuffer;
         public bool IsServer;
         public NetworkTime NetworkTime;
         [ReadOnly] public PhysicsWorld PhysicsWorld;
@@ -109,32 +107,28 @@ public partial struct StandardRaycastWeaponPredictionSystem : ISystem
                         IsServer,
                         NetworkTime.IsFirstTimeFullyPredictingTick);
 
-                    // Damage
-                    if (IsServer && Hits.Length > 0)
+                    /// The weapon will have an associated buffer of effects
+                    /// Effects are entities with a buffer of entities / positions that the effect might be applied to
+                    /// This avoids making new entities any time we want to apply an effect
+
+                    for (var k = 0; k < Hits.Length; k++)
                     {
-                        /// The weapon will have an associated buffer of effects
-                        /// Effects are entities with a buffer of entities / positions that the effect might be applied to
-                        /// This avoids making new entities any time we want to apply an effect
-                        
-                        for (var k = 0; k < Hits.Length; k++)
+                        var hitEntity = Hits[k].Entity;
+
+                        if (hitEntity == Entity.Null) continue;
+
+                        for (var j = 0; j < effectBuffer.Length; j++)
                         {
-                            var hitEntity = Hits[k].Entity;
+                            var effect = effectBuffer[j];
 
-                            if (hitEntity == Entity.Null) continue;
-
-                            for (var j = 0; j < effectBuffer.Length; j++)
+                            if (applyEffectToEntityBufferLookup.TryGetBuffer(effect.entity, out var applyToEntityBuffer))
                             {
-                                var effect = effectBuffer[j];
+                                applyToEntityBuffer.Add(new ApplyEffectToEntityBuffer { entity = hitEntity });
+                            }
 
-                                if (applyEffectToEntityBufferLookup.TryGetBuffer(effect.entity, out var applyToEntityBuffer))
-                                {
-                                    commandBuffer.AppendToBuffer(effect.entity, new ApplyEffectToEntityBuffer { entity = hitEntity });
-                                }
-
-                                if (applyEffectAtPositionBufferLookup.TryGetBuffer(effect.entity, out var applyAtPositionBuffer))
-                                {
-                                    commandBuffer.AppendToBuffer(effect.entity, new ApplyEffectAtPositionBuffer { position = Hits[k].Position });
-                                }
+                            if (applyEffectAtPositionBufferLookup.TryGetBuffer(effect.entity, out var applyAtPositionBuffer))
+                            {
+                                applyAtPositionBuffer.Add(new ApplyEffectAtPositionBuffer { position = Hits[k].Position });
                             }
                         }
                     }

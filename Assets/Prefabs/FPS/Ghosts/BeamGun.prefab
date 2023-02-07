@@ -67,7 +67,7 @@ Transform:
   m_Children:
   - {fileID: 3902965598849696175}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3902965599090628699
 MeshFilter:
@@ -165,6 +165,8 @@ MonoBehaviour:
     RecoilFOVKickRestitutionSharpness: 20
   ShotOrigin: {fileID: 3902965598849696172}
   ProjectileVisualPrefab: {fileID: 7460990098522836823, guid: 1e149f3ed7b84c2428267a2168c1f9e1,
+    type: 3}
+  CastOnHitEffect: {fileID: 7977147725320133136, guid: 98f0aaa9a34b7cc4a939f7f54935c2a0,
     type: 3}
   Range: 1000
   Damage: 1000

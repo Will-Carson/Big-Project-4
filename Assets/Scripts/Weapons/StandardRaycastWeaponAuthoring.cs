@@ -13,6 +13,7 @@ public class StandardRaycastWeaponAuthoring : MonoBehaviour
     public WeaponVisualFeedback.Authoring VisualFeedback = WeaponVisualFeedback.Authoring.GetDefault();
     public GameObject ShotOrigin;
     public GameObject ProjectileVisualPrefab;
+    public GameObject CastOnHitEffect;
     public float Range = 1000f;
     public int Damage = 1000;
     public float SpreadDegrees = 0f;
@@ -43,7 +44,13 @@ public class StandardRaycastWeaponAuthoring : MonoBehaviour
 
             var damageEffectEntity = CreateAdditionalEntity();
             AddComponent(damageEffectEntity, new DamageHealthEffect { damageValue = authoring.Damage });
+            if (authoring.CastOnHitEffect != null)
+            {
+                AddComponent(damageEffectEntity, new CastEffectEffect { entity = GetEntity(authoring.CastOnHitEffect) });
+            }
+
             AddBuffer<ApplyEffectToEntityBuffer>(damageEffectEntity);
+            AddBuffer<ApplyEffectAtPositionBuffer>(damageEffectEntity);
 
             var effects = AddBuffer<EffectBuffer>();
             effects.Add(new EffectBuffer
