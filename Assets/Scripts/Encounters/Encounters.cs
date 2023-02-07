@@ -12,8 +12,6 @@ public struct PlatformerMonster : IComponentData
 {
     [GhostField]
     public FixedString128Bytes Name;
-    [GhostField]
-    public Entity ControlledCharacter;
 }
 
 [Serializable]
@@ -48,6 +46,7 @@ public partial class MonsterSpawningSystem : SystemBase
     protected override void OnCreate()
     {
         random = new Random(int.MaxValue);
+        RequireForUpdate<PrefabContainer>();
     }
 
     protected override void OnUpdate()
@@ -61,12 +60,10 @@ public partial class MonsterSpawningSystem : SystemBase
 
         var prefabs = SystemAPI.GetSingletonBuffer<PrefabContainer>();
 
-        var monsterPrefab = PrefabContainer.GetEntityWithId(prefabs, "PlatformerMonster");
         var characterPrefab = PrefabContainer.GetEntityWithId(prefabs, "PlatformerUnownedCharacter");
 
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
 
-        var monsterInstance = commandBuffer.Instantiate(monsterPrefab);
         var characterInstance = commandBuffer.Instantiate(characterPrefab);
 
         var spawnPosition = new float3(1, 0, 0);
@@ -75,6 +72,27 @@ public partial class MonsterSpawningSystem : SystemBase
         spawnPosition.y = 0;
 
         commandBuffer.SetComponent(characterInstance, LocalTransform.FromPosition(spawnPosition));
-        commandBuffer.SetComponent(monsterInstance, new PlatformerMonster { ControlledCharacter = characterInstance });
+        commandBuffer.SetComponent(characterInstance, new PlatformerMonster { Name = random.NextInt().ToString() });
+    }
+}
+
+[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+public partial class DeathSystem : SystemBase
+{
+    protected override void OnUpdate()
+    {
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+
+        Entities
+        .ForEach((
+        Entity entity,
+        in Health health) =>
+        {
+            if (health.currentHealth <= 0)
+            {
+                commandBuffer.DestroyEntity(entity);
+            }
+        })
+        .Run();
     }
 }
