@@ -9,5 +9,5 @@ using UnityEngine;
 [UpdateInGroup(typeof(PredictedFixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
 [UpdateAfter(typeof(PredictedFixedStepTransformsUpdateSystem))]
-public class WeaponPredictionUpdateGroup : ComponentSystemGroup
+public partial class WeaponPredictionUpdateGroup : ComponentSystemGroup
 { }

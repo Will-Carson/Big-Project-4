@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Rival;
+using Unity.CharacterController;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Physics;
@@ -178,9 +178,9 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var localNetId = -1;
-        if (SystemAPI.HasSingleton<NetworkIdComponent>())
+        if (SystemAPI.HasSingleton<NetworkId>())
         {
-            localNetId = SystemAPI.GetSingleton<NetworkIdComponent>().Value;
+            localNetId = SystemAPI.GetSingleton<NetworkId>().Value;
         }
         
         var remoteShotsJob = new StandardRaycastWeaponRemoteShotsJob
@@ -221,7 +221,7 @@ public partial struct StandardRaycastWeaponVisualsSystem : ISystem
             ref StandardRaycastWeapon weapon, 
             ref WeaponVisualFeedback weaponFeedback,
             ref DynamicBuffer<StandardRaycastWeaponShotVFXRequest> shotVFXRequestsBuffer,
-            in GhostOwnerComponent ghostOwnerComponent,
+            in GhostOwner ghostOwnerComponent,
             in WeaponShotSimulationOriginOverride shotSimulationOriginOverride, 
             in DynamicBuffer<WeaponShotIgnoredEntity> ignoredEntities)
         {

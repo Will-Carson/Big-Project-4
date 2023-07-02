@@ -7,22 +7,23 @@ public class StatsTestAuthoring : MonoBehaviour
     {
         public override void Bake(StatsTestAuthoring authoring)
         {
-            var statSticks = AddBuffer<StatStickContainer>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            var statSticks = AddBuffer<StatStickContainer>(entity);
 
-            var extraStatStickEntity = CreateAdditionalEntity(entityName: "Extra stats");
+            var extraStatStickEntity = CreateAdditionalEntity(TransformUsageFlags.None, entityName: "Extra stats");
             AddBuffer<EquippedTo>(extraStatStickEntity);
             var extraStatStickStats = AddBuffer<StatContainer>(extraStatStickEntity);
             extraStatStickStats.Add(new StatContainer { stat = StatType.AdditionalStrength, value = 100 });
 
-            var baseStatStickEntity = CreateAdditionalEntity(entityName: "Base stats");
+            var baseStatStickEntity = CreateAdditionalEntity(TransformUsageFlags.None, entityName: "Base stats");
             AddBuffer<EquippedTo>(baseStatStickEntity);
             var baseStatStickStats = AddBuffer<StatContainer>(baseStatStickEntity);
             baseStatStickStats.Add(new StatContainer { stat = StatType.AdditionalLife, value = 100 });
 
-            var equipStatSticks = AddBuffer<EquipStatStickRequest>();
+            var equipStatSticks = AddBuffer<EquipStatStickRequest>(entity);
             equipStatSticks.Add(new EquipStatStickRequest { unequip = false, entity = extraStatStickEntity });
 
-            var derivedStats = AddBuffer<DerivedStat>();
+            var derivedStats = AddBuffer<DerivedStat>(entity);
             derivedStats.Add(new DerivedStat
             {
                 fromStat = StatType.AdditionalStrength,
@@ -31,9 +32,9 @@ public class StatsTestAuthoring : MonoBehaviour
                 toValue = 2,
             });
 
-            AddBuffer<StatContainer>();
+            AddBuffer<StatContainer>(entity);
 
-            AddComponent<StatRecalculationTag>();
+            AddComponent<StatRecalculationTag>(entity);
         }
     }
 }

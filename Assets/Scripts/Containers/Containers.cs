@@ -61,11 +61,11 @@ public partial class ServerContainerSystem : SystemBase
         Entities
         .ForEach((
         in PressContainerSlotRpc rpc,
-        in ReceiveRpcCommandRequestComponent receive,
+        in ReceiveRpcCommandRequest receive,
         in Entity entity) =>
         {
             commandBuffer.DestroyEntity(entity);
-            var targetEntity = SystemAPI.GetComponent<CommandTargetComponent>(receive.SourceConnection).targetEntity;
+            var targetEntity = SystemAPI.GetComponent<CommandTarget>(receive.SourceConnection).targetEntity;
 
             // Get the item in the hand slot
             var heldItem = SystemAPI.GetComponent<HandSlot>(targetEntity).item;

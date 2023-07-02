@@ -387,7 +387,7 @@ public struct CombinedStatResultsContainer : IBufferElementData
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(StatRecalculationSystemGroup))]
 [UpdateBefore(typeof(StatRecalculationTagCleanUpSystem))]
-public class CustomStatHandlingSystemGroup : ComponentSystemGroup
+public partial class CustomStatHandlingSystemGroup : ComponentSystemGroup
 {
 
 }
@@ -439,7 +439,7 @@ public partial struct StatRecalculationTagCleanUpSystem : ISystem
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(SimulationSystemGroup))]
-public class StatRecalculationSystemGroup : ComponentSystemGroup
+public partial class StatRecalculationSystemGroup : ComponentSystemGroup
 {
 
 }

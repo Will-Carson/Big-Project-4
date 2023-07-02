@@ -2,12 +2,11 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics.Authoring;
 using UnityEngine;
-using Rival;
+using Unity.CharacterController;
 using Unity.Physics;
 using UnityEngine.Serialization;
 
 [DisallowMultipleComponent]
-[RequireComponent(typeof(PhysicsShapeAuthoring))]
 public class PlatformerCharacterAuthoring : MonoBehaviour
 {
     public AuthoringKinematicCharacterProperties CharacterProperties = AuthoringKinematicCharacterProperties.GetDefault();
@@ -39,25 +38,27 @@ public class PlatformerCharacterAuthoring : MonoBehaviour
         {
             KinematicCharacterUtilities.BakeCharacter(this, authoring, authoring.CharacterProperties);
             
-            authoring.Character.DefaultCameraTargetEntity = GetEntity(authoring.DefaultCameraTarget);
-            authoring.Character.SwimmingCameraTargetEntity = GetEntity(authoring.SwimmingCameraTarget);
-            authoring.Character.ClimbingCameraTargetEntity = GetEntity(authoring.ClimbingCameraTarget);
-            authoring.Character.CrouchingCameraTargetEntity = GetEntity(authoring.CrouchingCameraTarget);
-            authoring.Character.MeshRootEntity = GetEntity(authoring.MeshRoot);
-            authoring.Character.RollballMeshEntity = GetEntity(authoring.RollballMesh);
-            authoring.Character.RopePrefabEntity = GetEntity(authoring.RopePrefab);
+            authoring.Character.DefaultCameraTargetEntity = GetEntity(authoring.DefaultCameraTarget, TransformUsageFlags.Dynamic);
+            authoring.Character.SwimmingCameraTargetEntity = GetEntity(authoring.SwimmingCameraTarget, TransformUsageFlags.Dynamic);
+            authoring.Character.ClimbingCameraTargetEntity = GetEntity(authoring.ClimbingCameraTarget, TransformUsageFlags.Dynamic);
+            authoring.Character.CrouchingCameraTargetEntity = GetEntity(authoring.CrouchingCameraTarget, TransformUsageFlags.Dynamic);
+            authoring.Character.MeshRootEntity = GetEntity(authoring.MeshRoot, TransformUsageFlags.Dynamic);
+            authoring.Character.RollballMeshEntity = GetEntity(authoring.RollballMesh, TransformUsageFlags.Dynamic);
+            authoring.Character.RopePrefabEntity = GetEntity(authoring.RopePrefab, TransformUsageFlags.Dynamic);
             authoring.Character.LocalSwimmingDetectionPoint = authoring.SwimmingDetectionPoint.transform.localPosition;
             authoring.Character.LocalLedgeDetectionPoint = authoring.LedgeDetectionPoint.transform.localPosition;
-            authoring.Character.WeaponAnimationSocketEntity = GetEntity(authoring.WeaponAnimationSocket);
+            authoring.Character.WeaponAnimationSocketEntity = GetEntity(authoring.WeaponAnimationSocket, TransformUsageFlags.Dynamic);
 
-            AddComponent(authoring.Character);
-            AddComponent(new PlatformerCharacterControl());
-            AddComponent(new PlatformerCharacterStateMachine());
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-            AddComponent(new ActiveWeapon());
-            AddComponent(new CharacterWeaponVisualFeedback());
+            AddComponent(entity, authoring.Character);
+            AddComponent(entity, new PlatformerCharacterControl());
+            AddComponent(entity, new PlatformerCharacterStateMachine());
 
-            AddComponent(new Health { currentHealth = 10000, maxHealth = 10000 });
+            AddComponent(entity, new ActiveWeapon());
+            AddComponent(entity, new CharacterWeaponVisualFeedback());
+
+            AddComponent(entity, new Health { currentHealth = 10000, maxHealth = 10000 });
         }
     }
 

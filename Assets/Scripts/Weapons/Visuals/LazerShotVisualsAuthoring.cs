@@ -15,13 +15,14 @@ public class LazerShotVisualsAuthoring : MonoBehaviour
     {
         public override void Bake(LazerShotVisualsAuthoring authoring)
         {
-            AddComponent(new LazerShotVisuals
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new LazerShotVisuals
             {
                 LifeTime = authoring.Lifetime,
                 Width = authoring.Width,
-                HitVisualsPrefab = GetEntity(authoring.HitVisualPrefab),
+                HitVisualsPrefab = GetEntity(authoring.HitVisualPrefab, TransformUsageFlags.NonUniformScale),
             });
-            AddComponent(new PostTransformScale { Value = float3x3.Scale(1f) });
+            AddComponent(entity, new PostTransformMatrix { Value = float4x4.Scale(1f) });
         }
     }
 }

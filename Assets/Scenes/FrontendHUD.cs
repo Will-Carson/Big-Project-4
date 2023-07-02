@@ -67,7 +67,7 @@ public partial class FrontendHUDSystem : SystemBase
         }
         if (!SystemAPI.TryGetSingletonEntity<NetworkStreamConnection>(out var connectionEntity))
             UIBehaviour.ConnectionStatus = "Not connected";
-        else if (!EntityManager.HasComponent<NetworkIdComponent>(connectionEntity))
+        else if (!EntityManager.HasComponent<NetworkId>(connectionEntity))
         {
             var connection = EntityManager.GetComponentData<NetworkStreamConnection>(connectionEntity);
             UIBehaviour.ConnectionStatus = $"Connecting to { SystemAPI.GetSingletonRW<NetworkStreamDriver>().ValueRO.GetRemoteEndPoint(connection).Address }";

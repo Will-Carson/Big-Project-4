@@ -29,7 +29,7 @@ public partial class UISetup : SystemBase
         {
             var rpc = talentRpcs[i];
             var rpcEntity = commandBuffer.CreateEntity();
-            commandBuffer.AddComponent<SendRpcCommandRequestComponent>(rpcEntity);
+            commandBuffer.AddComponent<SendRpcCommandRequest>(rpcEntity);
             commandBuffer.AddComponent(rpcEntity, rpc);
         }
         talentRpcs.Clear();
@@ -38,7 +38,7 @@ public partial class UISetup : SystemBase
         {
             var rpc = containerRpcs[i];
             var rpcEntity = commandBuffer.CreateEntity();
-            commandBuffer.AddComponent<SendRpcCommandRequestComponent>(rpcEntity);
+            commandBuffer.AddComponent<SendRpcCommandRequest>(rpcEntity);
             commandBuffer.AddComponent(rpcEntity, rpc);
         }
         containerRpcs.Clear();

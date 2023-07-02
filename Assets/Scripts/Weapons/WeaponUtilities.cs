@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
-using Rival;
+using Unity.CharacterController;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Physics;
@@ -30,32 +30,32 @@ public static class WeaponUtilities
         closestValidHit.Fraction = float.MaxValue;
         for (int j = 0; j < hits.Length; j++)
         {
-            RaycastHit tmpHit = hits[j];
+            //RaycastHit tmpHit = hits[j];
 
             // Check closest so far
-            if (tmpHit.Fraction < closestValidHit.Fraction)
-            {
-                // Check collidable
-                if (KinematicCharacterUtilities.IsHitCollidableOrCharacter(in storedKinematicCharacterDataLookup, tmpHit.Material, tmpHit.Entity))
-                {
-                    // Check entity ignore
-                    bool entityValid = true;
-                    for (int k = 0; k < ignoredEntities.Length; k++)
-                    {
-                        if (tmpHit.Entity == ignoredEntities[k].Entity)
-                        {
-                            entityValid = false;
-                            break;
-                        }
-                    }
+            //if (tmpHit.Fraction < closestValidHit.Fraction)
+            //{
+            //    // Check collidable
+            //    if (KinematicCharacterUtilities.IsHitCollidableOrCharacter(in storedKinematicCharacterDataLookup, tmpHit.Material, tmpHit.Entity))
+            //    {
+            //        // Check entity ignore
+            //        bool entityValid = true;
+            //        for (int k = 0; k < ignoredEntities.Length; k++)
+            //        {
+            //            if (tmpHit.Entity == ignoredEntities[k].Entity)
+            //            {
+            //                entityValid = false;
+            //                break;
+            //            }
+            //        }
 
-                    // Final hit
-                    if (entityValid)
-                    {
-                        closestValidHit = tmpHit;
-                    }
-                }
-            }
+            //        // Final hit
+            //        if (entityValid)
+            //        {
+            //            closestValidHit = tmpHit;
+            //        }
+            //    }
+            //}
         }
 
         return closestValidHit.Entity != Entity.Null;

@@ -15,7 +15,7 @@ public partial struct LazerShotVisualsSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate(SystemAPI.QueryBuilder().WithAll<LazerShotVisuals, LocalTransform, PostTransformScale, StandardRaycastWeaponShotVisualsData>().Build());
+        state.RequireForUpdate(SystemAPI.QueryBuilder().WithAll<LazerShotVisuals, LocalTransform, PostTransformMatrix, StandardRaycastWeaponShotVisualsData>().Build());
     }
 
     [BurstCompile]
@@ -43,7 +43,7 @@ public partial struct LazerShotVisualsSystem : ISystem
             Entity entity, 
             ref LazerShotVisuals shotVisuals, 
             ref LocalTransform localTransform, 
-            ref PostTransformScale postTransformScale, 
+            ref PostTransformMatrix postTransformMatrix, 
             in StandardRaycastWeaponShotVisualsData shotData)
         {
             if (!shotVisuals.HasInitialized)
@@ -72,7 +72,7 @@ public partial struct LazerShotVisualsSystem : ISystem
                 float clampedTimeRatio = math.clamp(timeRatio, 0f, 1f);
                 float invTimeRatio = 1f - clampedTimeRatio;
 
-                postTransformScale.Value = float3x3.Scale(shotVisuals.StartingScale.x * invTimeRatio, shotVisuals.StartingScale.y * invTimeRatio, shotVisuals.StartingScale.z);
+                postTransformMatrix.Value = float4x4.Scale(shotVisuals.StartingScale.x * invTimeRatio, shotVisuals.StartingScale.y * invTimeRatio, shotVisuals.StartingScale.z);
 
                 if (timeRatio >= 1f)
                 {

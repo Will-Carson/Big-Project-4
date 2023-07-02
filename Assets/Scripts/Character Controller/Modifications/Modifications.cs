@@ -1,5 +1,5 @@
-/// All modifications to the Platformer Rival sample are held here, to better facilitate upgrades.
-using Rival;
+/// All modifications to the Platformer Unity.CharacterController sample are held here, to better facilitate upgrades.
+using Unity.CharacterController;
 using System;
 using Unity.Entities;
 using Unity.Mathematics;

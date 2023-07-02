@@ -2,7 +2,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
-using Rival;
+using Unity.CharacterController;
 using CapsuleCollider = Unity.Physics.CapsuleCollider;
 using Material = Unity.Physics.Material;
 using Unity.NetCode;
@@ -331,26 +331,6 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
     }
 
     #region Character Processor Callbacks
-    public void UpdateGroundingUp(
-        ref PlatformerCharacterUpdateContext context,
-        ref KinematicCharacterUpdateContext baseContext)
-    {
-        ref KinematicCharacterBody characterBody = ref CharacterAspect.CharacterBody.ValueRW;
-        
-        CharacterAspect.Default_UpdateGroundingUp(ref characterBody);
-    }
-    
-    public bool CanCollideWithHit(
-        ref PlatformerCharacterUpdateContext context, 
-        ref KinematicCharacterUpdateContext baseContext,
-        in BasicHit hit)
-    {
-        return KinematicCharacterUtilities.IsHitCollidableOrCharacter(
-            in baseContext.StoredCharacterBodyPropertiesLookup, 
-            hit.Material, 
-            hit.Entity);
-    }
-
     public bool IsGroundedOnHit(
         ref PlatformerCharacterUpdateContext context, 
         ref KinematicCharacterUpdateContext baseContext,
@@ -366,43 +346,6 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
             in hit,
             in characterComponent.StepAndSlopeHandling,
             groundingEvaluationType);
-    }
-
-    public void OnMovementHit(
-            ref PlatformerCharacterUpdateContext context,
-            ref KinematicCharacterUpdateContext baseContext,
-            ref KinematicCharacterHit hit,
-            ref float3 remainingMovementDirection,
-            ref float remainingMovementLength,
-            float3 originalVelocityDirection,
-            float hitDistance)
-    {
-        ref KinematicCharacterBody characterBody = ref CharacterAspect.CharacterBody.ValueRW;
-        ref float3 characterPosition = ref CharacterAspect.LocalTransform.ValueRW.Position;
-        PlatformerCharacterComponent characterComponent = Character.ValueRO;
-        
-        CharacterAspect.Default_OnMovementHit(
-            in this,
-            ref context,
-            ref baseContext,
-            ref characterBody,
-            ref characterPosition,
-            ref hit,
-            ref remainingMovementDirection,
-            ref remainingMovementLength,
-            originalVelocityDirection,
-            hitDistance,
-            characterComponent.StepAndSlopeHandling.StepHandling,
-            characterComponent.StepAndSlopeHandling.MaxStepHeight);
-    }
-
-    public void OverrideDynamicHitMasses(
-        ref PlatformerCharacterUpdateContext context,
-        ref KinematicCharacterUpdateContext baseContext,
-        ref PhysicsMass characterMass,
-        ref PhysicsMass otherMass,
-        BasicHit hit)
-    {
     }
 
     public void ProjectVelocityOnHits(
@@ -423,6 +366,62 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
             in velocityProjectionHits,
             originalVelocityDirection,
             characterComponent.StepAndSlopeHandling.ConstrainVelocityToGroundPlane);
+    }
+
+    public void UpdateGroundingUp(
+        ref PlatformerCharacterUpdateContext context,
+        ref KinematicCharacterUpdateContext baseContext)
+    {
+        ref KinematicCharacterBody characterBody = ref CharacterAspect.CharacterBody.ValueRW;
+
+        CharacterAspect.Default_UpdateGroundingUp(ref characterBody);
+    }
+
+    public bool CanCollideWithHit(
+        ref PlatformerCharacterUpdateContext context,
+        ref KinematicCharacterUpdateContext baseContext,
+        in BasicHit hit)
+    {
+        return PhysicsUtilities.IsCollidable(hit.Material);
+    }
+
+    public void OnMovementHit(
+            ref PlatformerCharacterUpdateContext context,
+            ref KinematicCharacterUpdateContext baseContext,
+            ref KinematicCharacterHit hit,
+            ref float3 remainingMovementDirection,
+            ref float remainingMovementLength,
+            float3 originalVelocityDirection,
+            float hitDistance)
+    {
+        ref KinematicCharacterBody characterBody = ref CharacterAspect.CharacterBody.ValueRW;
+        ref float3 characterPosition = ref CharacterAspect.LocalTransform.ValueRW.Position;
+        PlatformerCharacterComponent characterComponent = Character.ValueRO;
+
+        CharacterAspect.Default_OnMovementHit(
+            in this,
+            ref context,
+            ref baseContext,
+            ref characterBody,
+            ref characterPosition,
+            ref hit,
+            ref remainingMovementDirection,
+            ref remainingMovementLength,
+            originalVelocityDirection,
+            hitDistance,
+            characterComponent.StepAndSlopeHandling.StepHandling,
+            characterComponent.StepAndSlopeHandling.MaxStepHeight,
+            characterComponent.StepAndSlopeHandling.CharacterWidthForStepGroundingCheck);
+    }
+
+    public void OverrideDynamicHitMasses(
+        ref PlatformerCharacterUpdateContext context,
+        ref KinematicCharacterUpdateContext baseContext,
+        ref PhysicsMass characterMass,
+        ref PhysicsMass otherMass,
+        BasicHit hit)
+    {
+        // Custom mass overrides
     }
     #endregion
 }

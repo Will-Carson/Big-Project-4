@@ -305,11 +305,11 @@ public partial class TalentServerSystem : SystemBase
         Entities
         .ForEach((
         in TalentAllocationRequestRpc rpc,
-        in ReceiveRpcCommandRequestComponent receive,
+        in ReceiveRpcCommandRequest receive,
         in Entity entity) =>
         {
             commandBuffer.DestroyEntity(entity);
-            var targetEntity = SystemAPI.GetComponent<CommandTargetComponent>(receive.SourceConnection).targetEntity;
+            var targetEntity = SystemAPI.GetComponent<CommandTarget>(receive.SourceConnection).targetEntity;
 
             for (var i = 0; i < talentComponents.Length; i++)
             {

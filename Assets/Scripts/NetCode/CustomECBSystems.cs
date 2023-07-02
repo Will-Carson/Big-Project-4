@@ -10,12 +10,12 @@ using UnityEngine;
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 [UpdateAfter(typeof(PredictedSimulationSystemGroup))]
 [UpdateBefore(typeof(TransformSystemGroup))]
-public class PostPredictionPreTransformsECBSystem : EntityCommandBufferSystem
+public partial class PostPredictionPreTransformsECBSystem : EntityCommandBufferSystem
 {
     public unsafe struct Singleton : IComponentData, IECBSingleton
     {
         internal UnsafeList<EntityCommandBuffer>* pendingBuffers;
-        internal Allocator allocator;
+        internal AllocatorManager.AllocatorHandle allocator;
 
         public EntityCommandBuffer CreateCommandBuffer(WorldUnmanaged world)
         {
@@ -31,13 +31,17 @@ public class PostPredictionPreTransformsECBSystem : EntityCommandBufferSystem
         {
             allocator = allocatorIn;
         }
+
+        public void SetAllocator(AllocatorManager.AllocatorHandle allocatorIn)
+        {
+            allocator = allocatorIn;
+        }
     }
-    
-    protected override unsafe void OnCreate()
+
+    protected override void OnCreate()
     {
         base.OnCreate();
 
-        ref UnsafeList<EntityCommandBuffer> pendingBuffers = ref *m_PendingBuffers;
-        this.RegisterSingleton<Singleton>(ref pendingBuffers, World.Unmanaged, $"{nameof(PostPredictionPreTransformsECBSystem)} {nameof(Singleton)}");
+        this.RegisterSingleton<Singleton>(ref PendingBuffers, World.Unmanaged);
     }
 }

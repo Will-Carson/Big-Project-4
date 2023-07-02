@@ -6,7 +6,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
-using Rival;
+using Unity.CharacterController;
 using Unity.NetCode;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
@@ -95,7 +95,7 @@ public partial struct PlatformerCharacterPhysicsUpdateSystem : ISystem
         public PlatformerCharacterUpdateContext Context;
         public KinematicCharacterUpdateContext BaseContext;
     
-        void Execute([ChunkIndexInQuery] int chunkIndex, ref PlatformerCharacterAspect characterAspect)
+        void Execute([ChunkIndexInQuery] int chunkIndex, PlatformerCharacterAspect characterAspect)
         {
             Context.OnIterateEntity(chunkIndex);
             BaseContext.EnsureCreationOfTmpCollections();
@@ -155,7 +155,7 @@ public partial struct PlatformerCharacterVariableUpdateSystem : ISystem
         public PlatformerCharacterUpdateContext Context;
         public KinematicCharacterUpdateContext BaseContext;
     
-        void Execute([ChunkIndexInQuery] int chunkIndex, ref PlatformerCharacterAspect characterAspect)
+        void Execute([ChunkIndexInQuery] int chunkIndex, PlatformerCharacterAspect characterAspect)
         {
             Context.OnIterateEntity(chunkIndex);
             BaseContext.EnsureCreationOfTmpCollections();

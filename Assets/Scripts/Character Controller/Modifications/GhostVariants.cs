@@ -5,9 +5,9 @@ using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
 using UnityEngine;
-using Rival;
+using Unity.CharacterController;
 
-public class DefaultVariantSystem : DefaultVariantSystemBase
+public partial class DefaultVariantSystem : DefaultVariantSystemBase
 {
     protected override void RegisterDefaultVariants(Dictionary<ComponentType, Rule> defaultVariants)
     {

@@ -1,5 +1,5 @@
 using Unity.Entities;
-using Rival;
+using Unity.CharacterController;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
@@ -238,7 +238,7 @@ public struct SwimmingState : IPlatformerCharacterState
         CollisionFilter waterDetectionFilter = new CollisionFilter
         {
             BelongsTo = physicsCollider.ColliderPtr->GetCollisionFilter().BelongsTo,
-            CollidesWith = character.WaterPhysicsCategory.Value,
+            CollidesWith = character.WaterPhysicsCategory.CollidesWith,
         };
 
         PointDistanceInput pointInput = new PointDistanceInput

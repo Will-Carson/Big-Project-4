@@ -18,7 +18,7 @@ public partial struct GoInGameClientSystem : ISystem
     {
         state.RequireForUpdate<PrefabContainer>();
         var builder = new EntityQueryBuilder(Allocator.Temp)
-            .WithAll<NetworkIdComponent>()
+            .WithAll<NetworkId>()
             .WithNone<NetworkStreamInGame>();
         state.RequireForUpdate(state.GetEntityQuery(builder));
     }
@@ -32,12 +32,12 @@ public partial struct GoInGameClientSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
-        foreach (var (id, entity) in SystemAPI.Query<RefRO<NetworkIdComponent>>().WithEntityAccess().WithNone<NetworkStreamInGame>())
+        foreach (var (id, entity) in SystemAPI.Query<RefRO<NetworkId>>().WithEntityAccess().WithNone<NetworkStreamInGame>())
         {
             commandBuffer.AddComponent<NetworkStreamInGame>(entity);
             var req = commandBuffer.CreateEntity();
             commandBuffer.AddComponent<GoInGameRpc>(req);
-            commandBuffer.AddComponent(req, new SendRpcCommandRequestComponent { TargetConnection = entity });
+            commandBuffer.AddComponent(req, new SendRpcCommandRequest { TargetConnection = entity });
         }
         commandBuffer.Playback(state.EntityManager);
     }
@@ -48,7 +48,7 @@ public partial struct GoInGameClientSystem : ISystem
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 public partial struct GoInGameServerSystem : ISystem
 {
-    private ComponentLookup<NetworkIdComponent> networkIdFromEntity;
+    private ComponentLookup<NetworkId> networkIdFromEntity;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -56,9 +56,9 @@ public partial struct GoInGameServerSystem : ISystem
         state.RequireForUpdate<PrefabContainer>();
         var builder = new EntityQueryBuilder(Allocator.Temp)
             .WithAll<GoInGameRpc>()
-            .WithAll<ReceiveRpcCommandRequestComponent>();
+            .WithAll<ReceiveRpcCommandRequest>();
         state.RequireForUpdate(state.GetEntityQuery(builder));
-        networkIdFromEntity = state.GetComponentLookup<NetworkIdComponent>(true);
+        networkIdFromEntity = state.GetComponentLookup<NetworkId>(true);
     }
 
     [BurstCompile]
@@ -81,7 +81,7 @@ public partial struct GoInGameServerSystem : ISystem
         networkIdFromEntity.Update(ref state);
 
         foreach (var (reqSrc, reqEntity) in SystemAPI.Query<
-            RefRO<ReceiveRpcCommandRequestComponent>>()
+            RefRO<ReceiveRpcCommandRequest>>()
             .WithAll<GoInGameRpc>()
             .WithEntityAccess())
         {
@@ -92,10 +92,10 @@ public partial struct GoInGameServerSystem : ISystem
 
             var player = commandBuffer.Instantiate(playerPrefab);
             var character = commandBuffer.Instantiate(characterPrefab);
-            commandBuffer.SetComponent(player, new GhostOwnerComponent { NetworkId = networkId });
-            commandBuffer.SetComponent(character, new GhostOwnerComponent { NetworkId = networkId });
+            commandBuffer.SetComponent(player, new GhostOwner { NetworkId = networkId });
+            commandBuffer.SetComponent(character, new GhostOwner { NetworkId = networkId });
             commandBuffer.SetComponent(reqSrc.ValueRO.SourceConnection, 
-                new CommandTargetComponent
+                new CommandTarget
                 {
                     targetEntity = player
                 });
@@ -323,10 +323,10 @@ public partial struct GoInGameServerSystem : ISystem
                 });
 
                 // Set the owner for the container
-                commandBuffer.SetComponent(inventory, new GhostOwnerComponent { NetworkId = networkId });
-                commandBuffer.SetComponent(equipment, new GhostOwnerComponent { NetworkId = networkId });
-                commandBuffer.SetComponent(abilities, new GhostOwnerComponent { NetworkId = networkId });
-                commandBuffer.SetComponent(foreign, new GhostOwnerComponent { NetworkId = networkId });
+                commandBuffer.SetComponent(inventory, new GhostOwner { NetworkId = networkId });
+                commandBuffer.SetComponent(equipment, new GhostOwner { NetworkId = networkId });
+                commandBuffer.SetComponent(abilities, new GhostOwner { NetworkId = networkId });
+                commandBuffer.SetComponent(foreign, new GhostOwner { NetworkId = networkId });
 
                 // Make sure these entities get destroyed when the player that holds them is destroyed.
                 commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = inventory });
@@ -337,7 +337,7 @@ public partial struct GoInGameServerSystem : ISystem
 
             // Spawn & assign starting weapon
             var weaponEntity = commandBuffer.Instantiate(weaponPrefab);
-            commandBuffer.SetComponent(weaponEntity, new GhostOwnerComponent { NetworkId = networkId });
+            commandBuffer.SetComponent(weaponEntity, new GhostOwner { NetworkId = networkId });
             commandBuffer.SetComponent(character, new ActiveWeapon { entity = weaponEntity });
         }
         commandBuffer.Playback(state.EntityManager);
@@ -396,7 +396,7 @@ public partial class ClientRpcQueueSystem<T> : SystemBase
         {
             var rpc = rpcs[i];
             var rpcEntity = commandBuffer.CreateEntity();
-            commandBuffer.AddComponent<SendRpcCommandRequestComponent>(rpcEntity);
+            commandBuffer.AddComponent<SendRpcCommandRequest>(rpcEntity);
             commandBuffer.AddComponent(rpcEntity, rpc);
         }
         rpcs.Clear();
@@ -439,7 +439,7 @@ public partial class ClientRpcEventSystem<T> : SystemBase
         {
             var rpc = rpcs[i];
             var rpcEntity = commandBuffer.CreateEntity();
-            commandBuffer.AddComponent<SendRpcCommandRequestComponent>(rpcEntity);
+            commandBuffer.AddComponent<SendRpcCommandRequest>(rpcEntity);
             commandBuffer.AddComponent(rpcEntity, rpc);
         }
         rpcs.Clear();

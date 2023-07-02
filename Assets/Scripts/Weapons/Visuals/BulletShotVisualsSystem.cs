@@ -39,7 +39,7 @@ public partial struct BulletShotVisualsSystem : ISystem
         public float DeltaTime;
         public EntityCommandBuffer.ParallelWriter ECB;
 
-        void Execute(Entity entity, [ChunkIndexInQuery] int chunkIndexInQuery, ref BulletShotVisuals shotVisuals, ref LocalTransform localTransform, ref PostTransformScale postTransformScale, in StandardRaycastWeaponShotVisualsData shotData)
+        void Execute(Entity entity, [ChunkIndexInQuery] int chunkIndexInQuery, ref BulletShotVisuals shotVisuals, ref LocalTransform localTransform, ref PostTransformMatrix postTransformMatrix, in StandardRaycastWeaponShotVisualsData shotData)
         {
             if (!shotVisuals.IsInitialized)
             {
@@ -77,7 +77,7 @@ public partial struct BulletShotVisualsSystem : ISystem
                 ECB.DestroyEntity(chunkIndexInQuery, entity);
             }
 
-            postTransformScale.Value = float3x3.Scale(localTransform.Scale, localTransform.Scale, zScale);
+            postTransformMatrix.Value = float4x4.Scale(localTransform.Scale, localTransform.Scale, zScale);
         }
     }
 }

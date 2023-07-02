@@ -1,5 +1,5 @@
 using Unity.Entities;
-using Rival;
+using Unity.CharacterController;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
@@ -115,7 +115,7 @@ public struct RopeSwingState : IPlatformerCharacterState
         float3 ropeDetectionPoint = math.transform(characterTransform, character.LocalRopeAnchorPoint);
 
         CollisionFilter ropeAnchorDetectionFilter = CollisionFilter.Default;
-        ropeAnchorDetectionFilter.CollidesWith = character.RopeAnchorCategory.Value;
+        ropeAnchorDetectionFilter.CollidesWith = character.RopeAnchorCategory.CollidesWith;
 
         PointDistanceInput pointInput = new PointDistanceInput
         {

@@ -4,7 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using Unity.Physics.Authoring;
-using Rival;
+using Unity.CharacterController;
 using Unity.Physics;
 
 [Serializable]
@@ -102,15 +102,15 @@ public struct PlatformerCharacterComponent : IComponentData
     [Header("Misc")]
     public CustomPhysicsBodyTags StickySurfaceTag;
     public CustomPhysicsBodyTags ClimbableTag;
-    public PhysicsCategoryTags WaterPhysicsCategory;
-    public PhysicsCategoryTags RopeAnchorCategory;
     public float UpOrientationAdaptationSharpness;
     public CapsuleGeometryDefinition StandingGeometry;
     public CapsuleGeometryDefinition CrouchingGeometry;
     public CapsuleGeometryDefinition RollingGeometry;
     public CapsuleGeometryDefinition ClimbingGeometry;
     public CapsuleGeometryDefinition SwimmingGeometry;
-    
+    public CollisionFilter WaterPhysicsCategory;
+    public CollisionFilter RopeAnchorCategory;
+
     [HideInInspector]
     public float3 LocalLedgeDetectionPoint;
     [HideInInspector]
