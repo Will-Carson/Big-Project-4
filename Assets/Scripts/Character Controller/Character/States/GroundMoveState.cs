@@ -9,7 +9,6 @@ public struct GroundMoveState : IPlatformerCharacterState
     public void OnStateEnter(CharacterState previousState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
-        //aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
     }
 
     public void OnStateExit(CharacterState nextState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
@@ -22,45 +21,70 @@ public struct GroundMoveState : IPlatformerCharacterState
 
     public void OnStatePhysicsUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
-        var deltaTime = baseContext.Time.DeltaTime;
-        var elapsedTime = (float)baseContext.Time.ElapsedTime;
+        ref var characterComponent = ref aspect.Character.ValueRW;
         ref var characterBody = ref aspect.CharacterAspect.CharacterBody.ValueRW;
-        ref var character = ref aspect.Character.ValueRW;
-        ref var characterControl = ref aspect.CharacterControl.ValueRW;
+        ref var characterPosition = ref aspect.CharacterAspect.LocalTransform.ValueRW.Position;
 
-        aspect.HandlePhysicsUpdatePhase1(ref context, ref baseContext, true, true);
+        // First phase of default character update
+        aspect.CharacterAspect.Update_Initialize(in aspect, ref context, ref baseContext, ref characterBody, baseContext.Time.DeltaTime);
+        aspect.CharacterAspect.Update_ParentMovement(in aspect, ref context, ref baseContext, ref characterBody, ref characterPosition, characterBody.WasGroundedBeforeCharacterUpdate);
+        aspect.CharacterAspect.Update_Grounding(in aspect, ref context, ref baseContext, ref characterBody, ref characterPosition);
 
-        if (characterBody.IsGrounded)
+        // Update desired character velocity after grounding was detected, but before doing additional processing that depends on velocity
         {
-            character.IsSprinting = characterControl.SprintHeld;
+            var deltaTime = baseContext.Time.DeltaTime;
+            ref var characterControl = ref aspect.CharacterControl.ValueRW;
 
-            // Move on ground
+            // Rotate move input and velocity to take into account parent rotation
+            if (characterBody.ParentEntity != Entity.Null)
             {
-                float chosenMaxSpeed = character.IsSprinting ? character.GroundSprintMaxSpeed : character.GroundRunMaxSpeed;
-
-                float chosenSharpness = character.GroundedMovementSharpness;
-                if (context.CharacterFrictionModifierLookup.TryGetComponent(characterBody.GroundHit.Entity, out var frictionModifier))
-                {
-                    chosenSharpness *= frictionModifier.Friction;
-                }
-                
-                float3 moveVectorOnPlane = math.normalizesafe(MathUtilities.ProjectOnPlane(characterControl.MoveVector, characterBody.GroundingUp)) * math.length(characterControl.MoveVector);
-                float3 targetVelocity = moveVectorOnPlane * chosenMaxSpeed;
-                CharacterControlUtilities.StandardGroundMove_Interpolated(ref characterBody.RelativeVelocity, targetVelocity, chosenSharpness, deltaTime, characterBody.GroundingUp, characterBody.GroundHit.Normal);
+                characterControl.MoveVector = math.rotate(characterBody.RotationFromParent, characterControl.MoveVector);
+                characterBody.RelativeVelocity = math.rotate(characterBody.RotationFromParent, characterBody.RelativeVelocity);
             }
-            
-            // Jumping
-            if (characterControl.JumpPressed || 
-                (character.JumpPressedBeforeBecameGrounded && elapsedTime < character.LastTimeJumpPressed + character.JumpBeforeGroundedGraceTime)) // this is for allowing jumps that were triggered shortly before becoming grounded
+
+            if (characterBody.IsGrounded)
             {
-                CharacterControlUtilities.StandardJump(ref characterBody, characterBody.GroundingUp * character.GroundJumpSpeed, true, characterBody.GroundingUp);
-                character.AllowJumpAfterBecameUngrounded = false;
+                // Move on ground
+                float3 targetVelocity = characterControl.MoveVector * characterComponent.GroundRunMaxSpeed;
+                CharacterControlUtilities.StandardGroundMove_Interpolated(ref characterBody.RelativeVelocity, targetVelocity, characterComponent.GroundedMovementSharpness, deltaTime, characterBody.GroundingUp, characterBody.GroundHit.Normal);
+
+                // Jump
+                if (characterControl.JumpPressed)
+                {
+                    CharacterControlUtilities.StandardJump(ref characterBody, characterBody.GroundingUp * characterComponent.AirJumpSpeed, true, characterBody.GroundingUp);
+                }
+            }
+            else
+            {
+                // Move in air
+                float3 airAcceleration = characterControl.MoveVector * characterComponent.AirAcceleration;
+                if (math.lengthsq(airAcceleration) > 0f)
+                {
+                    float3 tmpVelocity = characterBody.RelativeVelocity;
+                    CharacterControlUtilities.StandardAirMove(ref characterBody.RelativeVelocity, airAcceleration, characterComponent.AirMaxSpeed, characterBody.GroundingUp, deltaTime, false);
+
+                    // Cancel air acceleration from input if we would hit a non-grounded surface (prevents air-climbing slopes at high air accelerations)
+                    if (aspect.CharacterAspect.MovementWouldHitNonGroundedObstruction(in aspect, ref context, ref baseContext, characterBody.RelativeVelocity * deltaTime, out ColliderCastHit hit))
+                    {
+                        characterBody.RelativeVelocity = tmpVelocity;
+                    }
+                }
+
+                // Gravity
+                CharacterControlUtilities.AccelerateVelocity(ref characterBody.RelativeVelocity, aspect.CustomGravity.ValueRO.Gravity, deltaTime); // TODO need to deal with this gravity...
+
+                // Drag
+                CharacterControlUtilities.ApplyDragToVelocity(ref characterBody.RelativeVelocity, deltaTime, characterComponent.AirDrag);
             }
         }
 
-        aspect.HandlePhysicsUpdatePhase2(ref context, ref baseContext, true, true, true, true, true);
-
-        DetectTransitions(ref context, ref baseContext, in aspect);
+        // Second phase of default character update
+        aspect.CharacterAspect.Update_PreventGroundingFromFutureSlopeChange(in aspect, ref context, ref baseContext, ref characterBody, in characterComponent.StepAndSlopeHandling);
+        aspect.CharacterAspect.Update_GroundPushing(in aspect, ref context, ref baseContext, aspect.CustomGravity.ValueRO.Gravity.y); // TODO this gravity is wonky as hell
+        aspect.CharacterAspect.Update_MovementAndDecollisions(in aspect, ref context, ref baseContext, ref characterBody, ref characterPosition);
+        aspect.CharacterAspect.Update_MovingPlatformDetection(ref baseContext, ref characterBody);
+        aspect.CharacterAspect.Update_ParentMomentum(ref baseContext, ref characterBody);
+        aspect.CharacterAspect.Update_ProcessStatefulCharacterHits();
     }
 
     public void OnStateVariableUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
