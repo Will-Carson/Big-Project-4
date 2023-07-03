@@ -134,7 +134,7 @@ MonoBehaviour:
     InterpolateRotation: 0
     EvaluateGrounding: 1
     SnapToGround: 1
-    GroundSnappingDistance: 0.3
+    GroundSnappingDistance: 0.5
     EnhancedGroundPrecision: 0
     MaxGroundedSlopeAngle: 60
     DetectMovementCollisions: 1

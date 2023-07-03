@@ -8,8 +8,6 @@ public struct AirMoveState : IPlatformerCharacterState
     public void OnStateEnter(CharacterState previousState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
-        
-        //aspect.SetCapsuleGeometry(character.StandingGeometry.ToCapsuleGeometry());
     }
 
     public void OnStateExit(CharacterState nextState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
@@ -74,7 +72,7 @@ public struct AirMoveState : IPlatformerCharacterState
                 characterBody.RelativeVelocity += characterBody.GroundingUp * character.JumpHeldAcceleration * deltaTime;
             }
         }
-        
+
         // Gravity
         CharacterControlUtilities.AccelerateVelocity(ref characterBody.RelativeVelocity, customGravity.Gravity, deltaTime);
 

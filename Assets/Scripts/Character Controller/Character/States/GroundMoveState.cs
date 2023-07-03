@@ -26,9 +26,7 @@ public struct GroundMoveState : IPlatformerCharacterState
         ref var characterPosition = ref aspect.CharacterAspect.LocalTransform.ValueRW.Position;
 
         // First phase of default character update
-        aspect.CharacterAspect.Update_Initialize(in aspect, ref context, ref baseContext, ref characterBody, baseContext.Time.DeltaTime);
-        aspect.CharacterAspect.Update_ParentMovement(in aspect, ref context, ref baseContext, ref characterBody, ref characterPosition, characterBody.WasGroundedBeforeCharacterUpdate);
-        aspect.CharacterAspect.Update_Grounding(in aspect, ref context, ref baseContext, ref characterBody, ref characterPosition);
+        aspect.HandlePhysicsUpdatePhase1(ref context, ref baseContext, true, true);
 
         // Update desired character velocity after grounding was detected, but before doing additional processing that depends on velocity
         {
@@ -54,37 +52,12 @@ public struct GroundMoveState : IPlatformerCharacterState
                     CharacterControlUtilities.StandardJump(ref characterBody, characterBody.GroundingUp * characterComponent.AirJumpSpeed, true, characterBody.GroundingUp);
                 }
             }
-            else
-            {
-                // Move in air
-                float3 airAcceleration = characterControl.MoveVector * characterComponent.AirAcceleration;
-                if (math.lengthsq(airAcceleration) > 0f)
-                {
-                    float3 tmpVelocity = characterBody.RelativeVelocity;
-                    CharacterControlUtilities.StandardAirMove(ref characterBody.RelativeVelocity, airAcceleration, characterComponent.AirMaxSpeed, characterBody.GroundingUp, deltaTime, false);
-
-                    // Cancel air acceleration from input if we would hit a non-grounded surface (prevents air-climbing slopes at high air accelerations)
-                    if (aspect.CharacterAspect.MovementWouldHitNonGroundedObstruction(in aspect, ref context, ref baseContext, characterBody.RelativeVelocity * deltaTime, out ColliderCastHit hit))
-                    {
-                        characterBody.RelativeVelocity = tmpVelocity;
-                    }
-                }
-
-                // Gravity
-                CharacterControlUtilities.AccelerateVelocity(ref characterBody.RelativeVelocity, aspect.CustomGravity.ValueRO.Gravity, deltaTime); // TODO need to deal with this gravity...
-
-                // Drag
-                CharacterControlUtilities.ApplyDragToVelocity(ref characterBody.RelativeVelocity, deltaTime, characterComponent.AirDrag);
-            }
         }
 
         // Second phase of default character update
-        aspect.CharacterAspect.Update_PreventGroundingFromFutureSlopeChange(in aspect, ref context, ref baseContext, ref characterBody, in characterComponent.StepAndSlopeHandling);
-        aspect.CharacterAspect.Update_GroundPushing(in aspect, ref context, ref baseContext, aspect.CustomGravity.ValueRO.Gravity.y); // TODO this gravity is wonky as hell
-        aspect.CharacterAspect.Update_MovementAndDecollisions(in aspect, ref context, ref baseContext, ref characterBody, ref characterPosition);
-        aspect.CharacterAspect.Update_MovingPlatformDetection(ref baseContext, ref characterBody);
-        aspect.CharacterAspect.Update_ParentMomentum(ref baseContext, ref characterBody);
-        aspect.CharacterAspect.Update_ProcessStatefulCharacterHits();
+        aspect.HandlePhysicsUpdatePhase2(ref context, ref baseContext, true, true, true, true, true);
+
+        DetectTransitions(ref context, ref baseContext, in aspect);
     }
 
     public void OnStateVariableUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
