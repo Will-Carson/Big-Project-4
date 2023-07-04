@@ -18,7 +18,7 @@ public class MachineGunVisualsAuthoring : MonoBehaviour
 
             AddComponent(entity, new MachineGunVisuals
             {
-                BarrelEntity = GetEntity(authoring.BarrelEntity),
+                BarrelEntity = GetEntity(authoring.BarrelEntity, TransformUsageFlags.Dynamic),
                 SpinVelocity = authoring.SpinVelocity,
                 SpinVelocityDecay = authoring.SpinVelocityDecay,
             });

@@ -13,7 +13,7 @@ public class TeleporterAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-            AddComponent(entity, new Teleporter { DestinationEntity = GetEntity(authoring.Destination) });
+            AddComponent(entity, new Teleporter { DestinationEntity = GetEntity(authoring.Destination, TransformUsageFlags.Dynamic) });
         }
     }
 }

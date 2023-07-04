@@ -18,7 +18,7 @@ public class BulletShotVisualsAuthoring : MonoBehaviour
 
             AddComponent(entity, new BulletShotVisuals
             {
-                HitVisualsPrefab = GetEntity(authoring.HitVisualsPrefab),
+                HitVisualsPrefab = GetEntity(authoring.HitVisualsPrefab, TransformUsageFlags.Dynamic),
                 Speed = authoring.Speed,
                 StretchFromSpeed = authoring.StretchFromSpeed,
                 MaxStretch = authoring.MaxStretch,
