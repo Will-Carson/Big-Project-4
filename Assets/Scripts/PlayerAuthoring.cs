@@ -7,19 +7,21 @@ public class PlayerAuthoring : MonoBehaviour
     {
         public override void Bake(PlayerAuthoring authoring)
         {
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
             // Add container components
-            AddComponent<HandSlot>();
-            AddBuffer<ContainerSlot>();
+            AddComponent<HandSlot>(entity);
+            AddBuffer<ContainerSlot>(entity);
 
             // Stat stuff
-            AddBuffer<StatContainer>();
-            AddBuffer<DerivedStat>();
-            AddBuffer<StatStickContainer>();
-            AddBuffer<EquipStatStickRequest>();
+            AddBuffer<StatContainer>(entity);
+            AddBuffer<DerivedStat>(entity);
+            AddBuffer<StatStickContainer>(entity);
+            AddBuffer<EquipStatStickRequest>(entity);
 
             // Character controller stuff
 
-            AddComponent<LocalPlayerTag>();
+            AddComponent<LocalPlayerTag>(entity);
         }
     }
 }

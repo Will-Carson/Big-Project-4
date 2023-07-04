@@ -10,13 +10,15 @@ public class PrefabContainerAuthoring : MonoBehaviour
     {
         public override void Bake(PrefabContainerAuthoring authoring)
         {
-            var buffer = AddBuffer<PrefabContainer>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            var buffer = AddBuffer<PrefabContainer>(entity);
             foreach (var prefab in authoring.prefabs)
             {
                 buffer.Add(new PrefabContainer
                 {
                     id = prefab.name,
-                    prefab = GetEntity(prefab)
+                    prefab = GetEntity(prefab, TransformUsageFlags.Dynamic)
                 });
             }
         }

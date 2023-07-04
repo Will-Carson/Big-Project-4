@@ -346,6 +346,7 @@ public partial struct GoInGameServerSystem : ISystem
 
 public struct GoInGameRpc : IRpcCommand { }
 
+[BurstCompile]
 public struct PrefabContainer : IBufferElementData
 {
     public FixedString64Bytes id;

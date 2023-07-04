@@ -9,7 +9,9 @@ public class SpawnPointAuthoring : MonoBehaviour
     {
         public override void Bake(SpawnPointAuthoring authoring)
         {
-            AddComponent(new SpawnPoint());
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            AddComponent(entity, new SpawnPoint());
         }
     }
 }

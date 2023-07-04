@@ -34,7 +34,9 @@ public class GameResourcesAuthoring : MonoBehaviour
     {
         public override void Bake(GameResourcesAuthoring authoring)
         {
-            AddComponent(new GameResources
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            AddComponent(entity, new GameResources
             {
                 TickRate = authoring.TickRate,
                 SendRate = authoring.SendRate,
@@ -47,12 +49,12 @@ public class GameResourcesAuthoring : MonoBehaviour
                 GameResourcesScene = authoring.GameResourcesScene.GetEntitySceneReference(),
                 GameScene = authoring.GameScene.GetEntitySceneReference(),
             
-                PlayerGhost = GetEntity(authoring.PlayerGhost),
-                CharacterGhost = GetEntity(authoring.CharacterGhost),
-                RailgunGhost = GetEntity(authoring.RailgunGhost),
-                MachineGunGhost = GetEntity(authoring.MachineGunGhost),
+                PlayerGhost = GetEntity(authoring.PlayerGhost, TransformUsageFlags.Dynamic),
+                CharacterGhost = GetEntity(authoring.CharacterGhost, TransformUsageFlags.Dynamic),
+                RailgunGhost = GetEntity(authoring.RailgunGhost, TransformUsageFlags.Dynamic),
+                MachineGunGhost = GetEntity(authoring.MachineGunGhost, TransformUsageFlags.Dynamic),
             
-                SpectatorPrefab = GetEntity(authoring.SpectatorPrefab),
+                SpectatorPrefab = GetEntity(authoring.SpectatorPrefab, TransformUsageFlags.Dynamic),
             });
         }
     }

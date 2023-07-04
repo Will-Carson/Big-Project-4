@@ -14,7 +14,9 @@ public class BulletShotVisualsAuthoring : MonoBehaviour
     {
         public override void Bake(BulletShotVisualsAuthoring authoring)
         {
-            AddComponent(new BulletShotVisuals
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            AddComponent(entity, new BulletShotVisuals
             {
                 HitVisualsPrefab = GetEntity(authoring.HitVisualsPrefab),
                 Speed = authoring.Speed,

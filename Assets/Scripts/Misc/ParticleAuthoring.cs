@@ -10,7 +10,9 @@ public class ParticleAuthoring : MonoBehaviour
     {
         public override void Bake(ParticleAuthoring authoring)
         {
-            AddComponent(new Particle());
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            AddComponent(entity, new Particle());
         }
     }
 }

@@ -7,11 +7,13 @@ public class ItemAuthoring : MonoBehaviour
     {
         public override void Bake(ItemAuthoring authoring)
         {
-            AddBuffer<ContainerSlot>();
-            AddComponent<ItemSlotRestriction>();
-            AddComponent<ItemSessionId>();
-            AddComponent<ItemIcon>();
-            AddComponent<ContainerDisplayId>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            AddBuffer<ContainerSlot>(entity);
+            AddComponent<ItemSlotRestriction>(entity);
+            AddComponent<ItemSessionId>(entity);
+            AddComponent<ItemIcon>(entity);
+            AddComponent<ContainerDisplayId>(entity);
         }
     }
 }

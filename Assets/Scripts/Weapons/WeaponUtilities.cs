@@ -14,10 +14,12 @@ public static class WeaponUtilities
 {
     public static void AddBasicWeaponBakingComponents<T>(Baker<T> baker) where T : MonoBehaviour
     {
-        baker.AddComponent(new WeaponControl());
-        baker.AddComponent(new WeaponOwner());
-        baker.AddComponent(new WeaponShotSimulationOriginOverride());
-        baker.AddBuffer<WeaponShotIgnoredEntity>();
+        var entity = baker.GetEntity(TransformUsageFlags.Dynamic);
+
+        baker.AddComponent(entity, new WeaponControl());
+        baker.AddComponent(entity, new WeaponOwner());
+        baker.AddComponent(entity, new WeaponShotSimulationOriginOverride());
+        baker.AddBuffer<WeaponShotIgnoredEntity>(entity);
     }
 
     public static bool GetClosestValidWeaponRaycastHit(
@@ -30,32 +32,33 @@ public static class WeaponUtilities
         closestValidHit.Fraction = float.MaxValue;
         for (int j = 0; j < hits.Length; j++)
         {
-            //RaycastHit tmpHit = hits[j];
+            RaycastHit tmpHit = hits[j];
 
-            // Check closest so far
-            //if (tmpHit.Fraction < closestValidHit.Fraction)
-            //{
-            //    // Check collidable
-            //    if (KinematicCharacterUtilities.IsHitCollidableOrCharacter(in storedKinematicCharacterDataLookup, tmpHit.Material, tmpHit.Entity))
-            //    {
-            //        // Check entity ignore
-            //        bool entityValid = true;
-            //        for (int k = 0; k < ignoredEntities.Length; k++)
-            //        {
-            //            if (tmpHit.Entity == ignoredEntities[k].Entity)
-            //            {
-            //                entityValid = false;
-            //                break;
-            //            }
-            //        }
+            //Check closest so far
+            if (tmpHit.Fraction < closestValidHit.Fraction)
+            {
+                // Check collidable
+                //if (KinematicCharacterUtilities.IsHitCollidableOrCharacter(in storedKinematicCharacterDataLookup, tmpHit.Material, tmpHit.Entity))
+                if (true)
+                {
+                    // Check entity ignore
+                    bool entityValid = true;
+                    for (int k = 0; k < ignoredEntities.Length; k++)
+                    {
+                        if (tmpHit.Entity == ignoredEntities[k].Entity)
+                        {
+                            entityValid = false;
+                            break;
+                        }
+                    }
 
-            //        // Final hit
-            //        if (entityValid)
-            //        {
-            //            closestValidHit = tmpHit;
-            //        }
-            //    }
-            //}
+                    // Final hit
+                    if (entityValid)
+                    {
+                        closestValidHit = tmpHit;
+                    }
+                }
+            }
         }
 
         return closestValidHit.Entity != Entity.Null;
@@ -138,6 +141,8 @@ public static class WeaponUtilities
             hitDistance = closestValidHit.Fraction * weapon.Range;
             validHits.Add(closestValidHit);
         }
+
+        Debug.Log(hitFound);
 
         // No need to do visuals on resimulated ticks
         if (IsFirstTimeFullyPredictingTick)

@@ -8,8 +8,10 @@ public class PlatformerMonsterAuthoring : MonoBehaviour
     {
         public override void Bake(PlatformerMonsterAuthoring authoring)
         {
-            AddComponent(new PlatformerMonster());
-            AddComponent(new PlatformerMonsterInputs());
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            AddComponent(entity, new PlatformerMonster());
+            AddComponent(entity, new PlatformerMonsterInputs());
         }
     }
 }

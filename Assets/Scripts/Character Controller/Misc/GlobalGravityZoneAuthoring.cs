@@ -12,7 +12,9 @@ public class GlobalGravityZoneAuthoring : MonoBehaviour
     {
         public override void Bake(GlobalGravityZoneAuthoring authoring)
         {
-            AddComponent(new GlobalGravityZone { Gravity = authoring.Gravity });
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            AddComponent(entity, new GlobalGravityZone { Gravity = authoring.Gravity });
         }
     }
 }

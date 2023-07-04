@@ -12,7 +12,9 @@ public class StatEntityAnthoring : MonoBehaviour
     {
         public override void Bake(StatEntityAnthoring authoring)
         {
-            var baseStatStick = CreateAdditionalEntity();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            var baseStatStick = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
             AddBuffer<EquippedTo>(baseStatStick);
             var baseStatStickStats = AddBuffer<StatContainer>(baseStatStick);
 
@@ -21,17 +23,17 @@ public class StatEntityAnthoring : MonoBehaviour
                 baseStatStickStats.Add(stat);
             }
 
-            var equipTo = AddBuffer<EquipStatStickRequest>();
+            var equipTo = AddBuffer<EquipStatStickRequest>(entity);
             equipTo.Add(new EquipStatStickRequest
             {
                 entity = baseStatStick,
                 unequip = false
             });
 
-            AddBuffer<StatContainer>();
-            AddBuffer<DerivedStat>();
-            AddBuffer<StatStickContainer>();
-            AddComponent<StatRecalculationTag>();
+            AddBuffer<StatContainer>(entity);
+            AddBuffer<DerivedStat>(entity);
+            AddBuffer<StatStickContainer>(entity);
+            AddComponent<StatRecalculationTag>(entity);
         }
     }
 }

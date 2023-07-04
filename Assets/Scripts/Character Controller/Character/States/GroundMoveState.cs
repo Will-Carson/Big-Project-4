@@ -40,10 +40,10 @@ public struct GroundMoveState : IPlatformerCharacterState
                 characterBody.RelativeVelocity = math.rotate(characterBody.RotationFromParent, characterBody.RelativeVelocity);
             }
 
-            if (characterBody.IsGrounded)
+            if (characterBody.IsGrounded) // TODO is this necessary? 
             {
                 // Move on ground
-                float3 targetVelocity = characterControl.MoveVector * characterComponent.GroundRunMaxSpeed;
+                var targetVelocity = characterControl.MoveVector * characterComponent.GroundRunMaxSpeed;
                 CharacterControlUtilities.StandardGroundMove_Interpolated(ref characterBody.RelativeVelocity, targetVelocity, characterComponent.GroundedMovementSharpness, deltaTime, characterBody.GroundingUp, characterBody.GroundHit.Normal);
 
                 // Jump

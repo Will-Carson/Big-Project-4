@@ -7,9 +7,11 @@ public class BasicStatStickAuthoring : MonoBehaviour
     {
         public override void Bake(StatStickAuthoring authoring)
         {
-            AddBuffer<StatContainer>();
-            AddBuffer<StatRequirementContainer>();
-            AddBuffer<EquippedTo>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            AddBuffer<StatContainer>(entity);
+            AddBuffer<StatRequirementContainer>(entity);
+            AddBuffer<EquippedTo>(entity);
         }
     }
 }

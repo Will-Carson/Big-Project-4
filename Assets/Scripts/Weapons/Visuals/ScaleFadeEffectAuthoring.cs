@@ -15,8 +15,9 @@ public class ScaleFadeEffectAuthoring : MonoBehaviour
     {
         public override void Bake(ScaleFadeEffectAuthoring authoring)
         {
-            //AddComponent(new PostTransformScale { Value = float3x3.Scale(1f) });
-            AddComponent(new ScaleFade
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            AddComponent(entity, new ScaleFade
             {
                 LifeTime = authoring.Lifetime,
                 Width = authoring.Width,

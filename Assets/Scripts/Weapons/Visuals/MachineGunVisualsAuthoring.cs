@@ -14,7 +14,9 @@ public class MachineGunVisualsAuthoring : MonoBehaviour
     {
         public override void Bake(MachineGunVisualsAuthoring authoring)
         {
-            AddComponent(new MachineGunVisuals
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            AddComponent(entity, new MachineGunVisuals
             {
                 BarrelEntity = GetEntity(authoring.BarrelEntity),
                 SpinVelocity = authoring.SpinVelocity,

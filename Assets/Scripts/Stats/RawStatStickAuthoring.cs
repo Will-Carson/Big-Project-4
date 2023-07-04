@@ -7,8 +7,10 @@ public class RawStatStickAuthoring : MonoBehaviour
     {
         public override void Bake(RawStatStickAuthoring authoring)
         {
-            AddBuffer<StatContainer>();
-            AddBuffer<EquippedTo>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+            AddBuffer<StatContainer>(entity);
+            AddBuffer<EquippedTo>(entity);
         }
     }
 }
