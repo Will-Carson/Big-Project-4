@@ -1,19 +1,5 @@
 using Unity.NetCode;
 
-// This is a setup for dealing with a frontend menu which manually creates client and server worlds,
-// while still allowing play mode on a single level with auto connect.
-// If you do not need a frontend menu and just want to always auto connect it is usually enough to use
-// a simpler bootstrap like this:
-// [UnityEngine.Scripting.Preserve]
-// public class NetCodeBootstrap : ClientServerBootstrap
-// {
-//     public override bool Initialize(string defaultWorldName)
-//     {
-//         AutoConnectPort = 7979; // Enable auto connect
-//         return base.Initialize(defaultWorldName); // Use the regular bootstrap
-//     }
-// }
-
 // The preserve attibute is required to make sure the bootstrap is not stripped in il2cpp builds with stripping enabled
 [UnityEngine.Scripting.Preserve]
 // The bootstrap needs to extend `ClientServerBootstrap`, there can only be one class extending it in the project
@@ -30,23 +16,17 @@ public class NetCodeBootstrap : ClientServerBootstrap
         var sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         bool isFrontend = sceneName == "Frontend";
 #elif !FRONTEND_PLAYER_BUILD
-            bool isFrontend = false;
+        bool isFrontend = false;
 #endif
 
 #if UNITY_EDITOR || !FRONTEND_PLAYER_BUILD
         if (!isFrontend)
         {
-            // This will enable auto connect. We only enable auto connect if we are not going through frontend.
-            // The frontend will parse and validate the address before connecting manually.
-            // Using this auto connect feature will deal with the client only connect address from Multiplayer PlayMode Tools
             AutoConnectPort = 7979;
-            // Create the default client and server worlds, depending on build type in a player or the Multiplayer PlayMode Tools in the editor
             CreateDefaultClientServerWorlds();
         }
         else
         {
-            // Disable the autoconnect in the frontend. The reset i necessary in the Editor since we can start the demos directly and
-            // (the AutoConnectPort will lose its default value)
             AutoConnectPort = 0;
             CreateLocalWorld(defaultWorldName);
         }

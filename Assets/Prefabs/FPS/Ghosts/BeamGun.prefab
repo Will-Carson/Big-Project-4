@@ -172,39 +172,6 @@ MonoBehaviour:
   Damage: 1000
   SpreadDegrees: 0
   ProjectilesCount: 1
-  HitCollisionFilter:
-    Category00: 1
-    Category01: 1
-    Category02: 1
-    Category03: 1
-    Category04: 1
-    Category05: 1
-    Category06: 1
-    Category07: 1
-    Category08: 1
-    Category09: 1
-    Category10: 1
-    Category11: 1
-    Category12: 1
-    Category13: 1
-    Category14: 1
-    Category15: 1
-    Category16: 1
-    Category17: 1
-    Category18: 1
-    Category19: 1
-    Category20: 1
-    Category21: 1
-    Category22: 1
-    Category23: 1
-    Category24: 1
-    Category25: 1
-    Category26: 1
-    Category27: 1
-    Category28: 1
-    Category29: 1
-    Category30: 1
-    Category31: 1
 --- !u!114 &3902965599090628703
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -241,7 +208,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ComponentOverrides:
   - FullTypeName: Unity.Transforms.LocalTransform
-    GameObject: {fileID: 3902965599090628701}
+    EntityIndex: 0
     PrefabType: -1
     SendTypeOptimization: -1
     VariantHash: 10188360468653526834

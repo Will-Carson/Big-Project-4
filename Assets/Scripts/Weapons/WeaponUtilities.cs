@@ -37,26 +37,21 @@ public static class WeaponUtilities
             //Check closest so far
             if (tmpHit.Fraction < closestValidHit.Fraction)
             {
-                // Check collidable
-                //if (KinematicCharacterUtilities.IsHitCollidableOrCharacter(in storedKinematicCharacterDataLookup, tmpHit.Material, tmpHit.Entity))
-                if (true)
+                // Check entity ignore
+                bool entityValid = true;
+                for (int k = 0; k < ignoredEntities.Length; k++)
                 {
-                    // Check entity ignore
-                    bool entityValid = true;
-                    for (int k = 0; k < ignoredEntities.Length; k++)
+                    if (tmpHit.Entity == ignoredEntities[k].Entity)
                     {
-                        if (tmpHit.Entity == ignoredEntities[k].Entity)
-                        {
-                            entityValid = false;
-                            break;
-                        }
+                        entityValid = false;
+                        break;
                     }
+                }
 
-                    // Final hit
-                    if (entityValid)
-                    {
-                        closestValidHit = tmpHit;
-                    }
+                // Final hit
+                if (entityValid)
+                {
+                    closestValidHit = tmpHit;
                 }
             }
         }
@@ -131,18 +126,16 @@ public static class WeaponUtilities
             Filter = weapon.HitCollisionFilter,
         };
         CollisionWorld.CastRay(rayInput, ref Hits);
-        WeaponUtilities.GetClosestValidWeaponRaycastHit(in Hits, in StoredKinematicCharacterDataLookup, in ignoredEntities, out var closestValidHit);
+        GetClosestValidWeaponRaycastHit(in Hits, in StoredKinematicCharacterDataLookup, in ignoredEntities, out var closestValidHit);
 
         // Hit processing
         var hitFound = closestValidHit.Entity != Entity.Null;
         var hitDistance = weapon.Range;
-        if (closestValidHit.Entity != Entity.Null)
+        if (hitFound)
         {
             hitDistance = closestValidHit.Fraction * weapon.Range;
             validHits.Add(closestValidHit);
         }
-
-        Debug.Log(hitFound);
 
         // No need to do visuals on resimulated ticks
         if (IsFirstTimeFullyPredictingTick)

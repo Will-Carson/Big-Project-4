@@ -18,7 +18,6 @@ public class StandardRaycastWeaponAuthoring : MonoBehaviour
     public int Damage = 1000;
     public float SpreadDegrees = 0f;
     public int ProjectilesCount = 1;
-    //public PhysicsCategoryTags HitCollisionFilter;
     
     public class Baker : Baker<StandardRaycastWeaponAuthoring>
     {
@@ -38,7 +37,7 @@ public class StandardRaycastWeaponAuthoring : MonoBehaviour
                 Damage = authoring.Damage,
                 SpreadRadians = math.radians(authoring.SpreadDegrees),
                 ProjectilesCount = authoring.ProjectilesCount,
-                //HitCollisionFilter = new CollisionFilter { BelongsTo = CollisionFilter.Default.BelongsTo, CollidesWith = authoring.HitCollisionFilter.Value },
+                HitCollisionFilter = new CollisionFilter { BelongsTo = CollisionFilter.Default.BelongsTo, CollidesWith = CollisionFilter.Default.CollidesWith },
                 Random = Random.CreateFromIndex(0),
             });
             AddComponent<InterpolationDelay>(entity);
