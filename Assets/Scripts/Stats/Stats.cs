@@ -9,11 +9,11 @@
 /// 
 /// The versatility of stats is important. This means two things:
 /// 1. Stats must be able to be derived from any place; Auras, talent trees,
-/// equipment, or in the case of minions, from their 'owner.'
+/// equipment, or from an 'owner' in the case of pets/minions.
 /// 2. Stats must be able to be used to effect any aspect of game state.
 /// 
 /// The concept of the StatStick solves our first problem. A StatStick is any source
-/// of stats. Entities keep track of which StatSticks they have equipped, but
+/// of stats. Entities keep track of which StatSticks are applied to them, but
 /// StatSticks also keep track of which entities they are equipped to. This allows
 /// entities to update their own stats, and allows StatSticks force updates on
 /// entities they are equipped to when necessary (say, when an entity moves out of
@@ -38,11 +38,12 @@ using Unity.Collections;
 using Unity.NetCode;
 using Unity.Burst;
 using System;
+using Unity.Collections.LowLevel.Unsafe;
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateBefore(typeof(StatRecalculationSystemGroup))]
 [BurstCompile]
-public partial struct StatStickEquipper : ISystem
+public partial struct ApplyStatSticks : ISystem
 {
     private BufferLookup<EquippedTo> equippedToLookup;
     private BufferLookup<StatRequirementContainer> statStickRequirementLookup;
@@ -542,4 +543,205 @@ public readonly partial struct StatEntityAspect : IAspect
     public readonly DynamicBuffer<DerivedStat> derivedStats;
     public readonly DynamicBuffer<StatStickContainer> statSticks;
     public readonly DynamicBuffer<EquipStatStickRequest> equipRequests;
+}
+
+namespace StatsAsHashmap
+{
+    public struct ChangeStatsRequest : IBufferElementData
+    {
+        public Stats change;
+    }
+
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+    [UpdateBefore(typeof(StatRecalculationSystemGroup))]
+    [BurstCompile]
+    public partial struct ApplyChangeStatsRequest : ISystem
+    {
+        [BurstCompile]
+        public void OnCreate(ref SystemState state) { }
+
+        [BurstCompile]
+        public void OnDestroy(ref SystemState state) { }
+
+        [BurstCompile]
+        public void OnUpdate(ref SystemState state)
+        {
+            foreach (var (requests, stats, entity) in SystemAPI.Query<
+                DynamicBuffer<ChangeStatsRequest>,
+                RefRW<StatContainer>>()
+                .WithEntityAccess())
+            {
+                for (var i = 0; i < requests.Length; i++)
+                {
+                    var request = requests[i];
+                    stats.ValueRW.stats.AddStats(request.change);
+                }
+                requests.Clear();
+            }
+        }
+    }
+
+    public enum Stat : uint
+    {
+        Health,
+        Mana,
+        Damage,
+    }
+
+    public struct Stats
+    {
+        private UnsafeHashMap<uint, float> stats;
+
+        public Stats(int size)
+        {
+            stats = new UnsafeHashMap<uint, float>(size, Allocator.Persistent);
+        }
+
+        public bool GetStatValue(Stat stat, out float value)
+        {
+            return stats.TryGetValue((uint)stat, out value);
+        }
+
+        public void AddStat(Stat stat, float value)
+        {
+            if (value == 0) return;
+
+            if (GetStatValue(stat, out var oldValue))
+            {
+                if (value + oldValue == 0)
+                {
+                    stats.Remove((uint)stat);
+                    return;
+                }
+                stats[(uint)stat] = value + oldValue;
+            } 
+            else
+            {
+                stats.Add((uint)stat, value);
+            }
+        }
+
+        public float GetStatValue(Stat stat)
+        {
+            if (stats.TryGetValue((uint)stat,out var value))
+            {
+                return value;
+            }
+            return 0;
+        }
+
+        public void AddStats(Stats statsToAdd)
+        {
+            var stats = statsToAdd.GetEnumerator();
+
+            while (stats.MoveNext())
+            {
+                var stat = stats.Current;
+
+                AddStat((Stat)stat.Key, stat.Value);
+            }
+        }
+
+        public void RemoveStatsFrom(Stats statsToRemove)
+        {
+            var stats = statsToRemove.GetEnumerator();
+
+            while (stats.MoveNext())
+            {
+                var stat = stats.Current;
+
+                AddStat((Stat)stat.Key, -stat.Value);
+            }
+        }
+
+        public UnsafeHashMap<uint, float>.Enumerator GetEnumerator()
+        {
+            return stats.GetEnumerator();
+        }
+
+        public override string ToString()
+        {
+            var returnValue = "";
+
+            var stats = this.stats.GetEnumerator();
+
+            while (stats.MoveNext())
+            {
+                var stat = stats.Current;
+                returnValue += $"{(Stat)stat.Key} : {stat.Value}\n";
+            }
+
+            return returnValue;
+        }
+    }
+
+    public struct StatContainer : IComponentData
+    {
+        public Stats stats;
+    }
+
+    public struct StatRanges
+    {
+        private UnsafeHashMap<uint, Range> ranges;
+
+        public bool StatInRange(Stat stat, float value)
+        {
+            if (ranges.TryGetValue((uint)stat, out var range))
+            {
+                return range.IsInRange(value);
+            }
+            return false;
+        }
+
+        public bool StatsInRange(Stats stats)
+        {
+            var ranges = GetEnumerator();
+            while (ranges.MoveNext())
+            {
+                var kvp = ranges.Current;
+                var stat = (Stat)kvp.Key;
+                var value = stats.GetStatValue(stat);
+
+                if (!StatInRange(stat, value))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public UnsafeHashMap<uint, Range>.Enumerator GetEnumerator()
+        {
+            return ranges.GetEnumerator();
+        }
+    }
+
+    public struct Range
+    {
+        private float min;
+        private float max;
+
+        public Range(float min, float max)
+        {
+            this.min = min;
+            this.max = max;
+
+            if (min > max) throw new ArgumentException("Min is larger than max in range.");
+        }
+
+        public bool IsInRange(float value)
+        {
+            return value >= min && value <= max;
+        }
+    }
+
+    public struct StatRequirement : IComponentData
+    {
+        public StatRanges requirements;
+
+        public bool StatsMeetRequirements(Stats stats)
+        {
+            return requirements.StatsInRange(stats);
+        }
+    }
 }

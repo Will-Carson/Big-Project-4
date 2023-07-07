@@ -254,11 +254,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.transport": {
-      "version": "2.0.1",
-      "depth": 1,
+      "version": "2.0.2",
+      "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.collections": "2.1.1",
+        "com.unity.collections": "2.1.4",
         "com.unity.burst": "1.8.4",
         "com.unity.mathematics": "1.2.6"
       },
