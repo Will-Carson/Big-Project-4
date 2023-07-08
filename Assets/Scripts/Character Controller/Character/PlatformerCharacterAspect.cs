@@ -50,7 +50,7 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
     public readonly RefRW<PlatformerCharacterStateMachine> StateMachine;
     public readonly RefRW<CustomGravity> CustomGravity;
 
-    public readonly DynamicBuffer<StatContainer> StatContainer;
+    public readonly RefRW<StatContainer> StatContainer;
     public readonly RefRW<ActiveWeapon> ActiveWeapon;
 
     public void PhysicsUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext)

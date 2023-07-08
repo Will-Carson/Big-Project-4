@@ -1,5 +1,7 @@
 using UnityEngine;
 using Unity.Entities;
+using System.Linq.Expressions;
+using Unity.Collections;
 
 public class StatsTestAuthoring : MonoBehaviour
 {
@@ -12,13 +14,15 @@ public class StatsTestAuthoring : MonoBehaviour
 
             var extraStatStickEntity = CreateAdditionalEntity(TransformUsageFlags.None, entityName: "Extra stats");
             AddBuffer<EquippedTo>(extraStatStickEntity);
-            var extraStatStickStats = AddBuffer<StatContainer>(extraStatStickEntity);
-            extraStatStickStats.Add(new StatContainer { stat = StatType.AdditionalStrength, value = 100 });
+            var extraStatStickStats = new Stats(1, Allocator.Persistent);
+            extraStatStickStats.AddStat(Stat.AdditionalStrength, 100);
+            AddComponent(extraStatStickEntity, new StatContainer(extraStatStickStats));
 
             var baseStatStickEntity = CreateAdditionalEntity(TransformUsageFlags.None, entityName: "Base stats");
             AddBuffer<EquippedTo>(baseStatStickEntity);
-            var baseStatStickStats = AddBuffer<StatContainer>(baseStatStickEntity);
-            baseStatStickStats.Add(new StatContainer { stat = StatType.AdditionalLife, value = 100 });
+            var baseStatStickStats = new Stats(1, Allocator.Persistent);
+            baseStatStickStats.AddStat(Stat.AdditionalLife, 100);
+            AddComponent(baseStatStickEntity, new StatContainer(baseStatStickStats));
 
             var equipStatSticks = AddBuffer<EquipStatStickRequest>(entity);
             equipStatSticks.Add(new EquipStatStickRequest { unequip = false, entity = extraStatStickEntity });
@@ -26,14 +30,13 @@ public class StatsTestAuthoring : MonoBehaviour
             var derivedStats = AddBuffer<DerivedStat>(entity);
             derivedStats.Add(new DerivedStat
             {
-                fromStat = StatType.AdditionalStrength,
+                fromStat = Stat.AdditionalStrength,
                 fromValue = 10,
-                toStat = StatType.AdditionalLife,
+                toStat = Stat.AdditionalLife,
                 toValue = 2,
             });
 
-            AddBuffer<StatContainer>(entity);
-
+            AddComponent<StatContainer>(entity);
             AddComponent<StatRecalculationTag>(entity);
         }
     }

@@ -46,13 +46,13 @@ using Unity.Collections.LowLevel.Unsafe;
 public partial struct ApplyStatSticks : ISystem
 {
     private BufferLookup<EquippedTo> equippedToLookup;
-    private BufferLookup<StatRequirementContainer> statStickRequirementLookup;
+    private ComponentLookup<StatRequirements> statRequirementLookup;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         equippedToLookup = state.GetBufferLookup<EquippedTo>();
-        statStickRequirementLookup = state.GetBufferLookup<StatRequirementContainer>(true);
+        statRequirementLookup = state.GetComponentLookup<StatRequirements>(true);
     }
 
     [BurstCompile]
@@ -62,14 +62,14 @@ public partial struct ApplyStatSticks : ISystem
     public void OnUpdate(ref SystemState state)
     {
         equippedToLookup.Update(ref state);
-        statStickRequirementLookup.Update(ref state);
+        statRequirementLookup.Update(ref state);
 
         var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
 
         foreach (var (requests, statSticks, stats, entity) in SystemAPI.Query<
             DynamicBuffer<EquipStatStickRequest>,
             DynamicBuffer<StatStickContainer>,
-            DynamicBuffer<StatContainer>>()
+            RefRO<StatContainer>>()
             .WithEntityAccess())
         {
             var wasChanged = false;
@@ -111,31 +111,14 @@ public partial struct ApplyStatSticks : ISystem
                 }
                 else
                 {
-                    var requirementsMet = true;
-
                     // Check if this stat stick can be equipped. If the stat stick has no requirements, skip this step
-                    if (statStickRequirementLookup.TryGetBuffer(req.entity, out var requirementsBuffer))
+                    if (statRequirementLookup.TryGetComponent(req.entity, out var requirements))
                     {
-                        for (var j = 0; j < requirementsBuffer.Length; j++)
+                        if (!requirements.StatsMeetRequirements(stats.ValueRO.stats))
                         {
-                            var requirement = requirementsBuffer[j].requirement;
-
-                            for (var k = 0; k < stats.Length; k++)
-                            {
-                                var stat = stats[k];
-                                if (requirement.stat == stat.stat && !requirement.IsValueInRange(stat.value))
-                                {
-                                    requirementsMet = false;
-                                    break;
-                                }
-                            }
-
-                            // If we have already figured out we don't meet requirements, exit early
-                            if (!requirementsMet) break;
+                            continue;
                         }
                     }
-
-                    if (!requirementsMet) continue;
 
                     // Equip the statstick
                     statSticks.Add(new StatStickContainer { entity = req.entity });
@@ -168,13 +151,13 @@ public struct EquipStatStickRequest : IBufferElementData
 [BurstCompile]
 public partial struct StatTotaller : ISystem
 {
-    private BufferLookup<StatContainer> statsLookup;
+    private ComponentLookup<StatContainer> statsLookup;
     private BufferLookup<StatStickContainer> statSticksLookup;
 
     //[BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        statsLookup = state.GetBufferLookup<StatContainer>(true);
+        statsLookup = state.GetComponentLookup<StatContainer>(true);
         statSticksLookup = state.GetBufferLookup<StatStickContainer>(true);
 
         state.RequireForUpdate(state.GetEntityQuery(typeof(StatRecalculationTag)));
@@ -193,52 +176,25 @@ public partial struct StatTotaller : ISystem
         // Total stats from stat sticks and write that to the entities StatContainer buffer
         foreach (var (tag, stats, entity) in SystemAPI.Query<
             StatRecalculationTag,
-            DynamicBuffer<StatContainer>>()
+            RefRW<StatContainer>>()
             .WithEntityAccess())
         {
             if (!statSticksLookup.HasBuffer(entity)) return;
 
-            stats.Clear();
+            stats.ValueRW.stats.Clear();
 
             var statSticks = statSticksLookup[entity];
-            var statTotals = new NativeHashMap<int, int>(10, Allocator.Temp);
 
             for (var i = 0; i < statSticks.Length; i++)
             {
                 var statStick = statSticks[i];
 
-                if (!statsLookup.HasBuffer(statStick.entity)) return;
+                if (!statsLookup.HasComponent(statStick.entity)) return;
 
-                var statStickStats = statsLookup[statStick.entity];
+                var statStickStats = statsLookup[statStick.entity].stats;
 
-                for (var j = 0; j < statStickStats.Length; j++)
-                {
-                    var statStickStat = statStickStats[j];
-                    var statKey = (int)statStickStat.stat;
-                    var statValue = statStickStat.value;
-
-                    if (statTotals.ContainsKey(statKey))
-                    {
-                        statTotals[statKey] = statTotals[statKey] + statValue;
-                    }
-                    else
-                    {
-                        statTotals.Add(statKey, statValue);
-                    }
-                }
+                stats.ValueRW.stats.AddStats(statStickStats);
             }
-
-            // Add all stats to the StatContainer buffer
-            var keyArray = statTotals.GetKeyArray(Allocator.Temp);
-            for (var i = 0; i < keyArray.Length; i++)
-            {
-                var key = keyArray[i];
-                stats.Add(new StatContainer((StatType)key, statTotals[key]));
-            }
-
-            // Dispose of Native* types
-            keyArray.Dispose();
-            statTotals.Dispose();
         }
     }
 }
@@ -274,7 +230,7 @@ public partial struct DerivedStatHandlerSystem : ISystem
     {
         /// Sort the derived stats before we actually derive any stats. This
         /// ensures a reliable order to the way derived stats are processed.
-        /// It also imposes the limitation that the StatType enum order is
+        /// It also imposes the limitation that the Stat enum order is
         /// significant for determining which stats can meaningfully derive from
         /// which others. This may not be desireable behaviour in the future.
         foreach (var (tag, derivedStats) in SystemAPI.Query<
@@ -299,10 +255,10 @@ public partial struct DerivedStatHandlerSystem : ISystem
 
         derivedStatsLookup.Update(ref state);
 
-        foreach (var (tag, stats, entity) in SystemAPI.Query<
-            StatRecalculationTag,
-            DynamicBuffer<StatContainer>>()
-            .WithEntityAccess())
+        foreach (var (stats, entity) in SystemAPI.Query<
+            RefRW<StatContainer>>()
+            .WithEntityAccess()
+            .WithAll<StatRecalculationTag>())
         {
             if (!derivedStatsLookup.HasBuffer(entity)) return;
 
@@ -311,14 +267,13 @@ public partial struct DerivedStatHandlerSystem : ISystem
             for (var i = 0; i < derivedStats.Length; i++)
             {
                 var derivedStat = derivedStats[i];
-                for (var j = 0; j < stats.Length; j++)
-                {
-                    var stat = stats[j].stat;
-                    if (derivedStat.fromStat != stat) continue;
 
-                    var statToAdd = new StatContainer(derivedStat.toStat, (stats[j].value / derivedStat.fromValue) * derivedStat.toValue);
-                    StatContainer.Add(stats, statToAdd); // Does this need to be "ref stats"?
-                }
+                var fromStatValue = stats.ValueRW.stats.GetStatValue(derivedStat.fromStat);
+                var fromStatDivisor = derivedStat.fromValue;
+                var toStatMultiplier = derivedStat.toValue;
+                var bonusStatTotal = fromStatValue / fromStatDivisor * toStatMultiplier;
+
+                stats.ValueRW.stats.AddStat(derivedStat.toStat, bonusStatTotal);
             }
         }
     }
@@ -326,63 +281,54 @@ public partial struct DerivedStatHandlerSystem : ISystem
 
 public struct DerivedStat : IBufferElementData
 {
-    public StatType fromStat;
+    public Stat fromStat;
     public int fromValue;
-    public StatType toStat;
+    public Stat toStat;
     public int toValue;
 }
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(StatRecalculationSystemGroup))]
 [UpdateAfter(typeof(DerivedStatHandlerSystem))]
-public partial class CombinedStatCalculationSystem : SystemBase
+[BurstCompile]
+public partial struct StructCombinedStatCalculationSystem : ISystem
 {
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
         var statDefinitions = SystemAPI.GetSingleton<StatDefinitions.Singleton>();
 
         // Build StatContainers on CombinedStatResultContainers.
-        Entities
-        .WithAll<StatRecalculationTag>()
-        .ForEach((
-        Entity entity,
-        in DynamicBuffer<CombinedStatResultsContainer> combinedStatResults,
-        in DynamicBuffer<StatContainer> stats) =>
+        foreach (var (combinedStatResults, stats, entity) in SystemAPI.Query<
+            DynamicBuffer<StatFlavors>, 
+            RefRO<StatContainer>>()
+            .WithEntityAccess()
+            .WithAll<StatRecalculationTag>())
         {
             for (var i = 0; i < combinedStatResults.Length; i++)
             {
                 var combinedStatResult = combinedStatResults[i];
 
-                var combinedStatBuffer = commandBuffer.AddBuffer<StatContainer>(combinedStatResult.entity);
+                var combinedStats = new Stats(100, Allocator.Persistent); // TODO the number 100 was chosen arbitrarily and WILL cause strange behavior in the future.
 
-                var statResults = new NativeHashMap<int, int>(100, Allocator.Temp);
-                statDefinitions.TotalStatsWithFlavor(stats, combinedStatResult.statFlavorFlags, ref statResults);
+                statDefinitions.TotalStatsWithFlavor(stats.ValueRO.stats, combinedStatResult.statFlavorFlags, ref combinedStats);
 
-                var statResultsEnum = statResults.GetEnumerator();
-
-                while (statResultsEnum.MoveNext())
+                if (combinedStatResult.stats.Initialized())
                 {
-                    var current = statResultsEnum.Current;
-                    combinedStatBuffer.Add(
-                        new StatContainer
-                        {
-                            stat = (StatType)current.Key,
-                            value = current.Value,
-                        });
+                    combinedStatResult.stats.Dispose();
                 }
 
-                statResults.Dispose();
+                combinedStatResult.stats = combinedStats;
             }
-        })
-        .Run();
+        }
     }
 }
 
-public struct CombinedStatResultsContainer : IBufferElementData
+public struct StatFlavors : IBufferElementData
 {
     public StatFlavorFlag statFlavorFlags;
-    public Entity entity;
+    public Stats stats;
 }
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
@@ -450,87 +396,270 @@ public partial class StatRecalculationSystemGroup : ComponentSystemGroup
 /// </summary>
 public struct StatRecalculationTag : IComponentData { }
 
-[Serializable]
-[GhostComponent(OwnerSendType = SendToOwnerType.SendToOwner)]
-public struct StatContainer : IBufferElementData
+[ChunkSerializable]
+public struct Stats
 {
-    [GhostField]
-    public StatType stat;
-    [GhostField]
-    public int value;
+    private UnsafeHashMap<uint, float> stats;
 
-    public StatContainer(StatType stat, int value)
+    public Stats(int size, Allocator allocator)
     {
-        this.stat = stat;
-        this.value = value;
+        stats = new UnsafeHashMap<uint, float>(size, allocator);
     }
 
-    public static void Add(DynamicBuffer<StatContainer> stats, StatContainer statToAdd)
+    public bool GetStatValue(Stat stat, out float value)
     {
-        var hasStat = false;
-        for (var i = 0; i < stats.Length; i++)
+        return stats.TryGetValue((uint)stat, out value);
+    }
+
+    public void AddStat(Stat stat, float value)
+    {
+        if (value == 0) return;
+
+        if (GetStatValue(stat, out var oldValue))
         {
-            var stat = stats[i];
-            if (stat.stat == statToAdd.stat)
+            if (value + oldValue == 0)
             {
-                hasStat = true;
-                stats.Insert(i, statToAdd + stat);
+                stats.Remove((uint)stat);
+                return;
             }
+            stats[(uint)stat] = value + oldValue;
         }
-        if (!hasStat)
+        else
         {
-            stats.Add(statToAdd);
+            stats.Add((uint)stat, value);
         }
     }
 
-    public static StatContainer operator +(StatContainer a, StatContainer b)
+    public void AddStat((Stat, float) stat)
     {
-        if (a.stat == b.stat) return new StatContainer();
+        AddStat(stat.Item1, stat.Item2);
+    }
 
-        return new StatContainer { stat = a.stat, value = a.value + b.value };
+    public float GetStatValue(Stat stat)
+    {
+        if (stats.TryGetValue((uint)stat, out var value))
+        {
+            return value;
+        }
+        return 0;
+    }
+
+    public void AddStats(Stats statsToAdd)
+    {
+        var stats = statsToAdd.GetEnumerator();
+
+        while (stats.MoveNext())
+        {
+            var stat = stats.Current;
+
+            AddStat((Stat)stat.Key, stat.Value);
+        }
+    }
+
+    public void RemoveStatsFrom(Stats statsToRemove)
+    {
+        var stats = statsToRemove.GetEnumerator();
+
+        while (stats.MoveNext())
+        {
+            var stat = stats.Current;
+
+            AddStat((Stat)stat.Key, -stat.Value);
+        }
+    }
+
+    public UnsafeHashMap<uint, float>.Enumerator GetEnumerator()
+    {
+        return stats.GetEnumerator();
+    }
+
+    public void Clear()
+    {
+        stats.Clear();
+    }
+
+    public void Dispose()
+    {
+        stats.Dispose();
+    }
+
+    public bool Initialized()
+    {
+        return stats.IsCreated;
     }
 
     public override string ToString()
     {
-        return $"{stat} : {value}";
+        var returnValue = "";
+
+        var stats = this.stats.GetEnumerator();
+
+        while (stats.MoveNext())
+        {
+            var stat = stats.Current;
+            returnValue += $"{(Stat)stat.Key} : {stat.Value}\n";
+        }
+
+        return returnValue;
     }
 }
 
-public struct StatRequirementContainer : IBufferElementData
+public struct StatContainer : IComponentData
 {
-    public StatRequirement requirement;
+    public Stats stats;
+
+    public StatContainer(Stats baseStatStickStats)
+    {
+        stats = baseStatStickStats;
+    }
+
+    public StatContainer(int size, Allocator allocator)
+    {
+        stats = new Stats(size, allocator);
+    }
+
+    public void Dispose()
+    {
+        stats.Dispose();
+    }
 }
 
-public struct StatRequirement
+[ChunkSerializable]
+public struct StatRanges
 {
-    public StatType stat;
-    public int min;
-    public int max;
+    private UnsafeHashMap<uint, Range> ranges;
 
-    public bool IsValueInRange(int value)
+    public StatRanges(int size, Allocator allocator)
+    {
+        ranges = new UnsafeHashMap<uint, Range>(size, allocator);
+    }
+
+    public void AddRange(Stat stat, Range range)
+    {
+        if (ranges.ContainsKey((uint)stat))
+        {
+            ranges[(uint)stat] = range;
+        }
+        else
+        {
+            ranges.Add((uint)stat, range);
+        }
+    }
+
+    public void AddRange((Stat, float, float) range)
+    {
+        AddRange(range.Item1, new Range(range.Item2, range.Item3));
+    }
+
+    public bool StatInRange(Stat stat, float value)
+    {
+        if (ranges.TryGetValue((uint)stat, out var range))
+        {
+            return range.IsInRange(value);
+        }
+        return false;
+    }
+
+    public bool StatsInRange(Stats stats)
+    {
+        var ranges = GetEnumerator();
+        while (ranges.MoveNext())
+        {
+            var kvp = ranges.Current;
+            var stat = (Stat)kvp.Key;
+            var value = stats.GetStatValue(stat);
+
+            if (!StatInRange(stat, value))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public UnsafeHashMap<uint, Range>.Enumerator GetEnumerator()
+    {
+        return ranges.GetEnumerator();
+    }
+
+    public void Dispose()
+    {
+        ranges.Dispose();
+    }
+}
+
+public struct Range
+{
+    private float min;
+    private float max;
+
+    public Range(float min, float max)
+    {
+        this.min = min;
+        this.max = max;
+
+        if (min > max) throw new ArgumentException("Min is larger than max in range.");
+    }
+
+    public bool IsInRange(float value)
     {
         return value >= min && value <= max;
     }
 
-    public override string ToString()
+    public static Range FromMin(float min)
     {
-        return $"{stat} : {min}, {max}";
+        return new Range(min, float.MaxValue);
+    }
+
+    public static Range FromMax(float max)
+    {
+        return new Range(float.MinValue, max);
+    }
+}
+
+public struct StatRequirements : IComponentData
+{
+    public StatRanges requirements;
+
+    public StatRequirements(StatRanges ranges)
+    {
+        requirements = ranges;
+    }
+
+    public StatRequirements(int size, Allocator allocator)
+    {
+        requirements = new StatRanges(size, allocator);
+    }
+
+    public bool StatsMeetRequirements(Stats stats)
+    {
+        return requirements.StatsInRange(stats);
+    }
+
+    public UnsafeHashMap<uint, Range>.Enumerator GetEnumerator()
+    {
+        return requirements.GetEnumerator();
+    }
+
+    public void Dispose() 
+    { 
+        requirements.Dispose(); 
     }
 }
 
 public readonly partial struct StatStickAspect : IAspect
 {
     public readonly Entity entity;
-    public readonly DynamicBuffer<StatContainer> stats;
-    public readonly DynamicBuffer<StatRequirementContainer> requirements;
+    public readonly RefRW<StatContainer> stats;
+    public readonly RefRW<StatRequirements> requirements;
     public readonly DynamicBuffer<EquippedTo> equippedTo;
 }
 
 public readonly partial struct AdvancedStatStick : IAspect
 {
     public readonly Entity entity;
-    public readonly DynamicBuffer<StatContainer> stats;
-    public readonly DynamicBuffer<StatRequirementContainer> requirements;
+    public readonly RefRW<StatContainer> stats;
+    public readonly RefRW<StatRequirements> requirements;
     public readonly DynamicBuffer<EquippedTo> equippedTo;
     public readonly DynamicBuffer<StatStickContainer> statSticks;
     public readonly DynamicBuffer<EquipStatStickRequest> equipRequests;
@@ -539,209 +668,8 @@ public readonly partial struct AdvancedStatStick : IAspect
 public readonly partial struct StatEntityAspect : IAspect
 {
     public readonly Entity entity;
-    public readonly DynamicBuffer<StatContainer> stats;
+    public readonly RefRW<StatContainer> stats;
     public readonly DynamicBuffer<DerivedStat> derivedStats;
     public readonly DynamicBuffer<StatStickContainer> statSticks;
     public readonly DynamicBuffer<EquipStatStickRequest> equipRequests;
-}
-
-namespace StatsAsHashmap
-{
-    public struct ChangeStatsRequest : IBufferElementData
-    {
-        public Stats change;
-    }
-
-    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
-    [UpdateBefore(typeof(StatRecalculationSystemGroup))]
-    [BurstCompile]
-    public partial struct ApplyChangeStatsRequest : ISystem
-    {
-        [BurstCompile]
-        public void OnCreate(ref SystemState state) { }
-
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state) { }
-
-        [BurstCompile]
-        public void OnUpdate(ref SystemState state)
-        {
-            foreach (var (requests, stats, entity) in SystemAPI.Query<
-                DynamicBuffer<ChangeStatsRequest>,
-                RefRW<StatContainer>>()
-                .WithEntityAccess())
-            {
-                for (var i = 0; i < requests.Length; i++)
-                {
-                    var request = requests[i];
-                    stats.ValueRW.stats.AddStats(request.change);
-                }
-                requests.Clear();
-            }
-        }
-    }
-
-    public enum Stat : uint
-    {
-        Health,
-        Mana,
-        Damage,
-    }
-
-    public struct Stats
-    {
-        private UnsafeHashMap<uint, float> stats;
-
-        public Stats(int size)
-        {
-            stats = new UnsafeHashMap<uint, float>(size, Allocator.Persistent);
-        }
-
-        public bool GetStatValue(Stat stat, out float value)
-        {
-            return stats.TryGetValue((uint)stat, out value);
-        }
-
-        public void AddStat(Stat stat, float value)
-        {
-            if (value == 0) return;
-
-            if (GetStatValue(stat, out var oldValue))
-            {
-                if (value + oldValue == 0)
-                {
-                    stats.Remove((uint)stat);
-                    return;
-                }
-                stats[(uint)stat] = value + oldValue;
-            } 
-            else
-            {
-                stats.Add((uint)stat, value);
-            }
-        }
-
-        public float GetStatValue(Stat stat)
-        {
-            if (stats.TryGetValue((uint)stat,out var value))
-            {
-                return value;
-            }
-            return 0;
-        }
-
-        public void AddStats(Stats statsToAdd)
-        {
-            var stats = statsToAdd.GetEnumerator();
-
-            while (stats.MoveNext())
-            {
-                var stat = stats.Current;
-
-                AddStat((Stat)stat.Key, stat.Value);
-            }
-        }
-
-        public void RemoveStatsFrom(Stats statsToRemove)
-        {
-            var stats = statsToRemove.GetEnumerator();
-
-            while (stats.MoveNext())
-            {
-                var stat = stats.Current;
-
-                AddStat((Stat)stat.Key, -stat.Value);
-            }
-        }
-
-        public UnsafeHashMap<uint, float>.Enumerator GetEnumerator()
-        {
-            return stats.GetEnumerator();
-        }
-
-        public override string ToString()
-        {
-            var returnValue = "";
-
-            var stats = this.stats.GetEnumerator();
-
-            while (stats.MoveNext())
-            {
-                var stat = stats.Current;
-                returnValue += $"{(Stat)stat.Key} : {stat.Value}\n";
-            }
-
-            return returnValue;
-        }
-    }
-
-    public struct StatContainer : IComponentData
-    {
-        public Stats stats;
-    }
-
-    public struct StatRanges
-    {
-        private UnsafeHashMap<uint, Range> ranges;
-
-        public bool StatInRange(Stat stat, float value)
-        {
-            if (ranges.TryGetValue((uint)stat, out var range))
-            {
-                return range.IsInRange(value);
-            }
-            return false;
-        }
-
-        public bool StatsInRange(Stats stats)
-        {
-            var ranges = GetEnumerator();
-            while (ranges.MoveNext())
-            {
-                var kvp = ranges.Current;
-                var stat = (Stat)kvp.Key;
-                var value = stats.GetStatValue(stat);
-
-                if (!StatInRange(stat, value))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public UnsafeHashMap<uint, Range>.Enumerator GetEnumerator()
-        {
-            return ranges.GetEnumerator();
-        }
-    }
-
-    public struct Range
-    {
-        private float min;
-        private float max;
-
-        public Range(float min, float max)
-        {
-            this.min = min;
-            this.max = max;
-
-            if (min > max) throw new ArgumentException("Min is larger than max in range.");
-        }
-
-        public bool IsInRange(float value)
-        {
-            return value >= min && value <= max;
-        }
-    }
-
-    public struct StatRequirement : IComponentData
-    {
-        public StatRanges requirements;
-
-        public bool StatsMeetRequirements(Stats stats)
-        {
-            return requirements.StatsInRange(stats);
-        }
-    }
 }

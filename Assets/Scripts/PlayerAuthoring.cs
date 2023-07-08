@@ -14,7 +14,7 @@ public class PlayerAuthoring : MonoBehaviour
             AddBuffer<ContainerSlot>(entity);
 
             // Stat stuff
-            AddBuffer<StatContainer>(entity);
+            AddComponent<StatContainer>(entity);
             AddBuffer<DerivedStat>(entity);
             AddBuffer<StatStickContainer>(entity);
             AddBuffer<EquipStatStickRequest>(entity);

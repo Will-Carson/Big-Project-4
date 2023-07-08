@@ -1,7 +1,3 @@
-///
-///
-///
-
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
@@ -9,16 +5,16 @@ using Unity.NetCode;
 public struct TalentAuthoring
 {
     public string name;
-    public StatType stat;
+    public Stat stat;
     public int pointCost;
     public int levelRequirement;
     public int maxTalentLevel;
 
     // Stats required to allocate a talent
-    public StatRequirement[] requires;
+    public (Stat, float, float)[] requires;
 
     // Stats granted by allocating a talent
-    public StatContainer[] grants;
+    public (Stat, float)[] grants;
 }
 
 public static class TalentDefinitions
@@ -29,181 +25,181 @@ public static class TalentDefinitions
         new TalentAuthoring
         {
             name = "Physique",
-            stat = StatType.TalentPhysique,
+            stat = Stat.TalentPhysique,
             pointCost = 1,
             levelRequirement = 1,
             maxTalentLevel = 10,
-            requires = new StatRequirement[]
+            requires = new[]
             {
-                // No special requirements
+                ( Stat.TalentPoint, 1f, float.MaxValue ),
             },
-            grants = new StatContainer[]
+            grants = new[]
             {
-                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
+                ( Stat.AdditionalStrength, 10f ),
             },
         }, // Physique
-        new TalentAuthoring
-        {
-            name = "Reason",
-            stat = StatType.TalentReason,
-            pointCost = 1,
-            levelRequirement = 1,
-            maxTalentLevel = 10,
-            requires = new StatRequirement[]
-            {
-                // No special requirements
-            },
-            grants = new StatContainer[]
-            {
-                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
-            },
-        }, // Reason
-        new TalentAuthoring
-        {
-            name = "Dexterity",
-            stat = StatType.TalentDexterity,
-            pointCost = 1,
-            levelRequirement = 1,
-            maxTalentLevel = 10,
-            requires = new StatRequirement[]
-            {
-                // No special requirements
-            },
-            grants = new StatContainer[]
-            {
-                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
-            },
-        }, // Dexterity
-        new TalentAuthoring
-        {
-            name = "Perception",
-            stat = StatType.TalentPerception,
-            pointCost = 1,
-            levelRequirement = 1,
-            maxTalentLevel = 10,
-            requires = new StatRequirement[]
-            {
-                // No special requirements
-            },
-            grants = new StatContainer[]
-            {
-                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
-            },
-        }, // Perception
-        new TalentAuthoring
-        {
-            name = "Melee",
-            stat = StatType.TalentMelee,
-            pointCost = 1,
-            levelRequirement = 1,
-            maxTalentLevel = 10,
-            requires = new StatRequirement[]
-            {
-                // No special requirements
-            },
-            grants = new StatContainer[]
-            {
-                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
-            },
-        }, // Melee
-        new TalentAuthoring
-        {
-            name = "Ranged",
-            stat = StatType.TalentRanged,
-            pointCost = 1,
-            levelRequirement = 1,
-            maxTalentLevel = 10,
-            requires = new StatRequirement[]
-            {
-                // No special requirements
-            },
-            grants = new StatContainer[]
-            {
-                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
-            },
-        }, // Ranged
-        new TalentAuthoring
-        {
-            name = "Engineering",
-            stat = StatType.TalentEngineering,
-            pointCost = 1,
-            levelRequirement = 1,
-            maxTalentLevel = 10,
-            requires = new StatRequirement[]
-            {
-                // No special requirements
-            },
-            grants = new StatContainer[]
-            {
-                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
-            },
-        }, // Engineering
-        new TalentAuthoring
-        {
-            name = "Mysticism",
-            stat = StatType.TalentMysticism,
-            pointCost = 1,
-            levelRequirement = 1,
-            maxTalentLevel = 10,
-            requires = new StatRequirement[]
-            {
-                // No special requirements
-            },
-            grants = new StatContainer[]
-            {
-                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
-            },
-        }, // Mysticism
-        new TalentAuthoring
-        {
-            name = "Medicine",
-            stat = StatType.TalentMedicine,
-            pointCost = 1,
-            levelRequirement = 1,
-            maxTalentLevel = 10,
-            requires = new StatRequirement[]
-            {
-                // No special requirements
-            },
-            grants = new StatContainer[]
-            {
-                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
-            },
-        }, // Medicine
-        new TalentAuthoring
-        {
-            name = "Defense",
-            stat = StatType.TalentDefense,
-            pointCost = 1,
-            levelRequirement = 1,
-            maxTalentLevel = 10,
-            requires = new StatRequirement[]
-            {
-                // No special requirements
-            },
-            grants = new StatContainer[]
-            {
-                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
-            },
-        }, // Defense
+        //new TalentAuthoring
+        //{
+        //    name = "Reason",
+        //    stat = Stat.TalentReason,
+        //    pointCost = 1,
+        //    levelRequirement = 1,
+        //    maxTalentLevel = 10,
+        //    requires = new StatRequirement[]
+        //    {
+        //        // No special requirements
+        //    },
+        //    grants = new StatContainer[]
+        //    {
+        //        new StatContainer { stat = Stat.AdditionalStrength, value = 10 },
+        //    },
+        //}, // Reason
+        //new TalentAuthoring
+        //{
+        //    name = "Dexterity",
+        //    stat = Stat.TalentDexterity,
+        //    pointCost = 1,
+        //    levelRequirement = 1,
+        //    maxTalentLevel = 10,
+        //    requires = new StatRequirement[]
+        //    {
+        //        // No special requirements
+        //    },
+        //    grants = new StatContainer[]
+        //    {
+        //        new StatContainer { stat = Stat.AdditionalStrength, value = 10 },
+        //    },
+        //}, // Dexterity
+        //new TalentAuthoring
+        //{
+        //    name = "Perception",
+        //    stat = Stat.TalentPerception,
+        //    pointCost = 1,
+        //    levelRequirement = 1,
+        //    maxTalentLevel = 10,
+        //    requires = new StatRequirement[]
+        //    {
+        //        // No special requirements
+        //    },
+        //    grants = new StatContainer[]
+        //    {
+        //        new StatContainer { stat = Stat.AdditionalStrength, value = 10 },
+        //    },
+        //}, // Perception
+        //new TalentAuthoring
+        //{
+        //    name = "Melee",
+        //    stat = Stat.TalentMelee,
+        //    pointCost = 1,
+        //    levelRequirement = 1,
+        //    maxTalentLevel = 10,
+        //    requires = new StatRequirement[]
+        //    {
+        //        // No special requirements
+        //    },
+        //    grants = new StatContainer[]
+        //    {
+        //        new StatContainer { stat = Stat.AdditionalStrength, value = 10 },
+        //    },
+        //}, // Melee
+        //new TalentAuthoring
+        //{
+        //    name = "Ranged",
+        //    stat = Stat.TalentRanged,
+        //    pointCost = 1,
+        //    levelRequirement = 1,
+        //    maxTalentLevel = 10,
+        //    requires = new StatRequirement[]
+        //    {
+        //        // No special requirements
+        //    },
+        //    grants = new StatContainer[]
+        //    {
+        //        new StatContainer { stat = Stat.AdditionalStrength, value = 10 },
+        //    },
+        //}, // Ranged
+        //new TalentAuthoring
+        //{
+        //    name = "Engineering",
+        //    stat = Stat.TalentEngineering,
+        //    pointCost = 1,
+        //    levelRequirement = 1,
+        //    maxTalentLevel = 10,
+        //    requires = new StatRequirement[]
+        //    {
+        //        // No special requirements
+        //    },
+        //    grants = new StatContainer[]
+        //    {
+        //        new StatContainer { stat = Stat.AdditionalStrength, value = 10 },
+        //    },
+        //}, // Engineering
+        //new TalentAuthoring
+        //{
+        //    name = "Mysticism",
+        //    stat = Stat.TalentMysticism,
+        //    pointCost = 1,
+        //    levelRequirement = 1,
+        //    maxTalentLevel = 10,
+        //    requires = new StatRequirement[]
+        //    {
+        //        // No special requirements
+        //    },
+        //    grants = new StatContainer[]
+        //    {
+        //        new StatContainer { stat = Stat.AdditionalStrength, value = 10 },
+        //    },
+        //}, // Mysticism
+        //new TalentAuthoring
+        //{
+        //    name = "Medicine",
+        //    stat = Stat.TalentMedicine,
+        //    pointCost = 1,
+        //    levelRequirement = 1,
+        //    maxTalentLevel = 10,
+        //    requires = new StatRequirement[]
+        //    {
+        //        // No special requirements
+        //    },
+        //    grants = new StatContainer[]
+        //    {
+        //        new StatContainer { stat = Stat.AdditionalStrength, value = 10 },
+        //    },
+        //}, // Medicine
+        //new TalentAuthoring
+        //{
+        //    name = "Defense",
+        //    stat = Stat.TalentDefense,
+        //    pointCost = 1,
+        //    levelRequirement = 1,
+        //    maxTalentLevel = 10,
+        //    requires = new StatRequirement[]
+        //    {
+        //        // No special requirements
+        //    },
+        //    grants = new StatContainer[]
+        //    {
+        //        new StatContainer { stat = Stat.AdditionalStrength, value = 10 },
+        //    },
+        //}, // Defense
 
-        // Level 4 talents
-        new TalentAuthoring
-        {
-            name = "Technique",
-            stat = StatType.TalentTechnique,
-            pointCost = 1,
-            levelRequirement = 4,
-            maxTalentLevel = 10,
-            requires = new StatRequirement[]
-            {
-                // No special requirements
-            },
-            grants = new StatContainer[]
-            {
-                new StatContainer { stat = StatType.AdditionalStrength, value = 10 },
-            },
-        }, // Technique
+        //// Level 4 talents
+        //new TalentAuthoring
+        //{
+        //    name = "Technique",
+        //    stat = Stat.TalentTechnique,
+        //    pointCost = 1,
+        //    levelRequirement = 4,
+        //    maxTalentLevel = 10,
+        //    requires = new StatRequirement[]
+        //    {
+        //        // No special requirements
+        //    },
+        //    grants = new StatContainer[]
+        //    {
+        //        new StatContainer { stat = Stat.AdditionalStrength, value = 10 },
+        //    },
+        //}, // Technique
     };
 
     public static void CreateTalentsAsEntities(EntityManager em)
@@ -222,61 +218,32 @@ public static class TalentDefinitions
             });
 
             // Add requirements
-            var requirementsBuffer = em.AddBuffer<StatRequirementContainer>(talentEntity);
+            var requirements = new StatRanges(talent.requires.Length + 3, Allocator.Persistent);
 
             /// Do not allow players to take the talent if they do not meet level requirements, or if
             /// they already have too many points allocated in this talent. Next add the talent points
             /// requirement. Then add the addition requirements that are specific to a talent.
-            requirementsBuffer.Add(new StatRequirementContainer
-            {
-                requirement = new StatRequirement
-                {
-                    stat = StatType.Level,
-                    min = talent.levelRequirement,
-                    max = int.MaxValue
-                }
-            });
-            requirementsBuffer.Add(new StatRequirementContainer
-            {
-                requirement = new StatRequirement
-                {
-                    stat = talent.stat,
-                    min = 0,
-                    max = talent.maxTalentLevel
-                }
-            });
-            requirementsBuffer.Add(new StatRequirementContainer
-            {
-                requirement = new StatRequirement
-                {
-                    stat = StatType.TalentPoint,
-                    min = talent.pointCost,
-                    max = int.MaxValue
-                }
-            });
+            requirements.AddRange(Stat.Level, Range.FromMin(talent.levelRequirement));
+            requirements.AddRange(talent.stat, Range.FromMax(talent.maxTalentLevel));
+            requirements.AddRange(Stat.TalentPoint, Range.FromMin(talent.pointCost));
+
             foreach (var req in talent.requires)
             {
-                requirementsBuffer.Add(new StatRequirementContainer { requirement = req });
+                requirements.AddRange(req);
             }
 
+            em.AddComponentData(talentEntity, new StatRequirements(requirements));
+
             // Add granted stats
-            var statsBuffer = em.AddBuffer<StatContainer>(talentEntity);
+            var stats = new Stats(talent.grants.Length + 2, Allocator.Persistent);
 
             /// Add the talent to the granted stats buffer, the talent point cost, and then add 
             /// the regular granted stats.
-            statsBuffer.Add(new StatContainer
-            {
-                stat = talent.stat,
-                value = 1,
-            });
-            statsBuffer.Add(new StatContainer
-            {
-                stat = StatType.TalentPoint,
-                value = -talent.pointCost
-            });
+            stats.AddStat(talent.stat, 1);
+            stats.AddStat(Stat.TalentPoint, -talent.pointCost);
             foreach (var grants in talent.grants)
             {
-                statsBuffer.Add(grants);
+                stats.AddStat(grants);
             }
         }
     }
@@ -333,11 +300,11 @@ public partial class TalentServerSystem : SystemBase
 
 public struct TalentAllocationRequestRpc : IRpcCommand
 {
-    public StatType stat;
+    public Stat stat;
     public bool deallocate;
 }
 
 public struct TalentComponent : IComponentData
 {
-    public StatType stat;
+    public Stat stat;
 }

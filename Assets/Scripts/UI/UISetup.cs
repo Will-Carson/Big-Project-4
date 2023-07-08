@@ -206,7 +206,7 @@ public partial class UISetup : SystemBase
             // build the tooltip string
             var tooltipString = $"{talent.name}\n\nRequirements:\n\n";
 
-            tooltipString += $"{StatType.TalentPoint} : {talent.pointCost}\n";
+            tooltipString += $"{Stat.TalentPoint} : {talent.pointCost}\n";
 
             foreach (var requirement in talent.requires)
             {

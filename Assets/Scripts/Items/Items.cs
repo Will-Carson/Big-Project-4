@@ -45,11 +45,11 @@ public static class BaseItemDefinitions
             tags = new ItemTag[] { ItemTag.Armor, ItemTag.Body },
             grants = new StatRange[]
             {
-                new StatRange { stat = StatType.AdditionalStrength, min = 3, max = 5 },
+                new StatRange { stat = Stat.AdditionalStrength, min = 3, max = 5 },
             },
-            requirements = new StatRequirement[]
+            requirements = new StatRange[]
             {
-                new StatRequirement { stat = StatType.AdditionalStrength, min = 10, max = int.MaxValue },
+                new StatRange { stat = Stat.AdditionalStrength, min = 10, max = int.MaxValue },
             },
         },
     };
@@ -68,15 +68,16 @@ public static class BaseItemDefinitions
             var baseStatsStatStickEntity = em.Instantiate(rawStatStickPrefab);
 
             // Configure the entity
-            var baseStatsBuffer = em.AddBuffer<StatContainer>(baseStatsStatStickEntity);
-            foreach (var stat in baseItem.grants)
-            {
-                baseStatsBuffer.Add(new StatContainer
-                {
-                    stat = stat.stat,
-                    value = stat.max
-                });
-            }
+            var baseStats = em.AddComponent<StatContainer>(baseStatsStatStickEntity);
+
+            //foreach (var stat in baseItem.grants)
+            //{
+            //    baseStats.Add(new StatContainer
+            //    {
+            //        stat = stat.stat,
+            //        value = stat.max
+            //    });
+            //}
 
             var equipStatStickRequestsBuffer = em.AddBuffer<EquipStatStickRequest>(baseItemEntity);
             equipStatStickRequestsBuffer.Add(new EquipStatStickRequest
@@ -105,7 +106,7 @@ public static class AffixDefinitions
             tags = new ItemTag[] { ItemTag.Armor, ItemTag.Jewellery },
             grants = new StatRange[]
             {
-                new StatRange { stat = StatType.AdditionalStrength, min = 5, max = 8 },
+                new StatRange { stat = Stat.AdditionalStrength, min = 5, max = 8 },
             },
         },
     };
@@ -114,30 +115,30 @@ public static class AffixDefinitions
 
     public static void CreateAffixesAsEntities(EntityManager em, DynamicBuffer<PrefabContainer> prefabs)
     {
-        var statStickPrefab = PrefabContainer.GetEntityWithId(prefabs, "RawStatStick");
-        for (var i = 0; i < Affixes.Length; i++)
-        {
-            var affix = Affixes[i];
+        //var statStickPrefab = PrefabContainer.GetEntityWithId(prefabs, "RawStatStick");
+        //for (var i = 0; i < Affixes.Length; i++)
+        //{
+        //    var affix = Affixes[i];
 
-            var affixEntity = em.Instantiate(statStickPrefab);
-            em.SetName(affixEntity, "Affix-" + affix.name);
+        //    var affixEntity = em.Instantiate(statStickPrefab);
+        //    em.SetName(affixEntity, "Affix-" + affix.name);
 
-            // Configure the entity
-            var statBuffer = em.AddBuffer<StatContainer>(affixEntity);
-            for (var j = 0; j < affix.grants.Length; j++)
-            {
-                var grantedStat = affix.grants[j];
-                statBuffer.Add(new StatContainer
-                {
-                    stat = grantedStat.stat,
-                    value = grantedStat.max
-                });
-            }
+        //    // Configure the entity
+        //    var statBuffer = em.AddBuffer<StatContainer>(affixEntity);
+        //    for (var j = 0; j < affix.grants.Length; j++)
+        //    {
+        //        var grantedStat = affix.grants[j];
+        //        statBuffer.Add(new StatContainer
+        //        {
+        //            stat = grantedStat.stat,
+        //            value = grantedStat.max
+        //        });
+        //    }
 
-            // Add it back to the dictionary
-            affix.entity = affixEntity;
-            Affixes[i] = affix;
-        }
+        //    // Add it back to the dictionary
+        //    affix.entity = affixEntity;
+        //    Affixes[i] = affix;
+        //}
     }
 
     public static List<Entity> GetAffixesWithTags(uint ilevel, List<ItemTag> tags)
@@ -183,15 +184,15 @@ public struct BaseItemData
     public int minItemLevel;
     public ItemTag[] tags;
     public StatRange[] grants;
-    public StatRequirement[] requirements;
+    public StatRange[] requirements;
     public Entity entity;
 }
 
 public struct StatRange
 {
-    public StatType stat;
-    public int min;
-    public int max;
+    public Stat stat;
+    public float min;
+    public float max;
 }
 
 public enum ItemTag

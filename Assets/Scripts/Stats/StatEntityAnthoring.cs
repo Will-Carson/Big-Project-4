@@ -1,13 +1,9 @@
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
 public class StatEntityAnthoring : MonoBehaviour
 {
-    public StatContainer[] baseStats = new StatContainer[]
-    {
-        new StatContainer { stat = StatType.AdditionalLife, value = 100 },
-    };
-
     class Baker : Baker<StatEntityAnthoring>
     {
         public override void Bake(StatEntityAnthoring authoring)
@@ -16,12 +12,10 @@ public class StatEntityAnthoring : MonoBehaviour
 
             var baseStatStick = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
             AddBuffer<EquippedTo>(baseStatStick);
-            var baseStatStickStats = AddBuffer<StatContainer>(baseStatStick);
+            var baseStatStickStats = new Stats(1, Allocator.Persistent);
 
-            foreach (var stat in authoring.baseStats)
-            {
-                baseStatStickStats.Add(stat);
-            }
+            baseStatStickStats.AddStat(Stat.AdditionalLife, 100);
+            AddComponent(baseStatStick, new StatContainer(baseStatStickStats));
 
             var equipTo = AddBuffer<EquipStatStickRequest>(entity);
             equipTo.Add(new EquipStatStickRequest
@@ -30,7 +24,7 @@ public class StatEntityAnthoring : MonoBehaviour
                 unequip = false
             });
 
-            AddBuffer<StatContainer>(entity);
+            AddComponent<StatContainer>(entity);
             AddBuffer<DerivedStat>(entity);
             AddBuffer<StatStickContainer>(entity);
             AddComponent<StatRecalculationTag>(entity);
