@@ -1,3 +1,4 @@
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
@@ -9,8 +10,8 @@ public class BasicStatStickAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-            AddComponent<StatContainer>(entity);
-            AddComponent<StatRequirements>(entity);
+            AddComponent<StatContainerTag>(entity);
+            AddComponent<StatRequirementsTag>(entity);
             AddBuffer<EquippedTo>(entity);
         }
     }

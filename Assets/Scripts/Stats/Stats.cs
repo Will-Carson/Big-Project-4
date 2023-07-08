@@ -384,12 +384,51 @@ public partial struct StatRecalculationTagCleanUpSystem : ISystem
     }
 }
 
+[BurstCompile]
+public partial struct StatCleanupAndInitializationSystem : ISystem
+{
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
+
+        foreach (var (tag, entity) in SystemAPI.Query<RefRO<StatContainerTag>>()
+            .WithEntityAccess()
+            .WithNone<StatContainer>())
+        {
+            commandBuffer.AddComponent(entity, new StatContainer(100, Allocator.Persistent));
+        }
+
+        foreach (var (tag, entity) in SystemAPI.Query<RefRO<StatRequirementsTag>>()
+            .WithEntityAccess()
+            .WithNone<StatRequirements>())
+        {
+            commandBuffer.AddComponent(entity, new StatRequirements(100, Allocator.Persistent));
+        }
+
+        foreach (var (stats, entity) in SystemAPI.Query<
+            RefRW<StatContainer>>()
+            .WithEntityAccess()
+            .WithNone<StatContainerTag>())
+        {
+            stats.ValueRW.Dispose();
+            commandBuffer.RemoveComponent<StatContainer>(entity);
+        }
+
+        foreach (var (requirements, entity) in SystemAPI.Query<
+            RefRW<StatRequirements>>()
+            .WithEntityAccess()
+            .WithNone<StatRequirementsTag>())
+        {
+            requirements.ValueRW.Dispose();
+            commandBuffer.RemoveComponent<StatRequirements>(entity);
+        }
+    }
+}
+
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(SimulationSystemGroup))]
-public partial class StatRecalculationSystemGroup : ComponentSystemGroup
-{
-
-}
+public partial class StatRecalculationSystemGroup : ComponentSystemGroup { }
 
 /// <summary>
 /// Marks entities for stat recalculation
@@ -504,7 +543,7 @@ public struct Stats
     }
 }
 
-public struct StatContainer : IComponentData
+public struct StatContainer : ICleanupComponentData
 {
     public Stats stats;
 
@@ -617,7 +656,7 @@ public struct Range
     }
 }
 
-public struct StatRequirements : IComponentData
+public struct StatRequirements : ICleanupComponentData
 {
     public StatRanges requirements;
 
@@ -646,6 +685,10 @@ public struct StatRequirements : IComponentData
         requirements.Dispose(); 
     }
 }
+
+public struct StatContainerTag : IComponentData { }
+
+public struct StatRequirementsTag : IComponentData { }
 
 public readonly partial struct StatStickAspect : IAspect
 {

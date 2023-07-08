@@ -36,7 +36,7 @@ public class StatsTestAuthoring : MonoBehaviour
                 toValue = 2,
             });
 
-            AddComponent<StatContainer>(entity);
+            AddComponent(entity, new StatContainer(100, Allocator.Persistent));
             AddComponent<StatRecalculationTag>(entity);
         }
     }

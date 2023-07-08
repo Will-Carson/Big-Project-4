@@ -1,3 +1,4 @@
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
@@ -14,7 +15,7 @@ public class PlayerAuthoring : MonoBehaviour
             AddBuffer<ContainerSlot>(entity);
 
             // Stat stuff
-            AddComponent<StatContainer>(entity);
+            AddComponent<StatContainerTag>(entity);
             AddBuffer<DerivedStat>(entity);
             AddBuffer<StatStickContainer>(entity);
             AddBuffer<EquipStatStickRequest>(entity);
