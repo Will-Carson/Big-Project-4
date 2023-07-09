@@ -30,8 +30,6 @@
 /// and completely rebuilt. It would be good to test this vs a partial rebuild
 /// implementation that simply adds or removes stats from a statstick when it is
 /// added or removed.
-/// 
-/// TODO Theory craft a use for components that have Native containers on them.
 
 using Unity.Entities;
 using Unity.Collections;
@@ -291,7 +289,7 @@ public struct DerivedStat : IBufferElementData
 [UpdateInGroup(typeof(StatRecalculationSystemGroup))]
 [UpdateAfter(typeof(DerivedStatHandlerSystem))]
 [BurstCompile]
-public partial struct StructCombinedStatCalculationSystem : ISystem
+public partial struct CombinedStatCalculationSystem : ISystem
 {
     [BurstCompile]
     public void OnUpdate(ref SystemState state)

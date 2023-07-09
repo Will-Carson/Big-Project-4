@@ -21,8 +21,7 @@ public class PlayerAuthoring : MonoBehaviour
             AddBuffer<EquipStatStickRequest>(entity);
 
             // Character controller stuff
-
-            AddComponent<LocalPlayerTag>(entity);
+            AddComponent<LocalPlayerTag>(entity); // TODO there's no way adding this to every player is appropriate
         }
     }
 }

@@ -1,6 +1,9 @@
+using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(CustomStatHandlingSystemGroup))]
@@ -22,39 +25,37 @@ public partial class BuildWeaponEffectsSystem : SystemBase
 
 
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
-public partial class EffectSystem : SystemBase
+[BurstCompile]
+public partial struct EffectSystem : ISystem
 {
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(SystemState state)
     {
-        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
         var healthLookup = SystemAPI.GetComponentLookup<Health>();
 
-        Entities
-        .ForEach((
-        Entity entity,
-        ref DynamicBuffer<ApplyEffectToEntityBuffer> applyToEntityBuffer,
-        in DamageHealthEffect damageEffect) =>
+        foreach (var (applyToEntityBuffer, damageEffect) in SystemAPI.Query<
+            DynamicBuffer<ApplyEffectToEntityBuffer>,
+            RefRO<DamageHealthEffect>>())
         {
             /// 
 
             for (var i = 0; i < applyToEntityBuffer.Length; i++)
             {
                 var targetEntity = applyToEntityBuffer[i].entity;
+                Debug.Log(targetEntity);
 
                 if (healthLookup.TryGetComponent(targetEntity, out var targetHealth))
                 {
-                    targetHealth.currentHealth -= damageEffect.damageValue;
+                    targetHealth.currentHealth -= damageEffect.ValueRO.damageValue;
                     healthLookup[targetEntity] = targetHealth;
                 }
             }
-        })
-        .Run();
+        }
 
-        Entities
-        .ForEach((
-        Entity entity,
-        ref DynamicBuffer<ApplyEffectAtPositionBuffer> applyAtPositionBuffer,
-        in CastEffectEffect castEffect) =>
+        foreach (var (applyAtPositionBuffer, castEffect) in SystemAPI.Query<
+            DynamicBuffer<ApplyEffectAtPositionBuffer>,
+            RefRO<CastEffectEffect>>())
         {
             /// 
 
@@ -62,47 +63,43 @@ public partial class EffectSystem : SystemBase
             {
                 var position = applyAtPositionBuffer[i].position;
 
-                var instance = commandBuffer.Instantiate(castEffect.entity);
+                var instance = commandBuffer.Instantiate(castEffect.ValueRO.entity);
                 commandBuffer.SetComponent(instance, LocalTransform.FromPosition(position));
             }
-        })
-        .Run();
+        }
 
-        Entities
-        .ForEach((
-        ref DynamicBuffer<ApplyEffectToEntityBuffer> applyEffectToEntityBuffer) =>
+        foreach (var applyEffectToEntityBuffer in SystemAPI.Query<
+            DynamicBuffer<ApplyEffectToEntityBuffer>>())
         {
             applyEffectToEntityBuffer.Clear();
-        })
-        .Run();
+        }
 
-        Entities
-        .ForEach((
-        ref DynamicBuffer<ApplyEffectAtPositionBuffer> applyEffectAtPositionBuffer) =>
+        foreach (var applyAtPositionBuffer in SystemAPI.Query<
+            DynamicBuffer<ApplyEffectAtPositionBuffer>>())
         {
-            applyEffectAtPositionBuffer.Clear();
-        })
-        .Run();
+            applyAtPositionBuffer.Clear();
+        }
     }
 }
 
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 [UpdateBefore(typeof(TransformSystemGroup))]
 [UpdateAfter(typeof(PostPredictionPreTransformsECBSystem))]
-public partial class ScaleFadeSystem : SystemBase
+public partial struct ScaleFadeSystem : ISystem
 {
-    protected override void OnUpdate()
+    public void OnUpdate(SystemState state)
     {
-        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
         var elapsedTime = (float)SystemAPI.Time.ElapsedTime;
 
-        Entities
-        .ForEach((
-        Entity entity,
-        ref ScaleFade scaleFade,
-        //ref PostTransformScale postTransformScale,
-        ref LocalTransform localTransform) =>
+        foreach (var (scaleFadeRef, localTransformRef, entity) in SystemAPI.Query<
+            RefRW<ScaleFade>,
+            RefRW<LocalTransform>>()
+            .WithEntityAccess())
         {
+            var scaleFade = scaleFadeRef.ValueRW;
+            var localTransform = localTransformRef.ValueRW;
+
             if (!scaleFade.HasInitialized)
             {
                 scaleFade.StartTime = elapsedTime;
@@ -130,8 +127,7 @@ public partial class ScaleFadeSystem : SystemBase
             {
                 commandBuffer.DestroyEntity(entity);
             }
-        })
-        .Run();
+        }
     }
 }
 
