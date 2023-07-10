@@ -10,6 +10,27 @@ using Unity.Entities;
 /// 4. A player runs through a choice gate. The other gate despawns. A new encounter area is spawned. <summary>
 
 
+public struct DreamOrb : IComponentData
+{
+
+}
+
+/// <summary>
+/// Detects when a dream orb is hit. Spawns an encounter.
+/// </summary>
+[BurstCompile]
+public partial struct DreamOrbSystem : ISystem
+{
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        foreach (var (orb, entity) in SystemAPI.Query<DreamOrb>().WithEntityAccess())
+        {
+
+        }
+    }
+}
+
 public struct SpawnDreamRequest : IComponentData
 {
 
@@ -19,7 +40,7 @@ public struct SpawnDreamRequest : IComponentData
 public partial struct SpawnDreamRequestHandler : ISystem
 {
     [BurstCompile]
-    public void OnUpdate(SystemState state)
+    public void OnUpdate(ref SystemState state)
     {
         foreach (var (request, entity) in SystemAPI.Query<SpawnDreamRequest>().WithEntityAccess())
         {

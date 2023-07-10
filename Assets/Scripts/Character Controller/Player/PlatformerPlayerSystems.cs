@@ -162,10 +162,6 @@ public partial struct PlatformerPlayerFixedStepControlSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    { }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         uint fixedTick = SystemAPI.GetSingleton<FixedTickSystem.Singleton>().Tick;

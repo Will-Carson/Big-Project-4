@@ -75,24 +75,3 @@ public partial class MonsterSpawningSystem : SystemBase
         commandBuffer.SetComponent(characterInstance, new PlatformerMonster { Name = random.NextInt().ToString() });
     }
 }
-
-[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
-public partial class DeathSystem : SystemBase
-{
-    protected override void OnUpdate()
-    {
-        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
-
-        Entities
-        .ForEach((
-        Entity entity,
-        in Health health) =>
-        {
-            if (health.currentHealth <= 0)
-            {
-                commandBuffer.DestroyEntity(entity);
-            }
-        })
-        .Run();
-    }
-}

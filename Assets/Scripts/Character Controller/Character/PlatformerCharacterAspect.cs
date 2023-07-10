@@ -10,7 +10,7 @@ using Unity.NetCode;
 public struct PlatformerCharacterUpdateContext
 {
     public int ChunkIndex;
-    public EntityCommandBuffer.ParallelWriter EndFrameECB;
+    public EntityCommandBuffer.ParallelWriter commandBuffer;
     [ReadOnly] public ComponentLookup<CharacterFrictionModifier> CharacterFrictionModifierLookup;
     [ReadOnly] public BufferLookup<LinkedEntityGroup> LinkedEntityGroupLookup;
     [ReadOnly] public ComponentLookup<WeaponVisualFeedback> WeaponVisualFeedbackLookup;
@@ -33,7 +33,7 @@ public struct PlatformerCharacterUpdateContext
 
     public void OnSystemUpdate(ref SystemState state, EntityCommandBuffer endFrameECB)
     {
-        EndFrameECB = endFrameECB.AsParallelWriter();
+        commandBuffer = endFrameECB.AsParallelWriter();
         CharacterFrictionModifierLookup.Update(ref state);
         LinkedEntityGroupLookup.Update(ref state);
         WeaponVisualFeedbackLookup.Update(ref state);
@@ -50,7 +50,8 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
     public readonly RefRW<PlatformerCharacterStateMachine> StateMachine;
     public readonly RefRW<CustomGravity> CustomGravity;
 
-    public readonly RefRW<StatContainer> StatContainer;
+    public readonly RefRO<StatContainer> StatContainer;
+    public readonly RefRO<Health> Health;
     public readonly RefRW<ActiveWeapon> ActiveWeapon;
 
     public void PhysicsUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext)
@@ -121,7 +122,11 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
         ref var characterControl = ref CharacterControl.ValueRW;
 
         // If health is 0, transition to "dead" state.
-        
+        if (stateMachine.CurrentState != CharacterState.Dead && Health.ValueRO.currentHealth <= 0)
+        {
+            stateMachine.TransitionToState(CharacterState.Dead, ref context, ref baseContext, in this);
+            return true;
+        }
 
         if (stateMachine.CurrentState != CharacterState.Swimming && stateMachine.CurrentState != CharacterState.FlyingNoCollisions)
         {

@@ -40,17 +40,14 @@ public struct GroundMoveState : IPlatformerCharacterState
                 characterBody.RelativeVelocity = math.rotate(characterBody.RotationFromParent, characterBody.RelativeVelocity);
             }
 
-            if (characterBody.IsGrounded) // TODO is this necessary? 
-            {
-                // Move on ground
-                var targetVelocity = characterControl.MoveVector * characterComponent.GroundRunMaxSpeed;
-                CharacterControlUtilities.StandardGroundMove_Interpolated(ref characterBody.RelativeVelocity, targetVelocity, characterComponent.GroundedMovementSharpness, deltaTime, characterBody.GroundingUp, characterBody.GroundHit.Normal);
+            // Move on ground
+            var targetVelocity = characterControl.MoveVector * characterComponent.GroundRunMaxSpeed;
+            CharacterControlUtilities.StandardGroundMove_Interpolated(ref characterBody.RelativeVelocity, targetVelocity, characterComponent.GroundedMovementSharpness, deltaTime, characterBody.GroundingUp, characterBody.GroundHit.Normal);
 
-                // Jump
-                if (characterControl.JumpPressed)
-                {
-                    CharacterControlUtilities.StandardJump(ref characterBody, characterBody.GroundingUp * characterComponent.AirJumpSpeed, true, characterBody.GroundingUp);
-                }
+            // Jump
+            if (characterControl.JumpPressed)
+            {
+                CharacterControlUtilities.StandardJump(ref characterBody, characterBody.GroundingUp * characterComponent.AirJumpSpeed, true, characterBody.GroundingUp);
             }
         }
 
@@ -73,7 +70,7 @@ public struct GroundMoveState : IPlatformerCharacterState
 
         // Weapon
         PlatformerCharacterAspect.HandleWeaponSubstate(
-            context.EndFrameECB,
+            context.commandBuffer,
             context.ChunkIndex,
             aspect.ActiveWeapon.ValueRO,
             context.WeaponControlLookup,
@@ -108,10 +105,12 @@ public struct GroundMoveState : IPlatformerCharacterState
         ref KinematicCharacterBody characterBody = ref aspect.CharacterAspect.CharacterBody.ValueRW;
         ref PlatformerCharacterControl characterControl = ref aspect.CharacterControl.ValueRW;
         ref PlatformerCharacterStateMachine stateMachine = ref aspect.StateMachine.ValueRW;
-        
+
+        aspect.DetectGlobalTransitions(ref context, ref baseContext);
+
         if (characterControl.CrouchPressed)
         {
-            stateMachine.TransitionToState(CharacterState.Crouched, ref context, ref baseContext, in aspect);
+            stateMachine.TransitionToState(CharacterState.Crouched, ref context, ref baseContext, in aspect); 
             return true;
         }
 
@@ -142,6 +141,6 @@ public struct GroundMoveState : IPlatformerCharacterState
             }
         }
 
-        return aspect.DetectGlobalTransitions(ref context, ref baseContext);
+        return false;
     }
 }

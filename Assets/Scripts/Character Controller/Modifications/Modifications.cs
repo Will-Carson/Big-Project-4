@@ -371,6 +371,8 @@ public struct StunnedState : IPlatformerCharacterState
 
 public struct DeadState : IPlatformerCharacterState
 {
+    float deathTime;
+
     public void GetCameraParameters(in PlatformerCharacterComponent character, out Entity cameraTarget, out bool calculateUpFromGravity)
     {
         cameraTarget = Entity.Null;
@@ -384,7 +386,7 @@ public struct DeadState : IPlatformerCharacterState
 
     public void OnStateEnter(CharacterState previousState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
-
+        deathTime = (float)baseContext.Time.ElapsedTime;
     }
 
     public void OnStateExit(CharacterState nextState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
@@ -399,7 +401,11 @@ public struct DeadState : IPlatformerCharacterState
 
     public void OnStateVariableUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
-
+        var currentTime = (float)baseContext.Time.ElapsedTime;
+        if (currentTime - deathTime > 5f)
+        {
+            context.commandBuffer.DestroyEntity(context.ChunkIndex, aspect.CharacterAspect.Entity);
+        }
     }
 }
 

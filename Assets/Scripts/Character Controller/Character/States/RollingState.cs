@@ -17,7 +17,7 @@ public struct RollingState : IPlatformerCharacterState
         characterProperties.EvaluateGrounding = false;
         characterBody.IsGrounded = false;
 
-        PlatformerUtilities.SetEntityHierarchyEnabledParallel(true, character.RollballMeshEntity, context.EndFrameECB, context.ChunkIndex, context.LinkedEntityGroupLookup);
+        PlatformerUtilities.SetEntityHierarchyEnabledParallel(true, character.RollballMeshEntity, context.commandBuffer, context.ChunkIndex, context.LinkedEntityGroupLookup);
     }
 
     public void OnStateExit(CharacterState nextState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
@@ -27,7 +27,7 @@ public struct RollingState : IPlatformerCharacterState
 
         characterProperties.EvaluateGrounding = true;
 
-        PlatformerUtilities.SetEntityHierarchyEnabledParallel(false, character.RollballMeshEntity, context.EndFrameECB, context.ChunkIndex, context.LinkedEntityGroupLookup);
+        PlatformerUtilities.SetEntityHierarchyEnabledParallel(false, character.RollballMeshEntity, context.commandBuffer, context.ChunkIndex, context.LinkedEntityGroupLookup);
     }
 
     public void OnStatePhysicsUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)

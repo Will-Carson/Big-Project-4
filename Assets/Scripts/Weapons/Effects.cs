@@ -1,49 +1,50 @@
 using Unity.Burst;
+using Unity.CharacterController;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.NetCode;
 using Unity.Transforms;
 using UnityEngine;
 
-[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
-[UpdateInGroup(typeof(CustomStatHandlingSystemGroup))]
-public partial class BuildWeaponEffectsSystem : SystemBase
-{
-    protected override void OnUpdate()
-    {
-        Entities
-        .WithAll<StatRecalculationTag>()
-        .ForEach((
-        Entity entity, 
-        ref DynamicBuffer<EffectBuffer> effects) =>
-        {
-
-        })
-        .Run();
-    }
-}
-
-
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
+[UpdateAfter(typeof(KinematicCharacterPhysicsUpdateGroup))]
 [BurstCompile]
 public partial struct EffectSystem : ISystem
 {
+    private ComponentLookup<Health> healthLookup;
+    private EntityQuery query;
+
     [BurstCompile]
-    public void OnUpdate(SystemState state)
+    public void OnCreate(ref SystemState state)
     {
+        query = new EntityQueryBuilder(Allocator.Temp).WithAll<Health>().Build(ref state);
+        state.RequireForUpdate(query);
+        healthLookup = SystemAPI.GetComponentLookup<Health>(); // TODO this is wrong
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        healthLookup.Update(ref state);
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
-        var healthLookup = SystemAPI.GetComponentLookup<Health>();
+
+        /// I can't figure out how to make the Health component "blocking" for this system.
+        /// Basically, if I don't have this here then other systems will complain if they access
+        /// health inside of a job. I SHOULD be able to just add Health to the RequireForUpdate 
+        /// for this system but that doesn't work. This does.
+        foreach (var health in SystemAPI.Query<RefRW<Health>>())
+        {
+            break;
+        }
 
         foreach (var (applyToEntityBuffer, damageEffect) in SystemAPI.Query<
             DynamicBuffer<ApplyEffectToEntityBuffer>,
             RefRO<DamageHealthEffect>>())
         {
-            /// 
-
             for (var i = 0; i < applyToEntityBuffer.Length; i++)
             {
                 var targetEntity = applyToEntityBuffer[i].entity;
-                Debug.Log(targetEntity);
 
                 if (healthLookup.TryGetComponent(targetEntity, out var targetHealth))
                 {
@@ -57,8 +58,6 @@ public partial struct EffectSystem : ISystem
             DynamicBuffer<ApplyEffectAtPositionBuffer>,
             RefRO<CastEffectEffect>>())
         {
-            /// 
-
             for (var i = 0; i < applyAtPositionBuffer.Length; i++)
             {
                 var position = applyAtPositionBuffer[i].position;
@@ -87,36 +86,33 @@ public partial struct EffectSystem : ISystem
 [UpdateAfter(typeof(PostPredictionPreTransformsECBSystem))]
 public partial struct ScaleFadeSystem : ISystem
 {
-    public void OnUpdate(SystemState state)
+    public void OnUpdate(ref SystemState state)
     {
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
         var elapsedTime = (float)SystemAPI.Time.ElapsedTime;
 
-        foreach (var (scaleFadeRef, localTransformRef, entity) in SystemAPI.Query<
+        foreach (var (scaleFade, localTransform, entity) in SystemAPI.Query<
             RefRW<ScaleFade>,
             RefRW<LocalTransform>>()
             .WithEntityAccess())
         {
-            var scaleFade = scaleFadeRef.ValueRW;
-            var localTransform = localTransformRef.ValueRW;
-
-            if (!scaleFade.HasInitialized)
+            if (!scaleFade.ValueRO.HasInitialized)
             {
-                scaleFade.StartTime = elapsedTime;
+                scaleFade.ValueRW.StartTime = elapsedTime;
 
                 // Scale
-                scaleFade.StartingScale = localTransform.Scale;
+                scaleFade.ValueRW.StartingScale = localTransform.ValueRO.Scale;
 
-                scaleFade.HasInitialized = true;
+                scaleFade.ValueRW.HasInitialized = true;
             }
 
-            if (scaleFade.LifeTime > 0f)
+            if (scaleFade.ValueRO.LifeTime > 0f)
             {
-                float timeRatio = (elapsedTime - scaleFade.StartTime) / scaleFade.LifeTime;
+                float timeRatio = (elapsedTime - scaleFade.ValueRO.StartTime) / scaleFade.ValueRO.LifeTime;
                 float clampedTimeRatio = math.clamp(timeRatio, 0f, 1f);
                 float invTimeRatio = 1f - clampedTimeRatio;
 
-                localTransform.Scale = scaleFade.StartingScale * invTimeRatio;
+                localTransform.ValueRW.Scale = scaleFade.ValueRO.StartingScale * invTimeRatio;
 
                 if (timeRatio >= 1f)
                 {
@@ -168,6 +164,12 @@ public struct ApplyEffectAtPositionBuffer : IBufferElementData
 
 public struct Health : IComponentData
 {
-    public int maxHealth;
-    public int currentHealth;
+    public float maxHealth;
+    public float currentHealth;
+
+    public Health(float maxHealth)
+    {
+        this.maxHealth = maxHealth;
+        this.currentHealth = maxHealth;
+    }
 }

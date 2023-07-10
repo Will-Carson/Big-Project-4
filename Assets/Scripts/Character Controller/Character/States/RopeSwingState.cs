@@ -19,8 +19,8 @@ public struct RopeSwingState : IPlatformerCharacterState
         characterProperties.EvaluateGrounding = false;
 
         // Spawn rope
-        Entity ropeInstanceEntity = context.EndFrameECB.Instantiate(context.ChunkIndex, character.RopePrefabEntity);
-        context.EndFrameECB.AddComponent(context.ChunkIndex, ropeInstanceEntity, new CharacterRope { OwningCharacterEntity = entity });
+        Entity ropeInstanceEntity = context.commandBuffer.Instantiate(context.ChunkIndex, character.RopePrefabEntity);
+        context.commandBuffer.AddComponent(context.ChunkIndex, ropeInstanceEntity, new CharacterRope { OwningCharacterEntity = entity });
     }
 
     public void OnStateExit(CharacterState nextState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)

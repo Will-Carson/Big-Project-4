@@ -1,34 +1,22 @@
-using System;
 using Unity.Burst;
+using Unity.Burst.Intrinsics;
 using Unity.Entities;
-using Unity.Collections;
-using Unity.Jobs;
-using Unity.Mathematics;
 using Unity.Physics;
-using Unity.Transforms;
 using Unity.CharacterController;
-using Unity.NetCode;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 [RequireMatchingQueriesForUpdate]
 [BurstCompile]
 public partial struct PlatformerCharacterInitializationSystem : ISystem
 {
-    public void OnCreate(ref SystemState state)
-    { }
-
-    public void OnDestroy(ref SystemState state)
-    { }
-
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         EntityCommandBuffer ecb = SystemAPI.GetSingletonRW<EndSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged);
         BufferLookup<LinkedEntityGroup> linkedEntitiesLookup = SystemAPI.GetBufferLookup<LinkedEntityGroup>(true);
 
-        foreach (var (character, stateMachine, entity) in SystemAPI.Query<
-            RefRW<PlatformerCharacterComponent>, 
-            RefRW<PlatformerCharacterStateMachine>>()
+        foreach (var (character, entity) in SystemAPI.Query<
+            RefRW<PlatformerCharacterComponent>>()
             .WithNone<PlatformerCharacterInitialized>()
             .WithEntityAccess())
         {
@@ -71,10 +59,6 @@ public partial struct PlatformerCharacterPhysicsUpdateSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    { }
-
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         _context.OnSystemUpdate(ref state, SystemAPI.GetSingletonRW<EndSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged));
@@ -90,22 +74,28 @@ public partial struct PlatformerCharacterPhysicsUpdateSystem : ISystem
 
     [BurstCompile]
     [WithAll(typeof(Simulate))]
-    public partial struct PlatformerCharacterPhysicsUpdateJob : IJobEntity
+    public partial struct PlatformerCharacterPhysicsUpdateJob : IJobEntity, IJobEntityChunkBeginEnd
     {
         public PlatformerCharacterUpdateContext Context;
         public KinematicCharacterUpdateContext BaseContext;
-    
-        void Execute([ChunkIndexInQuery] int chunkIndex, PlatformerCharacterAspect characterAspect)
+
+        void Execute(PlatformerCharacterAspect characterAspect)
         {
-            Context.OnIterateEntity(chunkIndex);
-            BaseContext.EnsureCreationOfTmpCollections();
             characterAspect.PhysicsUpdate(ref Context, ref BaseContext);
         }
+
+        public bool OnChunkBegin(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
+        {
+            BaseContext.EnsureCreationOfTmpCollections();
+            return true;
+        }
+
+        public void OnChunkEnd(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask, bool chunkWasExecuted)
+        { }
     }
 }
 
-[UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
-[UpdateAfter(typeof(PredictedFixedStepSimulationSystemGroup))]
+[UpdateInGroup(typeof(KinematicCharacterVariableUpdateGroup))]
 [BurstCompile]
 public partial struct PlatformerCharacterVariableUpdateSystem : ISystem
 {
@@ -126,20 +116,16 @@ public partial struct PlatformerCharacterVariableUpdateSystem : ISystem
         _context.OnSystemCreate(ref state);
         _baseContext = new KinematicCharacterUpdateContext();
         _baseContext.OnSystemCreate(ref state);
-        
+
         state.RequireForUpdate(_characterQuery);
     }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    { }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         _context.OnSystemUpdate(ref state, SystemAPI.GetSingletonRW<EndSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged));
         _baseContext.OnSystemUpdate(ref state, SystemAPI.Time, SystemAPI.GetSingleton<PhysicsWorldSingleton>());
-        
+
         PlatformerCharacterVariableUpdateJob job = new PlatformerCharacterVariableUpdateJob
         {
             Context = _context,
@@ -150,16 +136,23 @@ public partial struct PlatformerCharacterVariableUpdateSystem : ISystem
 
     [BurstCompile]
     [WithAll(typeof(Simulate))]
-    public partial struct PlatformerCharacterVariableUpdateJob : IJobEntity
+    public partial struct PlatformerCharacterVariableUpdateJob : IJobEntity, IJobEntityChunkBeginEnd
     {
         public PlatformerCharacterUpdateContext Context;
         public KinematicCharacterUpdateContext BaseContext;
-    
-        void Execute([ChunkIndexInQuery] int chunkIndex, PlatformerCharacterAspect characterAspect)
+
+        void Execute(PlatformerCharacterAspect characterAspect)
         {
-            Context.OnIterateEntity(chunkIndex);
-            BaseContext.EnsureCreationOfTmpCollections();
             characterAspect.VariableUpdate(ref Context, ref BaseContext);
         }
+
+        public bool OnChunkBegin(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
+        {
+            BaseContext.EnsureCreationOfTmpCollections();
+            return true;
+        }
+
+        public void OnChunkEnd(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask, bool chunkWasExecuted)
+        { }
     }
 }

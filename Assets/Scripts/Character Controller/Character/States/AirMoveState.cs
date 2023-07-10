@@ -94,7 +94,7 @@ public struct AirMoveState : IPlatformerCharacterState
 
         // Weapon
         PlatformerCharacterAspect.HandleWeaponSubstate(
-            context.EndFrameECB,
+            context.commandBuffer,
             context.ChunkIndex,
             aspect.ActiveWeapon.ValueRO,
             context.WeaponControlLookup,
