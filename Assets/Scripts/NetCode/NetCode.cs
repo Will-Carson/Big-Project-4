@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
+using Unity.Transforms;
 
 [assembly: RegisterGenericComponentType(typeof(PressContainerSlotRpc))]
 [assembly: RegisterGenericComponentType(typeof(TalentAllocationRequestRpc))]
@@ -109,6 +110,9 @@ public partial struct GoInGameServerSystem : ISystem
             // Add the player to the linked entity group so it is destroyed automatically on disconnect
             commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = player });
             commandBuffer.DestroyEntity(reqEntity);
+
+            var spawnPoint = SystemAPI.GetComponent<LocalTransform>(SystemAPI.GetSingletonEntity<SpawnPoint>());
+            commandBuffer.SetComponent(character, spawnPoint);
 
             {
                 // Set up the players containers
@@ -345,27 +349,6 @@ public partial struct GoInGameServerSystem : ISystem
 }
 
 public struct GoInGameRpc : IRpcCommand { }
-
-[BurstCompile]
-public struct PrefabContainer : IBufferElementData
-{
-    public FixedString64Bytes id;
-    public Entity prefab;
-
-    [BurstCompile]
-    public static Entity GetEntityWithId(DynamicBuffer<PrefabContainer> prefabs, FixedString64Bytes id)
-    {
-        for (var i = 0; i < prefabs.Length; i++)
-        {
-            var prefab = prefabs[i];
-            if (prefab.id == id)
-            {
-                return prefab.prefab;
-            }
-        }
-        return Entity.Null;
-    }
-}
 
 // Might be something to this but for now it doesn't work.
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
