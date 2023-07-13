@@ -35,21 +35,17 @@ public partial struct DreamOrbSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
-        foreach (var (orb, entity) in SystemAPI.Query<DreamOrb>().WithEntityAccess())
-        {
 
-        }
-        foreach (var (player, entity) in SystemAPI.Query<PlatformerPlayerInputs>().WithEntityAccess())
-        {
-            var prefabs = SystemAPI.GetSingletonBuffer<PrefabContainer>(true);
-            var landmassPrefab = PrefabContainer.GetEntityWithId(prefabs, "InitialEncounter");
+        var spawnPoint = SystemAPI.GetComponent<LocalTransform>(SystemAPI.GetSingletonEntity<DreamSpawnpoint>());
 
-            var landmassInstance = commandBuffer.Instantiate(landmassPrefab);
-            commandBuffer.SetComponent(landmassInstance, LocalTransform.FromPosition(new float3(20, -5, 20)));
+        var prefabs = SystemAPI.GetSingletonBuffer<PrefabContainer>(true);
+        var encounterPrefab = PrefabContainer.GetEntityWithId(prefabs, "InitialEncounter");
 
-            Debug.Log("WE BE DREAMIN'");
-            state.Enabled = false;
-        }
+        var encounterIntance = commandBuffer.Instantiate(encounterPrefab);
+        commandBuffer.SetComponent(encounterIntance, spawnPoint);
+
+        Debug.Log("WE BE DREAMIN'");
+        state.Enabled = false;
     }
 }
 

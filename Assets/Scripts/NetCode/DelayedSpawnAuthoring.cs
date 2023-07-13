@@ -16,7 +16,11 @@ public class DelayedSpawnAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-            AddComponent(entity, new DelayedSpawn { spawn = GetEntity(authoring.spawn, TransformUsageFlags.Dynamic) });
+            AddComponent(entity, new DelayedSpawn
+            {
+                spawn = GetEntity(authoring.spawn, TransformUsageFlags.Dynamic),
+                transform = LocalTransform.FromPositionRotation(authoring.transform.position, authoring.transform.rotation)
+            });
         }
     }
 }
@@ -24,6 +28,7 @@ public class DelayedSpawnAuthoring : MonoBehaviour
 public struct DelayedSpawn : IComponentData
 {
     public Entity spawn;
+    public LocalTransform transform;
 }
 
 [BurstCompile]
@@ -34,10 +39,10 @@ public partial struct DelayedSpawnHandler : ISystem
     {
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
 
-        foreach (var (delayedSpawn, localToWorld, entity) in SystemAPI.Query<RefRO<DelayedSpawn>, RefRO<LocalToWorld>>().WithEntityAccess())
+        foreach (var (delayedSpawn, entity) in SystemAPI.Query<RefRO<DelayedSpawn>>().WithEntityAccess())
         {
             var instance = commandBuffer.Instantiate(delayedSpawn.ValueRO.spawn);
-            commandBuffer.SetComponent(instance, LocalTransform.FromPositionRotation(localToWorld.ValueRO.Position, localToWorld.ValueRO.Rotation));
+            commandBuffer.SetComponent(instance, delayedSpawn.ValueRO.transform);
             commandBuffer.DestroyEntity(entity);
         }
     }
