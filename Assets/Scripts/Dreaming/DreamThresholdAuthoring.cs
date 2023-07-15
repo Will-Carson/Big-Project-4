@@ -46,20 +46,21 @@ public partial struct DreamThresholdCollisionDetectionSystem : ISystem
     }
 
     [BurstCompile]
-    struct CollisionDetection : ICollisionEventsJob
+    struct CollisionDetection : ITriggerEventsJob
     {
         public EntityCommandBuffer commandBuffer;
         [ReadOnly] public ComponentLookup<DreamThreshold> dreamThresholdLookup;
 
-        public void Execute(CollisionEvent collisionEvent)
+        public void Execute(TriggerEvent triggerEvent)
         {
-            if (dreamThresholdLookup.HasComponent(collisionEvent.EntityA))
+            Debug.Log($"A: {triggerEvent.EntityA}, B: {triggerEvent.EntityB}");
+            if (dreamThresholdLookup.HasComponent(triggerEvent.EntityA))
             {
-                commandBuffer.DestroyEntity(collisionEvent.EntityA);
+                commandBuffer.DestroyEntity(triggerEvent.EntityA);
             }
-            if (dreamThresholdLookup.HasComponent(collisionEvent.EntityB))
+            if (dreamThresholdLookup.HasComponent(triggerEvent.EntityB))
             {
-                commandBuffer.DestroyEntity(collisionEvent.EntityB);
+                commandBuffer.DestroyEntity(triggerEvent.EntityB);
             }
         }
     }
