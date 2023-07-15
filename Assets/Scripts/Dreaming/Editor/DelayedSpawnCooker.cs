@@ -7,15 +7,13 @@ using Unity.NetCode;
 
 public class DelayedSpawnCooker : EditorWindow
 {
-    [MenuItem("Window/Delayed Spawn Cooker")]
+    [MenuItem("Helpers/Delayed Spawn Cooker")]
     public static void CookDelayedSpawners()
     {
         string prefabsPath = "Assets/Delayed Spawning/Prefabs";
         string[] prefabGUIDs = AssetDatabase.FindAssets("t:Prefab", new[] { prefabsPath });
 
         string productsPath = "Assets/Delayed Spawning/Products";
-        string[] productGUIDS = AssetDatabase.FindAssets("t:Prefab", new[] { productsPath });
-
 
         foreach (string prefabGUID in prefabGUIDs)
         {
@@ -42,8 +40,7 @@ public class DelayedSpawnCooker : EditorWindow
                 i++;
             }
 
-
-            PrefabUtility.SaveAsPrefabAsset(product, productsPath + "/" + product.name + ".prefab");
+            PrefabUtility.SaveAsPrefabAsset(product, $"{productsPath}/{product.name}.prefab");
             DestroyImmediate(product);
         }
     }
