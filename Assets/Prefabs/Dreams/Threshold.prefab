@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 3567889790297809522}
   - component: {fileID: 2032650616446340765}
   - component: {fileID: 8079884134574334636}
+  - component: {fileID: 3680872356858126688}
+  - component: {fileID: 3575514580584936144}
   m_Layer: 0
   m_Name: Threshold
   m_TagString: Untagged
@@ -73,12 +75,45 @@ MonoBehaviour:
   SupportedGhostModes: 3
   OptimizationMode: 1
   Importance: 1
-  prefabId: 
+  prefabId: 996e9cdc069a3a94f88ed24a45277ddd
   HasOwner: 0
   SupportAutoCommandTarget: 1
   TrackInterpolationDelay: 0
   GhostGroup: 0
   UsePreSerialization: 0
+--- !u!65 &3680872356858126688
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 393812054034229661}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 4, z: 4}
+  m_Center: {x: 1, y: 0, z: 0}
+--- !u!114 &3575514580584936144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 393812054034229661}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc259ba15e6b4f845ad318328c7ee533, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1521392344482255554
 PrefabInstance:
   m_ObjectHideFlags: 0
