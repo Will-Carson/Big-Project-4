@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08766ccd4a92e534eaad4adb08360c07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  encounter:
+  spawnables:
   - prefab: {fileID: 393812054034229661, guid: 996e9cdc069a3a94f88ed24a45277ddd, type: 3}
     position:
       x: 35

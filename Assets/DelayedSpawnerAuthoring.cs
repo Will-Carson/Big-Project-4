@@ -12,24 +12,24 @@ using UnityEditor.Animations;
 using UnityEngine;
 
 [ExecuteAlways]
-public class EncounterAuthoring : MonoBehaviour
+public class DelayedSpawnerAuthoring : MonoBehaviour
 {
-    public EncounterBuffer[] encounter;
+    public DelayedSpawnBuffer[] spawnables;
 
-    class Baker : Baker<EncounterAuthoring>
+    class Baker : Baker<DelayedSpawnerAuthoring>
     {
-        public override void Bake(EncounterAuthoring authoring)
+        public override void Bake(DelayedSpawnerAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
-            var buffer = AddBuffer<Encounter>(entity);
+            var buffer = AddBuffer<DelayedSpawn>(entity);
 
-            foreach (var encounter in authoring.encounter)
+            foreach (var spawnable in authoring.spawnables)
             {
-                buffer.Add(new Encounter
+                buffer.Add(new DelayedSpawn
                 {
-                    prefab = GetEntity(encounter.prefab, TransformUsageFlags.Dynamic),
-                    position = encounter.position,
-                    rotation = encounter.rotation,
+                    prefab = GetEntity(spawnable.prefab, TransformUsageFlags.Dynamic),
+                    position = spawnable.position,
+                    rotation = spawnable.rotation,
                 });
             }
         }
@@ -37,14 +37,14 @@ public class EncounterAuthoring : MonoBehaviour
 }
 
 [Serializable]
-public struct EncounterBuffer
+public struct DelayedSpawnBuffer
 {
     public GameObject prefab;
     public float3 position;
     public quaternion rotation;
 }
 
-public struct Encounter : IBufferElementData
+public struct DelayedSpawn : IBufferElementData
 {
     public Entity prefab;
     public float3 position;
@@ -59,15 +59,15 @@ public partial struct DelayedSpawnHandler : ISystem
     {
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
 
-        foreach (var (encounters, transform, entity) in SystemAPI.Query<DynamicBuffer<Encounter>, RefRO<LocalTransform>>().WithEntityAccess())
+        foreach (var (spawnables, transform, entity) in SystemAPI.Query<DynamicBuffer<DelayedSpawn>, RefRO<LocalTransform>>().WithEntityAccess())
         {
-            foreach (var encounter in encounters)
+            foreach (var spawnable in spawnables)
             {
-                var instance = commandBuffer.Instantiate(encounter.prefab);
+                var instance = commandBuffer.Instantiate(spawnable.prefab);
 
                 var instanceTransform = LocalTransform.FromPositionRotation(
-                    encounter.position + transform.ValueRO.Position, 
-                    math.mul(encounter.rotation, transform.ValueRO.Rotation)
+                    spawnable.position + transform.ValueRO.Position, 
+                    math.mul(spawnable.rotation, transform.ValueRO.Rotation)
                 );
                 commandBuffer.SetComponent(instance, instanceTransform);
             }
