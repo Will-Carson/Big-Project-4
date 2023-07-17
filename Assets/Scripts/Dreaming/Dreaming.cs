@@ -34,9 +34,12 @@ public struct DreamOrb : IComponentData
 [BurstCompile]
 public partial struct DreamOrbSystem : ISystem
 {
+    Unity.Mathematics.Random random;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        random = new Unity.Mathematics.Random(uint.MaxValue);
         state.RequireForUpdate<PrefabContainer>();
     }
 
@@ -53,7 +56,7 @@ public partial struct DreamOrbSystem : ISystem
                 var spawnPoint = SystemAPI.GetComponent<LocalTransform>(SystemAPI.GetSingletonEntity<DreamSpawnpoint>());
 
                 var encounters = SystemAPI.GetSingletonBuffer<Encounter>(true);
-                var encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterTags.Combat).prefab;
+                var encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterTags.Combat, ref random).prefab;
 
                 var encounterInstance = commandBuffer.Instantiate(encounterPrefab);
                 commandBuffer.SetComponent(encounterInstance, spawnPoint);
@@ -70,7 +73,7 @@ public partial struct DreamOrbSystem : ISystem
                 jumper.ValueRW.lastActivated = (float)elapsedTime;
 
                 var encounters = SystemAPI.GetSingletonBuffer<Encounter>(true);
-                var encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterTags.Combat).prefab;
+                var encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterTags.Combat, ref random).prefab;
 
                 var encounterInstance = commandBuffer.Instantiate(encounterPrefab);
                 var encounterPosition = transform.ValueRO.Translate(new float3(0, -10, 0)).Position;

@@ -6,15 +6,15 @@ using Unity.VisualScripting;
 using Unity.NetCode;
 using System.Collections.Generic;
 
-public class DelayedSpawnCooker : EditorWindow
+public class EncounterCooker : EditorWindow
 {
-    [MenuItem("Helpers/Delayed Spawn Cooker")]
+    [MenuItem("Helpers/Encounter cooker")]
     public static void CookDelayedSpawners()
     {
-        string prefabsPath = "Assets/Delayed Spawning/Prefabs";
+        string prefabsPath = "Assets/Encounters/Prefabs";
         string[] prefabGUIDs = AssetDatabase.FindAssets("t:Prefab", new[] { prefabsPath });
 
-        string productsPath = "Assets/Delayed Spawning/Products";
+        string productsPath = "Assets/Encounters/Products";
 
         var encounters = FindObjectOfType<EncountersAuthoring>();
         encounters.encounters = new List<EncounterAuthoring>();

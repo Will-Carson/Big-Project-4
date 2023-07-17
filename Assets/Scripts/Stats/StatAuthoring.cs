@@ -1,6 +1,7 @@
 using Unity.Collections;
 using Unity.Entities;
 using System;
+using Unity.Burst;
 
 /// <summary>
 /// Some stats fit into categories; For instance, IncreasedDamage, IncreasedFireDamage, and
@@ -20,6 +21,7 @@ using System;
 /// </summary>
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
+[BurstCompile]
 public partial class StatDefinitions : SystemBase
 {
     public StatAuthoring[] StatAuthorings = new StatAuthoring[]
@@ -407,6 +409,7 @@ public partial class StatDefinitions : SystemBase
 
     protected override void OnUpdate() { }
 
+    [BurstCompile]
     public struct Singleton : IComponentData
     {
         public NativeHashMap<uint, StatFlavorFlag> StatToStatFlavorFlags;
@@ -426,21 +429,22 @@ public partial class StatDefinitions : SystemBase
             }
         }
 
+        [BurstCompile]
         public void OnDestroy()
         {
             StatToStatFlavorFlags.Dispose();
             StatToStatType.Dispose();
         }
 
+        /// <summary>
+        /// Takes a set of stats and stat flavors, and returns a set of generic stats that match the value.
+        /// </summary>
+        /// <param name="stats"></param>
+        /// <param name="inputFlavorFlags"></param>
+        /// <param name="results"></param>
+        [BurstCompile]
         public void TotalStatsWithFlavor(in Stats stats, StatFlavorFlag inputFlavorFlags, ref Stats results)
         {
-            /// Iterate over stat keys, 
-            /// iterate over matches.
-            /// Get the matching tags from the StatMatchesTags dictionary.
-            /// If every tag from the StatMatchesTags dictionary is in the matches array, add the value to the results dictionary
-            /// based on the StatGrantsTags dictionary.
-            /// 
-
             var statsEnumerator = stats.GetEnumerator();
 
             while (statsEnumerator.MoveNext())
@@ -448,16 +452,12 @@ public partial class StatDefinitions : SystemBase
                 var stat = statsEnumerator.Current.Key;
                 var value = statsEnumerator.Current.Value;
 
-                /// Iterate over the stats StatMatchesTags
-                /// if the input StatFlavorFlag does not contain one of that stats StatFlavorFlag
-                /// i.e., if the stat applies to Fire attacks and the input StatFlavorFlag are for Ice attacks,
-                /// we will skip this stat. Otherwise we will add it to the results.
                 if (!StatToStatFlavorFlags.TryGetValue(stat, out var statFlavorFlags))
                 {
                     continue;
                 }
 
-                /// If every '1' flag in the stats flavor flags is present in the input flavor flags, then proceed. 
+                // If every '1' flag in the stats flavor flags is a 1 in the input flavor flags, then proceed. 
                 if ((statFlavorFlags & inputFlavorFlags) != statFlavorFlags)
                 {
                     continue;

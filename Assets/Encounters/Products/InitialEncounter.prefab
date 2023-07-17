@@ -45,28 +45,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnables:
-  - prefab: {fileID: 393812054034229661, guid: 996e9cdc069a3a94f88ed24a45277ddd, type: 3}
-    position:
-      x: 35
-      y: 5.76
-      z: -16.4
-    rotation:
-      value:
-        x: -0
-        y: -0
-        z: -0
-        w: 1
-  - prefab: {fileID: 393812054034229661, guid: 996e9cdc069a3a94f88ed24a45277ddd, type: 3}
-    position:
-      x: 33.16
-      y: 5.76
-      z: -10.209999
-    rotation:
-      value:
-        x: -0
-        y: -0.27530015
-        z: -0
-        w: 0.96135837
   - prefab: {fileID: 6158834744236089986, guid: 39470bf5a525a3042897e880de9b2682,
       type: 3}
     position:

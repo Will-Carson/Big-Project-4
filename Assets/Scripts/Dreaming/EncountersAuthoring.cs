@@ -47,16 +47,29 @@ public struct Encounter : IBufferElementData
     public Entity prefab;
 
     [BurstCompile]
-    public static Encounter GetRandomEncounterByTag(DynamicBuffer<Encounter> encounters, EncounterTags tags)
+    public static Encounter GetRandomEncounterByTag(DynamicBuffer<Encounter> encounters, EncounterTags tags, ref Unity.Mathematics.Random random)
     {
         var result = default(Encounter);
         var possibleEncounters = GetEncountersByTag(encounters, tags);
 
+        float totalWeight = 0f;
         foreach (var encounter in possibleEncounters)
         {
-            result = encounter;
-            break;
-        } // TODO actually sort them by weight
+            totalWeight += encounter.weight;
+        }
+
+        float randomWeight = random.NextFloat(0, totalWeight);
+        float cumulativeWeight = 0f;
+
+        foreach (var encounter in possibleEncounters)
+        {
+            cumulativeWeight += encounter.weight;
+            if (cumulativeWeight >= randomWeight)
+            {
+                result = encounter;
+                break;
+            }
+        }
 
         possibleEncounters.Dispose();
         return result;
