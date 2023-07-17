@@ -39,7 +39,7 @@ public struct Spawnable : IBufferElementData
     public static Spawnable GetRandomSpawnableByFlags(DynamicBuffer<Spawnable> spawnables, SpawnableFlags flags, ref Unity.Mathematics.Random random)
     {
         var result = default(Spawnable);
-        var possibleSpawnables = GetEncountersByTag(spawnables, flags);
+        var possibleSpawnables = GetSpawnablesByTag(spawnables, flags);
 
         float totalWeight = 0f;
         foreach (var spawnable in possibleSpawnables)
@@ -65,7 +65,7 @@ public struct Spawnable : IBufferElementData
     }
 
     [BurstCompile]
-    public static NativeList<Spawnable> GetEncountersByTag(DynamicBuffer<Spawnable> spawnables, SpawnableFlags flags)
+    public static NativeList<Spawnable> GetSpawnablesByTag(DynamicBuffer<Spawnable> spawnables, SpawnableFlags flags)
     {
         var result = new NativeList<Spawnable>(Allocator.Temp);
 
