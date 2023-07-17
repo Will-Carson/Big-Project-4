@@ -3,6 +3,7 @@ using System.Collections;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -62,10 +63,24 @@ public partial struct SpawnPointHandlerSystem : ISystem
             var spawnFlags = spawn.ValueRO.flags;
 
             var spawnablePrefab = Spawnable.GetRandomSpawnableByFlags(spawnables, spawnFlags, ref random).prefab;
-            var instance = commandBuffer.Instantiate(spawnablePrefab);
-            commandBuffer.SetComponent(instance, LocalTransform.FromPositionRotation(transform.ValueRO.Position, transform.ValueRO.Rotation));
+            for (var i = 0; i < 25; i++)
+            {
+                var point = GetPointAlongSpiral(2, .2f, i * 1);
+                var instance = commandBuffer.Instantiate(spawnablePrefab);
+                commandBuffer.SetComponent(instance, LocalTransform.FromPositionRotation(transform.ValueRO.Position, transform.ValueRO.Rotation).Translate(point));
+            }
 
             commandBuffer.DestroyEntity(entity);
         }
+    }
+
+    public float3 GetPointAlongSpiral(float a, float b, float theta)
+    {
+        var result = default(float3);
+
+        result.x = (a + b * theta) * math.cos(theta);
+        result.z = (a + b * theta) * math.sin(theta);
+
+        return result;
     }
 }

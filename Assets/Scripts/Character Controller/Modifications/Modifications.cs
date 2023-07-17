@@ -402,7 +402,7 @@ public struct DeadState : IPlatformerCharacterState
     public void OnStateVariableUpdate(ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
         var currentTime = (float)baseContext.Time.ElapsedTime;
-        if (currentTime - deathTime > 5f)
+        if (currentTime - deathTime > .2f)
         {
             context.commandBuffer.DestroyEntity(context.ChunkIndex, aspect.CharacterAspect.Entity);
         }
