@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
+using Unity.Transforms;
 using UnityEngine;
 
 public class DreamThresholdAuthoring : MonoBehaviour
@@ -37,11 +39,14 @@ public partial struct DreamThresholdCollisionDetectionSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state) 
     {
-        Debug.Log("Bababooey");
+        var prefabs = SystemAPI.GetSingletonBuffer<PrefabContainer>(true);
+
         state.Dependency = new CollisionDetection
         {
             commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged),
             dreamThresholdLookup = state.GetComponentLookup<DreamThreshold>(true),
+            localTransformLookup = state.GetComponentLookup<LocalTransform>(true),
+            prefabs = prefabs,
         }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
     }
 
@@ -50,17 +55,29 @@ public partial struct DreamThresholdCollisionDetectionSystem : ISystem
     {
         public EntityCommandBuffer commandBuffer;
         [ReadOnly] public ComponentLookup<DreamThreshold> dreamThresholdLookup;
+        [ReadOnly] public ComponentLookup<LocalTransform> localTransformLookup;
+        [ReadOnly] public DynamicBuffer<PrefabContainer> prefabs;
 
         public void Execute(TriggerEvent triggerEvent)
         {
-            Debug.Log($"A: {triggerEvent.EntityA}, B: {triggerEvent.EntityB}");
+            var dreamThresholdEntity = Entity.Null;
             if (dreamThresholdLookup.HasComponent(triggerEvent.EntityA))
             {
                 commandBuffer.DestroyEntity(triggerEvent.EntityA);
+                dreamThresholdEntity = triggerEvent.EntityA;
             }
             if (dreamThresholdLookup.HasComponent(triggerEvent.EntityB))
             {
                 commandBuffer.DestroyEntity(triggerEvent.EntityB);
+                dreamThresholdEntity = triggerEvent.EntityB;
+            }
+
+            var prefab = PrefabContainer.GetEntityWithId(prefabs, "InitialEncounter");
+            var instance = commandBuffer.Instantiate(prefab);
+
+            if (localTransformLookup.TryGetComponent(dreamThresholdEntity, out var transform))
+            {
+                commandBuffer.SetComponent(instance, transform.Translate(new float3(0, -30, 0)));
             }
         }
     }

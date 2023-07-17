@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.Transforms;
 using Unity.VisualScripting;
 using Unity.NetCode;
+using System.Collections.Generic;
 
 public class DelayedSpawnCooker : EditorWindow
 {
@@ -14,6 +15,9 @@ public class DelayedSpawnCooker : EditorWindow
         string[] prefabGUIDs = AssetDatabase.FindAssets("t:Prefab", new[] { prefabsPath });
 
         string productsPath = "Assets/Delayed Spawning/Products";
+
+        var encounters = FindObjectOfType<EncountersAuthoring>();
+        encounters.encounters = new List<EncounterAuthoring>();
 
         foreach (string prefabGUID in prefabGUIDs)
         {
@@ -40,8 +44,16 @@ public class DelayedSpawnCooker : EditorWindow
                 i++;
             }
 
-            PrefabUtility.SaveAsPrefabAsset(product, $"{productsPath}/{product.name}.prefab");
+            var savedProduct = PrefabUtility.SaveAsPrefabAsset(product, $"{productsPath}/{product.name}.prefab");
             DestroyImmediate(product);
+
+            var encounter = prefab.GetComponent<EncounterComponent>().encounter;
+            encounters.encounters.Add(new EncounterAuthoring
+            {
+                tags = encounter.tags,
+                weight = encounter.weight,
+                prefab = savedProduct,
+            });
         }
     }
 }
