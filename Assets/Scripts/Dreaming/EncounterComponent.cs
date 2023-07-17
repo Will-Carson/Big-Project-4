@@ -10,7 +10,7 @@ public class EncounterComponent : MonoBehaviour
 [Serializable]
 public struct EncounterAuthoring
 {
-    public EncounterTags tags;
+    public EncounterFlags tags;
     public float weight;
     public GameObject prefab;
 }

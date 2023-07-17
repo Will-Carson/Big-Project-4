@@ -46,6 +46,7 @@ public partial struct DreamOrbSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        var encounters = SystemAPI.GetSingletonBuffer<Encounter>(true);
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
         
         foreach (var (health, entity) in SystemAPI.Query<RefRO<Health>>().WithAll<DreamOrb>().WithEntityAccess())
@@ -55,8 +56,7 @@ public partial struct DreamOrbSystem : ISystem
                 //health.ValueRW.currentHealth = health.ValueRW.maxHealth;
                 var spawnPoint = SystemAPI.GetComponent<LocalTransform>(SystemAPI.GetSingletonEntity<DreamSpawnpoint>());
 
-                var encounters = SystemAPI.GetSingletonBuffer<Encounter>(true);
-                var encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterTags.Combat, ref random).prefab;
+                var encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterFlags.Combat, ref random).prefab;
 
                 var encounterInstance = commandBuffer.Instantiate(encounterPrefab);
                 commandBuffer.SetComponent(encounterInstance, spawnPoint);
@@ -72,8 +72,7 @@ public partial struct DreamOrbSystem : ISystem
             {
                 jumper.ValueRW.lastActivated = (float)elapsedTime;
 
-                var encounters = SystemAPI.GetSingletonBuffer<Encounter>(true);
-                var encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterTags.Combat, ref random).prefab;
+                var encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterFlags.Combat, ref random).prefab;
 
                 var encounterInstance = commandBuffer.Instantiate(encounterPrefab);
                 var encounterPosition = transform.ValueRO.Translate(new float3(0, -10, 0)).Position;

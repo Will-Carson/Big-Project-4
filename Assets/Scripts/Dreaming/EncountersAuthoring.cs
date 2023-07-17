@@ -20,7 +20,7 @@ public class EncountersAuthoring : MonoBehaviour
             {
                 buffer.Add(new Encounter
                 {
-                    tags = encounter.tags,
+                    flags = encounter.tags,
                     weight = encounter.weight,
                     prefab = GetEntity(encounter.prefab, TransformUsageFlags.Dynamic),
                 });
@@ -30,7 +30,7 @@ public class EncountersAuthoring : MonoBehaviour
 }
 
 [Flags]
-public enum EncounterTags
+public enum EncounterFlags
 {
     Uninitialized = 0,
 
@@ -42,15 +42,15 @@ public enum EncounterTags
 [BurstCompile]
 public struct Encounter : IBufferElementData
 {
-    public EncounterTags tags;
+    public EncounterFlags flags;
     public float weight;
     public Entity prefab;
 
     [BurstCompile]
-    public static Encounter GetRandomEncounterByTag(DynamicBuffer<Encounter> encounters, EncounterTags tags, ref Unity.Mathematics.Random random)
+    public static Encounter GetRandomEncounterByTag(DynamicBuffer<Encounter> encounters, EncounterFlags flags, ref Unity.Mathematics.Random random)
     {
         var result = default(Encounter);
-        var possibleEncounters = GetEncountersByTag(encounters, tags);
+        var possibleEncounters = GetEncountersByTag(encounters, flags);
 
         float totalWeight = 0f;
         foreach (var encounter in possibleEncounters)
@@ -76,13 +76,13 @@ public struct Encounter : IBufferElementData
     }
 
     [BurstCompile]
-    public static NativeList<Encounter> GetEncountersByTag(DynamicBuffer<Encounter> encounters, EncounterTags tags)
+    public static NativeList<Encounter> GetEncountersByTag(DynamicBuffer<Encounter> encounters, EncounterFlags flags)
     {
         var result = new NativeList<Encounter>(Allocator.Temp);
 
         foreach (var encounter in encounters)
         {
-            if ((encounter.tags & tags) == tags)
+            if ((encounter.flags & flags) == flags)
             {
                 result.Add(encounter);
             }

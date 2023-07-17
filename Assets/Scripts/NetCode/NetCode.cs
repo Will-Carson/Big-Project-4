@@ -111,7 +111,7 @@ public partial struct GoInGameServerSystem : ISystem
             commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = player });
             commandBuffer.DestroyEntity(reqEntity);
 
-            var spawnPoint = SystemAPI.GetComponent<LocalTransform>(SystemAPI.GetSingletonEntity<SpawnPoint>());
+            var spawnPoint = SystemAPI.GetComponent<LocalTransform>(SystemAPI.GetSingletonEntity<InitialPlayerSpawnPoint>());
             commandBuffer.SetComponent(character, spawnPoint);
 
             {

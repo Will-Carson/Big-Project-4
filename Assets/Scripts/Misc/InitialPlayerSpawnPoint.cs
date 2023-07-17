@@ -3,5 +3,5 @@ using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 
-public struct SpawnPoint : IComponentData
+public struct InitialPlayerSpawnPoint : IComponentData
 { }
