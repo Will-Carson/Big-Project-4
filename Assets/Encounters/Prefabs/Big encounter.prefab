@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   encounter:
-    tags: -1
+    tags: 4
     weight: 1
     prefab: {fileID: 0}
 --- !u!1001 &7095966878931974790
@@ -57,6 +57,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4569805318028021196}
     m_Modifications:
+    - target: {fileID: 989218719781441503, guid: edcffcf0e41ca1f458cad17cf8798cec,
+        type: 3}
+      propertyPath: prefabId
+      value: 5dd1b24542a8b544cbe464b5038821b4
+      objectReference: {fileID: 0}
     - target: {fileID: 7785190944548462877, guid: edcffcf0e41ca1f458cad17cf8798cec,
         type: 3}
       propertyPath: m_Name

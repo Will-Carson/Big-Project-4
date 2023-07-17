@@ -392,7 +392,6 @@ GameObject:
   - component: {fileID: 3391512440001677408}
   - component: {fileID: 7754589235337989164}
   - component: {fileID: 3179470327120742064}
-  - component: {fileID: 3718058161117277149}
   - component: {fileID: 6386482716032019589}
   m_Layer: 0
   m_Name: PlatformerUnownedCharacter
@@ -719,18 +718,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0c37e22442edb94d83f2cbbee6519a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &3718058161117277149
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3807298699949259711}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bcb032b8231e0fd4b9ecdee19d4f9103, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!136 &6386482716032019589

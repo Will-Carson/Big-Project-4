@@ -58,7 +58,6 @@ public partial struct SpawnPointHandlerSystem : ISystem
             var spawnablePrefab = spawnable.prefab;
             var spawnNumber = 1 * spawnable.multiplier; // TODO replace 1 with some "mob density" value
 
-            Debug.Log(spawnNumber);
             for (var i = 0; i < spawnNumber; i++)
             {
                 var point = GetPointAlongSpiral(2, .2f, i * 1);

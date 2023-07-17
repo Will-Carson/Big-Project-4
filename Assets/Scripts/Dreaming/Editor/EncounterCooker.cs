@@ -47,6 +47,7 @@ public class EncounterCooker : EditorWindow
             var savedProduct = PrefabUtility.SaveAsPrefabAsset(product, $"{productsPath}/{product.name}.prefab");
             DestroyImmediate(product);
 
+            if (prefab.GetComponent<EncounterComponent>() == null) Debug.Log(prefab.name);
             var encounter = prefab.GetComponent<EncounterComponent>().encounter;
             encounters.encounters.Add(new EncounterAuthoring
             {
