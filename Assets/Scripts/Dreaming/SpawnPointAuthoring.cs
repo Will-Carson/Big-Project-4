@@ -32,14 +32,6 @@ public struct SpawnPoint : IComponentData
     }
 }
 
-[Flags]
-public enum SpawnableFlags
-{
-    Uninitialized = 0,
-    Boss = 1 << 0,
-    Pack = 2 << 1,
-}
-
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [BurstCompile]
 public partial struct SpawnPointHandlerSystem : ISystem
@@ -62,8 +54,12 @@ public partial struct SpawnPointHandlerSystem : ISystem
         {
             var spawnFlags = spawn.ValueRO.flags;
 
-            var spawnablePrefab = Spawnable.GetRandomSpawnableByFlags(spawnables, spawnFlags, ref random).prefab;
-            for (var i = 0; i < 25; i++)
+            var spawnable = Spawnable.GetRandomSpawnableByFlags(spawnables, spawnFlags, ref random);
+            var spawnablePrefab = spawnable.prefab;
+            var spawnNumber = 1 * spawnable.multiplier; // TODO replace 1 with some "mob density" value
+
+            Debug.Log(spawnNumber);
+            for (var i = 0; i < spawnNumber; i++)
             {
                 var point = GetPointAlongSpiral(2, .2f, i * 1);
                 var instance = commandBuffer.Instantiate(spawnablePrefab);

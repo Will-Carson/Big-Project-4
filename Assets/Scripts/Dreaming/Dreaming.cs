@@ -56,7 +56,7 @@ public partial struct DreamOrbSystem : ISystem
                 //health.ValueRW.currentHealth = health.ValueRW.maxHealth;
                 var spawnPoint = SystemAPI.GetComponent<LocalTransform>(SystemAPI.GetSingletonEntity<DreamSpawnpoint>());
 
-                var encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterFlags.Combat, ref random).prefab;
+                var encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterFlags.InitialEncounter, ref random).prefab;
 
                 var encounterInstance = commandBuffer.Instantiate(encounterPrefab);
                 commandBuffer.SetComponent(encounterInstance, spawnPoint);

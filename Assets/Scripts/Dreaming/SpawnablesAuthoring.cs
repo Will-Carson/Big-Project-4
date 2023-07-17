@@ -23,10 +23,19 @@ public class SpawnablesAuthoring : MonoBehaviour
                     flags = spawnable.flags,
                     weight = spawnable.weight,
                     prefab = GetEntity(spawnable.prefab, TransformUsageFlags.Dynamic),
+                    multiplier = spawnable.multiplier,
                 });
             }
         }
     }
+}
+
+[Flags]
+public enum SpawnableFlags
+{
+    Uninitialized = 0,
+    Boss = 1 << 0,
+    Pack = 2 << 1,
 }
 
 public struct Spawnable : IBufferElementData
@@ -34,6 +43,7 @@ public struct Spawnable : IBufferElementData
     public SpawnableFlags flags;
     public float weight;
     public Entity prefab;
+    public float multiplier;
 
     [BurstCompile]
     public static Spawnable GetRandomSpawnableByFlags(DynamicBuffer<Spawnable> spawnables, SpawnableFlags flags, ref Unity.Mathematics.Random random)
@@ -86,4 +96,5 @@ public struct SpawnableAuthoring
     public SpawnableFlags flags;
     public float weight;
     public GameObject prefab;
+    public float multiplier;
 }
