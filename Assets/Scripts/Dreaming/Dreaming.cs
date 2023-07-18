@@ -48,6 +48,7 @@ public partial struct DreamOrbSystem : ISystem
     {
         var encounters = SystemAPI.GetSingletonBuffer<Encounter>(true);
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
+        var manager = SystemAPI.GetSingleton<DreamManager>();
         
         foreach (var (health, entity) in SystemAPI.Query<RefRO<Health>>().WithAll<DreamOrb>().WithEntityAccess())
         {
@@ -73,6 +74,12 @@ public partial struct DreamOrbSystem : ISystem
                 jumper.ValueRW.lastActivated = (float)elapsedTime;
 
                 var encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterFlags.Combat, ref random).prefab;
+
+                if (manager.nextEncounterIsBoss == true)
+                {
+                    Debug.Log("Prepare to die!");
+                    encounterPrefab = Encounter.GetRandomEncounterByTag(encounters, EncounterFlags.Boss, ref random).prefab;
+                }
 
                 var encounterInstance = commandBuffer.Instantiate(encounterPrefab);
                 var encounterPosition = transform.ValueRO.Translate(new float3(0, -10, 0)).Position;

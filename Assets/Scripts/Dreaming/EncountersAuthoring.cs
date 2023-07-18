@@ -37,6 +37,7 @@ public enum EncounterFlags
     InitialEncounter = 1 << 0,
     Shop = 1 << 1,
     Combat = 1 << 2,
+    Boss = 1 << 3,
 }
 
 [BurstCompile]
@@ -84,6 +85,7 @@ public struct Encounter : IBufferElementData
         {
             if ((encounter.flags & flags) == flags)
             {
+                Debug.Log($"{encounter.flags}, {flags}");
                 result.Add(encounter);
             }
         }

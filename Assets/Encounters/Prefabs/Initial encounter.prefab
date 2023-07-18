@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1120775419214729351}
   - component: {fileID: -3778857937240770120}
   m_Layer: 0
-  m_Name: InitialEncounter
+  m_Name: Initial encounter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
