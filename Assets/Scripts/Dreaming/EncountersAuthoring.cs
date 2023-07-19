@@ -85,7 +85,6 @@ public struct Encounter : IBufferElementData
         {
             if ((encounter.flags & flags) == flags)
             {
-                Debug.Log($"{encounter.flags}, {flags}");
                 result.Add(encounter);
             }
         }

@@ -69,3 +69,15 @@ MonoBehaviour:
         y: -0
         z: -0
         w: 1
+  - prefab: {fileID: 7151562434275535278, guid: 3970b10ae4920bb45a9767298043f256,
+      type: 3}
+    position:
+      x: 0
+      y: 7.18
+      z: 0
+    rotation:
+      value:
+        x: -0
+        y: -0
+        z: -0
+        w: 1

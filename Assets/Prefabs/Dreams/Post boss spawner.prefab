@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &9162491776597446016
+--- !u!1 &7151562434275535278
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,40 +8,40 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1700208527296362095}
-  - component: {fileID: 2995068708636334813}
+  - component: {fileID: 7737979280831779966}
+  - component: {fileID: 1061448119421008739}
   m_Layer: 0
-  m_Name: Player zapper
+  m_Name: Post boss spawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1700208527296362095
+--- !u!4 &7737979280831779966
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9162491776597446016}
+  m_GameObject: {fileID: 7151562434275535278}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 7.18, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2995068708636334813
+--- !u!114 &1061448119421008739
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9162491776597446016}
+  m_GameObject: {fileID: 7151562434275535278}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 08766ccd4a92e534eaad4adb08360c07, type: 3}
+  m_Script: {fileID: 11500000, guid: f3d8e7cb29bb8534ab2e75edad9d40fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnables: []
+  prefab: {fileID: 3089161686122793534, guid: ac6e3347a6d20364a8fbb8cc3b15d515, type: 3}
