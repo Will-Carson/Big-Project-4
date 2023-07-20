@@ -19,6 +19,8 @@ public class EncounterCooker : EditorWindow
         var encounters = FindObjectOfType<EncountersAuthoring>();
         encounters.encounters = new List<EncounterAuthoring>();
 
+
+
         foreach (string prefabGUID in prefabGUIDs)
         {
             // Check if prefabGUID is in productGUIDS
@@ -55,6 +57,40 @@ public class EncounterCooker : EditorWindow
                 weight = encounter.weight,
                 prefab = savedProduct,
             });
+        }
+    }
+
+    [MenuItem("Helpers/Thingamajig")]
+    public static void Thingamajig()
+    {
+        Debug.Log("Thingamajig");
+
+        // Get all prefabs
+        // Check each for a marker component
+        // If it has it, iterate over all chidren of the prefab.
+        // If the child is a prefab, put it in the set
+        // If a child is not a prefab, save it as one and put it 
+
+        string[] prefabGUIDs = AssetDatabase.FindAssets("t:Prefab");
+
+        foreach (string prefabGUID in prefabGUIDs)
+        {
+            string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGUID);
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+
+            if (!prefab.TryGetComponent<ComplexColliderMarker>(out var m))
+            {
+                continue;
+            }
+
+            foreach (Transform child in prefab.transform)
+            {
+
+                if (child.gameObject.GetPrefabDefinition() != null)
+                {
+                    Debug.Log($"{child.name} from parent {prefab.name}");
+                }
+            }
         }
     }
 }
