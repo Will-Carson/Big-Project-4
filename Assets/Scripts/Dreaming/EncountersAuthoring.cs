@@ -40,14 +40,14 @@ public enum EncounterFlags
     Boss = 1 << 3,
 }
 
-[BurstCompile]
+//[BurstCompile]
 public struct Encounter : IBufferElementData
 {
     public EncounterFlags flags;
     public float weight;
     public Entity prefab;
 
-    [BurstCompile]
+    //[BurstCompile]
     public static Encounter GetRandomEncounterByTag(DynamicBuffer<Encounter> encounters, EncounterFlags flags, ref Unity.Mathematics.Random random)
     {
         var result = default(Encounter);
@@ -76,7 +76,7 @@ public struct Encounter : IBufferElementData
         return result;
     }
 
-    [BurstCompile]
+    //[BurstCompile]
     public static NativeList<Encounter> GetEncountersByTag(DynamicBuffer<Encounter> encounters, EncounterFlags flags)
     {
         var result = new NativeList<Encounter>(Allocator.Temp);
