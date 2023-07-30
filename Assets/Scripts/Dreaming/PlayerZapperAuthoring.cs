@@ -20,6 +20,7 @@ public class PlayerZapperAuthoring : MonoBehaviour
 
 public struct PlayerZapper : IComponentData { }
 
+[UpdateBefore(typeof(TransformSystemGroup))]
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [BurstCompile]
 public partial struct PlayerZapperSystem : ISystem
@@ -34,11 +35,11 @@ public partial struct PlayerZapperSystem : ISystem
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
 
         var playerZapper = SystemAPI.GetSingletonEntity<PlayerZapper>();
-        var playerZapperTransform = SystemAPI.GetComponent<LocalTransform>(playerZapper);
+        var playerZapperTransform = SystemAPI.GetComponent<LocalToWorld>(playerZapper);
 
         foreach (var playerTransform in SystemAPI.Query<RefRW<LocalTransform>>().WithAll<Jumper>())
         {
-            playerTransform.ValueRW = playerZapperTransform;
+            playerTransform.ValueRW = LocalTransform.FromPositionRotation(playerZapperTransform.Position, playerZapperTransform.Rotation);
         }
 
         commandBuffer.DestroyEntity(playerZapper);

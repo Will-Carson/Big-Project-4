@@ -27,13 +27,11 @@ public class PrefabContainerAuthoring : MonoBehaviour
     }
 }
 
-[BurstCompile]
 public struct PrefabContainer : IBufferElementData
 {
     public FixedString64Bytes id;
     public Entity prefab;
 
-    [BurstCompile]
     public static Entity GetEntityWithId(DynamicBuffer<PrefabContainer> prefabs, FixedString64Bytes id)
     {
         for (var i = 0; i < prefabs.Length; i++)
