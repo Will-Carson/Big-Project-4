@@ -756,7 +756,7 @@ MonoBehaviour:
     prefab: {fileID: 21265157554234536, guid: 557cecaa3586d5e47bc990c4d68255fa, type: 3}
   - tags: 1
     weight: 1
-    prefab: {fileID: 6654399109398679218, guid: a8a5d5065e583384099b5f46936399b5,
+    prefab: {fileID: 7783767497849231098, guid: 96785031512842d47b6e8b60abc2289e,
       type: 3}
 --- !u!4 &1436662311
 Transform:
