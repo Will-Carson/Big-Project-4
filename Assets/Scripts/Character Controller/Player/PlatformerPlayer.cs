@@ -28,7 +28,7 @@ public struct PlatformerPlayerInputs : IInputComponentData
     public bool SprintHeld;
     public bool RollHeld;
     public bool JumpHeld;
-    
+
     public InputEvent JumpPressed;
     public InputEvent DashPressed;
     public InputEvent CrouchPressed;

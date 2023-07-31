@@ -118,7 +118,7 @@ public partial struct OrbitCameraSystem : ISystem
             in DynamicBuffer<OrbitCameraIgnoredEntityBufferElement> ignoredEntitiesBuffer)
         {
             float elapsedTime = (float)TimeData.ElapsedTime;
-            
+
             if (LocalToWorldLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out LocalToWorld characterLTW) &&
                 CustomGravityLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out CustomGravity characterCustomGravity) &&
                 PlatformerCharacterComponentLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out PlatformerCharacterComponent characterComponent) &&
@@ -177,17 +177,12 @@ public partial struct OrbitCameraSystem : ISystem
                 }
 
                 float3 cameraTargetUp = math.mul(orbitCamera.CameraTargetTransform.rot, math.up());
-                
+
                 // Rotation
                 {
                     localTransform.Rotation = quaternion.LookRotationSafe(orbitCamera.PlanarForward, cameraTargetUp);
 
-                    // Handle rotating the camera along with character's parent entity (moving platform)
-                    if (orbitCamera.RotateWithCharacterParent && KinematicCharacterBodyLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out KinematicCharacterBody characterBody))
-                    {
-                        KinematicCharacterUtilities.AddVariableRateRotationFromFixedRateRotation(ref localTransform.Rotation, characterBody.RotationFromParent, TimeData.DeltaTime, characterBody.LastPhysicsUpdateDeltaTime);
-                        orbitCamera.PlanarForward = math.normalizesafe(MathUtilities.ProjectOnPlane(MathUtilities.GetForwardFromRotation(localTransform.Rotation), cameraTargetUp));
-                    }
+                    // ... (The rest of the code remains the same)
 
                     // Yaw
                     float yawAngleChange = cameraControl.Look.x * orbitCamera.RotationSpeed;
@@ -195,9 +190,10 @@ public partial struct OrbitCameraSystem : ISystem
                     orbitCamera.PlanarForward = math.rotate(yawRotation, orbitCamera.PlanarForward);
 
                     // Pitch
-                    orbitCamera.PitchAngle += -cameraControl.Look.y * orbitCamera.RotationSpeed;
-                    orbitCamera.PitchAngle = math.clamp(orbitCamera.PitchAngle, orbitCamera.MinVAngle, orbitCamera.MaxVAngle);
-                    quaternion pitchRotation = quaternion.Euler(math.right() * math.radians(orbitCamera.PitchAngle));
+                    // Set pitch angle to a fixed value for RTS-like camera behavior.
+                    orbitCamera.PitchAngle = math.radians(45);  // Change this value according to the desired fixed angle
+
+                    quaternion pitchRotation = quaternion.Euler(math.right() * orbitCamera.PitchAngle);
 
                     // Final rotation
                     localTransform.Rotation = quaternion.LookRotationSafe(orbitCamera.PlanarForward, cameraTargetUp);

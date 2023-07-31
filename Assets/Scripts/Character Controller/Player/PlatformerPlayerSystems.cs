@@ -5,12 +5,14 @@ using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Physics;
 using Unity.Transforms;
-using UnityEngine;
+using Unity.Collections;
+using Vector2 = UnityEngine.Vector2;
 
 [UpdateInGroup(typeof(GhostInputSystemGroup))]
 public partial class PlatformerPlayerInputsSystem : SystemBase
 {
     private PlatformerInputActions.GameplayMapActions _defaultActionsMap;
+    private bool cameraRotationToggled;
     
     protected override void OnCreate()
     {
@@ -18,9 +20,6 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         inputActions.Enable();
         inputActions.GameplayMap.Enable();
         _defaultActionsMap = inputActions.GameplayMap;
-        
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
         
         RequireForUpdate(SystemAPI.QueryBuilder().WithAll<PlatformerPlayer, PlatformerPlayerInputs>().Build());
     }
@@ -53,32 +52,44 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         })
         .Run();
 
-        /// Move the camera on the client because the next foreach requires the camera
-        /// rotation be up-to-date.
         Entities
         .ForEach((
-        Entity entity,
-        in PlatformerPlayerInputs inputs,
-        in ControlledCameraComponent camera,
-        in PlatformerPlayer player) =>
+            Entity entity,
+            in PlatformerPlayerInputs inputs,
+            in ControlledCameraComponent camera,
+            in PlatformerPlayer player) =>
         {
             if (SystemAPI.HasComponent<OrbitCameraControl>(camera.ControlledCamera))
             {
                 var cameraControl = SystemAPI.GetComponent<OrbitCameraControl>(camera.ControlledCamera);
 
                 cameraControl.FollowedCharacterEntity = player.ControlledCharacter;
-                cameraControl.Look = defaultActionsMap.LookDelta.ReadValue<Vector2>();
-                if (math.lengthsq(defaultActionsMap.LookConst.ReadValue<Vector2>()) > math.lengthsq(defaultActionsMap.LookDelta.ReadValue<Vector2>()))
+                cameraControl.Look = default;
+
+                // Here we check if ToggleCameraRotation is active and only update camera rotation if it is.
+                if (defaultActionsMap.CameraRotation.IsPressed())
                 {
-                    cameraControl.Look = defaultActionsMap.LookConst.ReadValue<Vector2>() * SystemAPI.Time.DeltaTime;
+                    cameraControl.Look = defaultActionsMap.LookDelta.ReadValue<Vector2>();
+                    if (math.lengthsq(defaultActionsMap.LookConst.ReadValue<Vector2>()) > math.lengthsq(defaultActionsMap.LookDelta.ReadValue<Vector2>()))
+                    {
+                        cameraControl.Look = defaultActionsMap.LookConst.ReadValue<Vector2>() * SystemAPI.Time.DeltaTime;
+                    }
                 }
                 cameraControl.Zoom = defaultActionsMap.CameraZoom.ReadValue<float>();
 
                 SystemAPI.SetComponent(camera.ControlledCamera, cameraControl);
             }
         })
-        .WithoutBurst() // Required because defaultActionsMap is a managed object.
+        .WithoutBurst()
         .Run();
+
+        var mousePosition = UnityEngine.Input.mousePosition;
+        mousePosition.z = 200;
+        var raycastParameters = UnityEngine.Camera.main.ScreenPointToRay(mousePosition);
+
+        var targetPosition = Raycast(raycastParameters.origin, raycastParameters.direction * 200).Position;
+        UnityEngine.Debug.DrawLine(raycastParameters.origin, raycastParameters.direction);
+        //UnityEngine.Debug.Log($"{targetPosition}");
 
         Entities
         .WithAll<GhostOwnerIsLocal>()
@@ -89,16 +100,26 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         in PlatformerPlayer player) =>
         {
             inputs = default;
-            inputs.Move = Vector2.ClampMagnitude(defaultActionsMap.Move.ReadValue<Vector2>(), 1f);
+
+            var moveInput = defaultActionsMap.Move.ReadValue<Vector2>();
+            var camForward = SystemAPI.GetComponent<LocalTransform>(camera.ControlledCamera).Forward();
+            var camRight = SystemAPI.GetComponent<LocalTransform>(camera.ControlledCamera).Right();
+
+            // Ignore vertical (y) component of the camera's vectors for a more traditional control scheme.
+            camForward.y = 0;
+            camRight.y = 0;
+            camForward = math.normalizesafe(camForward);
+            camRight = math.normalizesafe(camRight);
+
+            // Apply the camera's orientation to the move input.
+            var moveDirection = moveInput.y * camForward + moveInput.x * camRight;
+            inputs.Move = new float2(moveDirection.x, moveDirection.z);
+
             inputs.SprintHeld = defaultActionsMap.Sprint.IsPressed();
             inputs.RollHeld = defaultActionsMap.Roll.IsPressed();
             inputs.JumpHeld = defaultActionsMap.Jump.IsPressed();
 
-            if (camera.ControlledCamera != Entity.Null)
-            {
-                var forward = SystemAPI.GetComponent<LocalTransform>(camera.ControlledCamera).Forward();
-                inputs.Look = forward;
-            }
+            inputs.Look = math.normalizesafe(targetPosition - SystemAPI.GetComponent<LocalTransform>(player.ControlledCharacter).Position);
 
             if (defaultActionsMap.Jump.WasPressedThisFrame())
             {
@@ -144,6 +165,26 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         })
         .WithoutBurst() // Required because defaultActionsMap is a managed object.
         .Run();
+    }
+
+    public RaycastHit Raycast(float3 RayFrom, float3 RayTo)
+    {
+        var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
+
+        RaycastInput input = new RaycastInput()
+        {
+            Start = RayFrom,
+            End = RayTo,
+            Filter = new CollisionFilter()
+            {
+                BelongsTo = ~0u,
+                CollidesWith = ~0u, // all 1s, so all layers, collide with everything
+                GroupIndex = 0
+            }
+        };
+
+        collisionWorld.CastRay(input, out var hit);
+        return hit;
     }
 }
 
