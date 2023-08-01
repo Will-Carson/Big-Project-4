@@ -64,9 +64,10 @@ public struct GroundMoveState : IPlatformerCharacterState
         ref var character = ref aspect.Character.ValueRW;
         ref var characterControl = ref aspect.CharacterControl.ValueRW;
         ref var characterRotation = ref aspect.CharacterAspect.LocalTransform.ValueRW.Rotation;
+        var position = aspect.CharacterAspect.LocalTransform.ValueRO.Position;
         var customGravity = aspect.CustomGravity.ValueRO;
 
-        CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, deltaTime, math.normalizesafe(characterControl.LookVector), MathUtilities.GetUpFromRotation(characterRotation), character.AirRotationSharpness);
+        CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, deltaTime, math.normalizesafe(characterControl.Target - position), MathUtilities.GetUpFromRotation(characterRotation), character.AirRotationSharpness);
 
         // Weapon
         PlatformerCharacterAspect.HandleWeaponSubstate(

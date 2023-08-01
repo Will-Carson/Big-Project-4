@@ -112,11 +112,10 @@ public partial class WeaponMovementSystem : SystemBase
             var characterControl = SystemAPI.GetComponent<PlatformerCharacterControl>(owner.Entity);
             var weaponSocketEntity = SystemAPI.GetComponent<PlatformerCharacterComponent>(owner.Entity).WeaponAnimationSocketEntity;
             var characterTransform = SystemAPI.GetComponent<LocalTransform>(owner.Entity);
-
-            CharacterControlUtilities.SlerpRotationTowardsDirection(ref transform.Rotation, deltaTime, math.normalizesafe(characterControl.LookVector), float.MaxValue);
-
             var targetPosition = characterTransform.Position + math.mul(characterTransform.Rotation, new float3(.5f, 1, 1));
             transform.Position = math.lerp(transform.Position, targetPosition, 1);
+
+            CharacterControlUtilities.SlerpRotationTowardsDirection(ref transform.Rotation, deltaTime, math.normalizesafe(characterControl.Target - transform.Position), float.MaxValue);
 
             localTransformLookup[entity] = transform;
         })

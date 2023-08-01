@@ -264,7 +264,7 @@ public struct PlatformerCharacterComponent : IComponentData
 public struct PlatformerCharacterControl : IComponentData
 {
     public float3 MoveVector;
-    public float3 LookVector;
+    public float3 Target;
     
     public bool JumpHeld;
     public bool RollHeld;
@@ -281,6 +281,11 @@ public struct PlatformerCharacterControl : IComponentData
     public bool Fire1Released;
     public bool Fire2Pressed;
     public bool Fire2Released;
+
+    public float3 GetLookFromPosition(float3 position)
+    {
+        return Target - position;
+    }
 }
 
 public struct PlatformerCharacterInitialized : IComponentData

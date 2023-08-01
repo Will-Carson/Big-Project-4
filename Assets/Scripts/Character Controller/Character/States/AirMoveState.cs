@@ -90,6 +90,7 @@ public struct AirMoveState : IPlatformerCharacterState
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
         ref PlatformerCharacterControl characterControl = ref aspect.CharacterControl.ValueRW;
         ref quaternion characterRotation = ref aspect.CharacterAspect.LocalTransform.ValueRW.Rotation;
+        var position = aspect.CharacterAspect.LocalTransform.ValueRO.Position;
         CustomGravity customGravity = aspect.CustomGravity.ValueRO;
 
         // Weapon
@@ -102,7 +103,7 @@ public struct AirMoveState : IPlatformerCharacterState
             characterControl,
             0);
 
-        CharacterControlUtilities.SlerpRotationTowardsDirection(ref characterRotation, deltaTime, math.normalizesafe(characterControl.LookVector), character.AirRotationSharpness);
+        CharacterControlUtilities.SlerpRotationTowardsDirection(ref characterRotation, deltaTime, math.normalizesafe(characterControl.Target - position), character.AirRotationSharpness);
 
         CharacterControlUtilities.SlerpCharacterUpTowardsDirection(ref characterRotation, deltaTime, math.normalizesafe(-customGravity.Gravity), character.UpOrientationAdaptationSharpness);
     }

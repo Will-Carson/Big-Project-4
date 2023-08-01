@@ -303,7 +303,6 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
 
     public static void GetCommonMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
-        moveVector = (math.mul(lookRotation, math.right()) * inputs.Move.x) + (math.mul(lookRotation, math.forward()) * inputs.Move.y);
         moveVector = new float3(inputs.Move.x, 0, inputs.Move.y);
     }
 

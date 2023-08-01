@@ -12,7 +12,6 @@ using Vector2 = UnityEngine.Vector2;
 public partial class PlatformerPlayerInputsSystem : SystemBase
 {
     private PlatformerInputActions.GameplayMapActions _defaultActionsMap;
-    private bool cameraRotationToggled;
     
     protected override void OnCreate()
     {
@@ -31,6 +30,9 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         var prefabs = SystemAPI.GetSingletonBuffer<PrefabContainer>(true);
         var cameraPrefab = PrefabContainer.GetEntityWithId(prefabs, "OrbitCamera");
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+
+        var expPrefab = PrefabContainer.GetEntityWithId(prefabs, "Sphere");
+        var lazPrefab = PrefabContainer.GetEntityWithId(prefabs, "RailgunLazerVisual");
 
         Entities
         .WithNone<ControlledCameraComponent>()
@@ -84,12 +86,32 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         .Run();
 
         var mousePosition = UnityEngine.Input.mousePosition;
-        mousePosition.z = 200;
         var raycastParameters = UnityEngine.Camera.main.ScreenPointToRay(mousePosition);
 
-        var targetPosition = Raycast(raycastParameters.origin, raycastParameters.direction * 200).Position;
-        UnityEngine.Debug.DrawLine(raycastParameters.origin, raycastParameters.direction);
-        //UnityEngine.Debug.Log($"{targetPosition}");
+        var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
+
+        RaycastInput input = new RaycastInput()
+        {
+            Start = raycastParameters.origin,
+            End = raycastParameters.origin + (raycastParameters.direction * 200),
+            Filter = new CollisionFilter()
+            {
+                BelongsTo = ~0u,
+                CollidesWith = ~0u, // all 1s, so all layers, collide with everything
+                GroupIndex = 0
+            }
+        };
+
+        collisionWorld.CastRay(input, out var targetHit);
+        var targetPosition = targetHit.Position;
+
+        for (var i = 0; i < 10; i++)
+        {
+            var instance = commandBuffer.Instantiate(expPrefab);
+            commandBuffer.SetComponent(instance, LocalTransform.FromPosition(targetPosition));
+
+            //raycastParameters.origin + 
+        }
 
         Entities
         .WithAll<GhostOwnerIsLocal>()
@@ -119,7 +141,7 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
             inputs.RollHeld = defaultActionsMap.Roll.IsPressed();
             inputs.JumpHeld = defaultActionsMap.Jump.IsPressed();
 
-            inputs.Look = math.normalizesafe(targetPosition - SystemAPI.GetComponent<LocalTransform>(player.ControlledCharacter).Position);
+            inputs.Target = targetPosition;
 
             if (defaultActionsMap.Jump.WasPressedThisFrame())
             {
@@ -166,26 +188,6 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         .WithoutBurst() // Required because defaultActionsMap is a managed object.
         .Run();
     }
-
-    public RaycastHit Raycast(float3 RayFrom, float3 RayTo)
-    {
-        var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
-
-        RaycastInput input = new RaycastInput()
-        {
-            Start = RayFrom,
-            End = RayTo,
-            Filter = new CollisionFilter()
-            {
-                BelongsTo = ~0u,
-                CollidesWith = ~0u, // all 1s, so all layers, collide with everything
-                GroupIndex = 0
-            }
-        };
-
-        collisionWorld.CastRay(input, out var hit);
-        return hit;
-    }
 }
 
 /// <summary>
@@ -206,22 +208,30 @@ public partial struct PlatformerPlayerFixedStepControlSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         uint fixedTick = SystemAPI.GetSingleton<FixedTickSystem.Singleton>().Tick;
+
+        var localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
+
+        foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>()) { break; }
         
         foreach (var (playerInputs, player) in SystemAPI.Query<
             RefRW<PlatformerPlayerInputs>, 
-            PlatformerPlayer>()
+            RefRO<PlatformerPlayer>>()
             .WithAll<Simulate>())
         {
-            if (SystemAPI.HasComponent<PlatformerCharacterControl>(player.ControlledCharacter) && SystemAPI.HasComponent<PlatformerCharacterStateMachine>(player.ControlledCharacter))
+            if (SystemAPI.HasComponent<PlatformerCharacterControl>(player.ValueRO.ControlledCharacter) && SystemAPI.HasComponent<PlatformerCharacterStateMachine>(player.ValueRO.ControlledCharacter))
             {
-                var characterControl = SystemAPI.GetComponent<PlatformerCharacterControl>(player.ControlledCharacter);
-                var stateMachine = SystemAPI.GetComponent<PlatformerCharacterStateMachine>(player.ControlledCharacter);
+                var characterControl = SystemAPI.GetComponent<PlatformerCharacterControl>(player.ValueRO.ControlledCharacter);
+                var stateMachine = SystemAPI.GetComponent<PlatformerCharacterStateMachine>(player.ValueRO.ControlledCharacter);
 
-                var lookDirection = playerInputs.ValueRW.Look;
+                var lookDirection = default(float3);
+                if (localTransformLookup.TryGetComponent(player.ValueRO.ControlledCharacter, out var characterTransform))
+                {
+                    lookDirection = math.normalizesafe(playerInputs.ValueRW.Target - characterTransform.Position);
+                }
 
                 stateMachine.GetMoveVectorFromPlayerInput(stateMachine.CurrentState, in playerInputs.ValueRO, quaternion.LookRotationSafe(lookDirection, new float3(0, 1, 0)), out characterControl.MoveVector);
 
-                characterControl.LookVector = lookDirection;
+                characterControl.Target = playerInputs.ValueRW.Target;
                 
                 characterControl.JumpHeld = playerInputs.ValueRW.JumpHeld;
                 characterControl.RollHeld = playerInputs.ValueRW.RollHeld;
@@ -239,7 +249,7 @@ public partial struct PlatformerPlayerFixedStepControlSystem : ISystem
                 characterControl.Fire2Pressed = playerInputs.ValueRW.Fire2Pressed.IsSet;
                 characterControl.Fire2Released = playerInputs.ValueRW.Fire2Released.IsSet;
 
-                SystemAPI.SetComponent(player.ControlledCharacter, characterControl);
+                SystemAPI.SetComponent(player.ValueRO.ControlledCharacter, characterControl);
             }
         }
     }
