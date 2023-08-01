@@ -31,9 +31,6 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         var cameraPrefab = PrefabContainer.GetEntityWithId(prefabs, "OrbitCamera");
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
 
-        var expPrefab = PrefabContainer.GetEntityWithId(prefabs, "Sphere");
-        var lazPrefab = PrefabContainer.GetEntityWithId(prefabs, "RailgunLazerVisual");
-
         Entities
         .WithNone<ControlledCameraComponent>()
         .WithAll<GhostOwnerIsLocal, PlatformerPlayer>()
@@ -104,14 +101,6 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
 
         collisionWorld.CastRay(input, out var targetHit);
         var targetPosition = targetHit.Position;
-
-        for (var i = 0; i < 10; i++)
-        {
-            var instance = commandBuffer.Instantiate(expPrefab);
-            commandBuffer.SetComponent(instance, LocalTransform.FromPosition(targetPosition));
-
-            //raycastParameters.origin + 
-        }
 
         Entities
         .WithAll<GhostOwnerIsLocal>()

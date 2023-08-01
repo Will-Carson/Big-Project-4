@@ -93,6 +93,7 @@ public partial struct OrbitCameraSystem : ISystem
             PlatformerCharacterComponentLookup = SystemAPI.GetComponentLookup<PlatformerCharacterComponent>(true),
             PlatformerCharacterStateMachineLookup = SystemAPI.GetComponentLookup<PlatformerCharacterStateMachine>(true),
             CustomGravityLookup = SystemAPI.GetComponentLookup<CustomGravity>(true),
+            PlatformerCharacterControlLookup = SystemAPI.GetComponentLookup<PlatformerCharacterControl>(true),
         };
         job.Schedule();
     }
@@ -109,6 +110,7 @@ public partial struct OrbitCameraSystem : ISystem
         [ReadOnly] public ComponentLookup<PlatformerCharacterComponent> PlatformerCharacterComponentLookup;
         [ReadOnly] public ComponentLookup<PlatformerCharacterStateMachine> PlatformerCharacterStateMachineLookup;
         [ReadOnly] public ComponentLookup<CustomGravity> CustomGravityLookup;
+        [ReadOnly] public ComponentLookup<PlatformerCharacterControl> PlatformerCharacterControlLookup;
 
         void Execute(
             Entity entity,
@@ -119,10 +121,11 @@ public partial struct OrbitCameraSystem : ISystem
         {
             float elapsedTime = (float)TimeData.ElapsedTime;
 
-            if (LocalToWorldLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out LocalToWorld characterLTW) &&
-                CustomGravityLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out CustomGravity characterCustomGravity) &&
-                PlatformerCharacterComponentLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out PlatformerCharacterComponent characterComponent) &&
-                PlatformerCharacterStateMachineLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out PlatformerCharacterStateMachine characterStateMachine))
+            if (LocalToWorldLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out var characterLTW) &&
+                CustomGravityLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out var characterCustomGravity) &&
+                PlatformerCharacterComponentLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out var characterComponent) &&
+                PlatformerCharacterStateMachineLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out var characterStateMachine) &&
+                PlatformerCharacterControlLookup.TryGetComponent(cameraControl.FollowedCharacterEntity, out var characterControl))
             {
                 // Camera target handling
                 {
@@ -141,6 +144,9 @@ public partial struct OrbitCameraSystem : ISystem
                     {
                         selectedCameraTargetTransform.rot = MathUtilities.CreateRotationWithUpPriority(math.normalizesafe(-characterCustomGravity.Gravity), math.mul(selectedCameraTargetTransform.rot, math.forward()));
                     }
+
+                    selectedCameraTargetTransform.pos = math.lerp(characterLTW.Position, characterControl.Target, 0.5f);
+                    selectedCameraTargetTransform.pos.y = camTargetLTW.Position.y;
 
                     // Detect transition
                     if (orbitCamera.ActiveCameraTarget != selectedCameraTarget ||
@@ -182,8 +188,6 @@ public partial struct OrbitCameraSystem : ISystem
                 {
                     localTransform.Rotation = quaternion.LookRotationSafe(orbitCamera.PlanarForward, cameraTargetUp);
 
-                    // ... (The rest of the code remains the same)
-
                     // Yaw
                     float yawAngleChange = cameraControl.Look.x * orbitCamera.RotationSpeed;
                     quaternion yawRotation = quaternion.Euler(cameraTargetUp * math.radians(yawAngleChange));
@@ -207,68 +211,69 @@ public partial struct OrbitCameraSystem : ISystem
                 orbitCamera.TargetDistance = math.clamp(orbitCamera.TargetDistance + desiredDistanceMovementFromInput, orbitCamera.MinDistance, orbitCamera.MaxDistance);
                 orbitCamera.CurrentDistanceFromMovement = math.lerp(orbitCamera.CurrentDistanceFromMovement, orbitCamera.TargetDistance, MathUtilities.GetSharpnessInterpolant(orbitCamera.DistanceMovementSharpness, TimeData.DeltaTime));
 
-                // Obstructions
-                if (orbitCamera.ObstructionRadius > 0f)
-                {
-                    float obstructionCheckDistance = orbitCamera.CurrentDistanceFromMovement;
+                orbitCamera.CurrentDistanceFromObstruction = orbitCamera.CurrentDistanceFromMovement;
+                //// Obstructions
+                //if (orbitCamera.ObstructionRadius > 0f)
+                //{
+                //    float obstructionCheckDistance = orbitCamera.CurrentDistanceFromMovement;
 
-                    CameraObstructionHitsCollector collector = new CameraObstructionHitsCollector(cameraControl.FollowedCharacterEntity, ignoredEntitiesBuffer, cameraForward);
-                    PhysicsWorld.SphereCastCustom<CameraObstructionHitsCollector>(
-                        orbitCamera.CameraTargetTransform.pos,
-                        orbitCamera.ObstructionRadius,
-                        -cameraForward,
-                        obstructionCheckDistance,
-                        ref collector,
-                        CollisionFilter.Default,
-                        QueryInteraction.IgnoreTriggers);
+                //    CameraObstructionHitsCollector collector = new CameraObstructionHitsCollector(cameraControl.FollowedCharacterEntity, ignoredEntitiesBuffer, cameraForward);
+                //    PhysicsWorld.SphereCastCustom<CameraObstructionHitsCollector>(
+                //        orbitCamera.CameraTargetTransform.pos,
+                //        orbitCamera.ObstructionRadius,
+                //        -cameraForward,
+                //        obstructionCheckDistance,
+                //        ref collector,
+                //        CollisionFilter.Default,
+                //        QueryInteraction.IgnoreTriggers);
 
-                    float newObstructedDistance = obstructionCheckDistance;
-                    if (collector.NumHits > 0)
-                    {
-                        newObstructedDistance = obstructionCheckDistance * collector.ClosestHit.Fraction;
+                //    float newObstructedDistance = obstructionCheckDistance;
+                //    if (collector.NumHits > 0)
+                //    {
+                //        newObstructedDistance = obstructionCheckDistance * collector.ClosestHit.Fraction;
 
-                        // Redo cast with the interpolated body transform to prevent FixedUpdate jitter in obstruction detection
-                        if (orbitCamera.PreventFixedUpdateJitter)
-                        {
-                            RigidBody hitBody = PhysicsWorld.Bodies[collector.ClosestHit.RigidBodyIndex];
-                            if (LocalToWorldLookup.TryGetComponent(hitBody.Entity, out LocalToWorld hitBodyLocalToWorld))
-                            {
-                                hitBody.WorldFromBody = new RigidTransform(quaternion.LookRotationSafe(hitBodyLocalToWorld.Forward, hitBodyLocalToWorld.Up), hitBodyLocalToWorld.Position);
+                //        // Redo cast with the interpolated body transform to prevent FixedUpdate jitter in obstruction detection
+                //        if (orbitCamera.PreventFixedUpdateJitter)
+                //        {
+                //            RigidBody hitBody = PhysicsWorld.Bodies[collector.ClosestHit.RigidBodyIndex];
+                //            if (LocalToWorldLookup.TryGetComponent(hitBody.Entity, out LocalToWorld hitBodyLocalToWorld))
+                //            {
+                //                hitBody.WorldFromBody = new RigidTransform(quaternion.LookRotationSafe(hitBodyLocalToWorld.Forward, hitBodyLocalToWorld.Up), hitBodyLocalToWorld.Position);
 
-                                collector = new CameraObstructionHitsCollector(cameraControl.FollowedCharacterEntity, ignoredEntitiesBuffer, cameraForward);
-                                hitBody.SphereCastCustom<CameraObstructionHitsCollector>(
-                                    orbitCamera.CameraTargetTransform.pos,
-                                    orbitCamera.ObstructionRadius,
-                                    -cameraForward,
-                                    obstructionCheckDistance,
-                                    ref collector,
-                                    CollisionFilter.Default,
-                                    QueryInteraction.IgnoreTriggers);
+                //                collector = new CameraObstructionHitsCollector(cameraControl.FollowedCharacterEntity, ignoredEntitiesBuffer, cameraForward);
+                //                hitBody.SphereCastCustom<CameraObstructionHitsCollector>(
+                //                    orbitCamera.CameraTargetTransform.pos,
+                //                    orbitCamera.ObstructionRadius,
+                //                    -cameraForward,
+                //                    obstructionCheckDistance,
+                //                    ref collector,
+                //                    CollisionFilter.Default,
+                //                    QueryInteraction.IgnoreTriggers);
 
-                                if (collector.NumHits > 0)
-                                {
-                                    newObstructedDistance = obstructionCheckDistance * collector.ClosestHit.Fraction;
-                                }
-                            }
-                        }
-                    }
+                //                if (collector.NumHits > 0)
+                //                {
+                //                    newObstructedDistance = obstructionCheckDistance * collector.ClosestHit.Fraction;
+                //                }
+                //            }
+                //        }
+                //    }
 
-                    // Update current distance based on obstructed distance
-                    if (orbitCamera.CurrentDistanceFromObstruction < newObstructedDistance)
-                    {
-                        // Move outer
-                        orbitCamera.CurrentDistanceFromObstruction = math.lerp(orbitCamera.CurrentDistanceFromObstruction, newObstructedDistance, MathUtilities.GetSharpnessInterpolant(orbitCamera.ObstructionOuterSmoothingSharpness, TimeData.DeltaTime));
-                    }
-                    else if (orbitCamera.CurrentDistanceFromObstruction > newObstructedDistance)
-                    {
-                        // Move inner
-                        orbitCamera.CurrentDistanceFromObstruction = math.lerp(orbitCamera.CurrentDistanceFromObstruction, newObstructedDistance, MathUtilities.GetSharpnessInterpolant(orbitCamera.ObstructionInnerSmoothingSharpness, TimeData.DeltaTime));
-                    }
-                }
-                else
-                {
-                    orbitCamera.CurrentDistanceFromObstruction = orbitCamera.CurrentDistanceFromMovement;
-                }
+                //    // Update current distance based on obstructed distance
+                //    if (orbitCamera.CurrentDistanceFromObstruction < newObstructedDistance)
+                //    {
+                //        // Move outer
+                //        orbitCamera.CurrentDistanceFromObstruction = math.lerp(orbitCamera.CurrentDistanceFromObstruction, newObstructedDistance, MathUtilities.GetSharpnessInterpolant(orbitCamera.ObstructionOuterSmoothingSharpness, TimeData.DeltaTime));
+                //    }
+                //    else if (orbitCamera.CurrentDistanceFromObstruction > newObstructedDistance)
+                //    {
+                //        // Move inner
+                //        orbitCamera.CurrentDistanceFromObstruction = math.lerp(orbitCamera.CurrentDistanceFromObstruction, newObstructedDistance, MathUtilities.GetSharpnessInterpolant(orbitCamera.ObstructionInnerSmoothingSharpness, TimeData.DeltaTime));
+                //    }
+                //}
+                //else
+                //{
+                //    orbitCamera.CurrentDistanceFromObstruction = orbitCamera.CurrentDistanceFromMovement;
+                //}
 
                 // Calculate final camera position from targetposition + rotation + distance
                 localTransform.Position = orbitCamera.CameraTargetTransform.pos + (-cameraForward * orbitCamera.CurrentDistanceFromObstruction);
