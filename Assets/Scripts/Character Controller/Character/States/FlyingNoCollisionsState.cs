@@ -56,12 +56,6 @@ public struct FlyingNoCollisionsState : IPlatformerCharacterState
         characterRotation = quaternion.identity;
     }
 
-    public void GetCameraParameters(in PlatformerCharacterComponent character, out Entity cameraTarget, out bool calculateUpFromGravity)
-    {
-        cameraTarget = character.DefaultCameraTargetEntity;
-        calculateUpFromGravity = false;
-    }
-
     public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
         PlatformerCharacterAspect.GetCommonMoveVectorFromPlayerInput(in inputs, lookRotation, out moveVector);

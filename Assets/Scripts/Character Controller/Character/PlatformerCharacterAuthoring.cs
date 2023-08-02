@@ -14,10 +14,6 @@ public class PlatformerCharacterAuthoring : MonoBehaviour
 
     [Header("References")]
     public GameObject MeshPrefab;
-    public GameObject DefaultCameraTarget;
-    public GameObject SwimmingCameraTarget;
-    public GameObject ClimbingCameraTarget;
-    public GameObject CrouchingCameraTarget;
     public GameObject MeshRoot;
     public GameObject RollballMesh;
     public GameObject RopePrefab;
@@ -38,10 +34,6 @@ public class PlatformerCharacterAuthoring : MonoBehaviour
         {
             KinematicCharacterUtilities.BakeCharacter(this, authoring, authoring.CharacterProperties);
             
-            authoring.Character.DefaultCameraTargetEntity = GetEntity(authoring.DefaultCameraTarget, TransformUsageFlags.Dynamic);
-            authoring.Character.SwimmingCameraTargetEntity = GetEntity(authoring.SwimmingCameraTarget, TransformUsageFlags.Dynamic);
-            authoring.Character.ClimbingCameraTargetEntity = GetEntity(authoring.ClimbingCameraTarget, TransformUsageFlags.Dynamic);
-            authoring.Character.CrouchingCameraTargetEntity = GetEntity(authoring.CrouchingCameraTarget, TransformUsageFlags.Dynamic);
             authoring.Character.MeshRootEntity = GetEntity(authoring.MeshRoot, TransformUsageFlags.Dynamic);
             authoring.Character.RollballMeshEntity = GetEntity(authoring.RollballMesh, TransformUsageFlags.Dynamic);
             authoring.Character.RopePrefabEntity = GetEntity(authoring.RopePrefab, TransformUsageFlags.Dynamic);

@@ -123,12 +123,6 @@ public struct ClimbingState : IPlatformerCharacterState
         MathUtilities.SetRotationAroundPoint(ref characterRotation, ref characterPosition, geometryCenter, smoothedRotation);
     }
 
-    public void GetCameraParameters(in PlatformerCharacterComponent character, out Entity cameraTarget, out bool calculateUpFromGravity)
-    {
-        cameraTarget = character.ClimbingCameraTargetEntity;
-        calculateUpFromGravity = true;
-    }
-
     public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
         moveVector = new float3();

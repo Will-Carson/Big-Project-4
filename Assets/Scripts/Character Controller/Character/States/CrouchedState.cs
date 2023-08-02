@@ -9,8 +9,6 @@ public struct CrouchedState : IPlatformerCharacterState
     public void OnStateEnter(CharacterState previousState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
     {
         ref PlatformerCharacterComponent character = ref aspect.Character.ValueRW;
-
-        //aspect.SetCapsuleGeometry(character.CrouchingGeometry.ToCapsuleGeometry());
     }
 
     public void OnStateExit(CharacterState nextState, ref PlatformerCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, in PlatformerCharacterAspect aspect)
@@ -69,12 +67,6 @@ public struct CrouchedState : IPlatformerCharacterState
         {
             CharacterControlUtilities.SlerpCharacterUpTowardsDirection(ref characterRotation, deltaTime, math.normalizesafe(-customGravity.Gravity), character.UpOrientationAdaptationSharpness);
         }
-    }
-
-    public void GetCameraParameters(in PlatformerCharacterComponent character, out Entity cameraTarget, out bool calculateUpFromGravity)
-    {
-        cameraTarget = character.CrouchingCameraTargetEntity;
-        calculateUpFromGravity = !character.IsOnStickySurface;
     }
 
     public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)

@@ -95,12 +95,6 @@ public struct SwimmingState : IPlatformerCharacterState
         }
     }
 
-    public void GetCameraParameters(in PlatformerCharacterComponent character, out Entity cameraTarget, out bool calculateUpFromGravity)
-    {
-        cameraTarget = character.SwimmingCameraTargetEntity;
-        calculateUpFromGravity = true;
-    }
-
     public void GetMoveVectorFromPlayerInput(in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
         moveVector = new float3();

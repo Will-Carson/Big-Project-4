@@ -231,58 +231,6 @@ public struct PlatformerCharacterStateMachine : IComponentData
         }
     }
 
-    public void GetCameraParameters(CharacterState state, in PlatformerCharacterComponent character, out Entity cameraTarget, out bool calculateUpFromGravity)
-    {
-        cameraTarget = default;
-        calculateUpFromGravity = default;
-
-        switch (state)
-        {
-            case CharacterState.GroundMove:
-                GroundMoveState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.Crouched:
-                CrouchedState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.AirMove:
-                AirMoveState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.WallRun:
-                WallRunState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.Rolling:
-                RollingState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.LedgeGrab:
-                LedgeGrabState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.LedgeStandingUp:
-                LedgeStandingUpState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.Dashing:
-                DashingState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.Swimming:
-                SwimmingState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.Climbing:
-                ClimbingState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.FlyingNoCollisions:
-                FlyingNoCollisionsState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.RopeSwing:
-                RopeSwingState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.Stunned:
-                StunnedState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-            case CharacterState.Dead:
-                DeadState.GetCameraParameters(in character, out cameraTarget, out calculateUpFromGravity);
-                break;
-        }
-    }
-
     public void GetMoveVectorFromPlayerInput(CharacterState state, in PlatformerPlayerInputs inputs, quaternion lookRotation, out float3 moveVector)
     {
         moveVector = default;

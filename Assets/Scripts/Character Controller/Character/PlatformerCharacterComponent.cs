@@ -11,10 +11,6 @@ using Unity.Physics;
 public struct PlatformerCharacterComponent : IComponentData
 {
     [Header("References")]
-    public Entity DefaultCameraTargetEntity;
-    public Entity ClimbingCameraTargetEntity;
-    public Entity SwimmingCameraTargetEntity;
-    public Entity CrouchingCameraTargetEntity;
     public Entity MeshRootEntity;
     public Entity RopePrefabEntity;
     public Entity RollballMeshEntity;
