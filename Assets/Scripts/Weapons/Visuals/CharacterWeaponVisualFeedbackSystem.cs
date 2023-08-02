@@ -33,7 +33,6 @@ public partial struct CharacterWeaponVisualFeedbackSystem : ISystem
             WeaponVisualFeedbackLookup = SystemAPI.GetComponentLookup<WeaponVisualFeedback>(true),
             WeaponControlLookup = SystemAPI.GetComponentLookup<WeaponControl>(true),
             LocalTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(false),
-            MainEntityCameraLookup = SystemAPI.GetComponentLookup<MainEntityCamera>(false),
         };
         job.Schedule();
     }
@@ -48,7 +47,6 @@ public partial struct CharacterWeaponVisualFeedbackSystem : ISystem
         [ReadOnly]
         public ComponentLookup<WeaponControl> WeaponControlLookup;
         public ComponentLookup<LocalTransform> LocalTransformLookup;
-        public ComponentLookup<MainEntityCamera> MainEntityCameraLookup;
 
         void Execute(Entity entity, ref CharacterWeaponVisualFeedback characterWeaponVisualFeedback, in PlatformerCharacterComponent character, in KinematicCharacterBody characterBody, in ActiveWeapon activeWeapon)
         {
@@ -94,37 +92,6 @@ public partial struct CharacterWeaponVisualFeedbackSystem : ISystem
                 // Final weapon pose
                 float3 targetWeaponAnimSocketLocalPosition = characterWeaponVisualFeedback.WeaponLocalPosBob + characterWeaponVisualFeedback.WeaponLocalPosRecoil;
                 LocalTransformLookup[character.WeaponAnimationSocketEntity] = LocalTransform.FromPosition(targetWeaponAnimSocketLocalPosition);
-
-                //// FoV modifications
-                //if (MainEntityCameraLookup.TryGetComponent(character.ViewEntity, out MainEntityCamera entityCamera))
-                //{
-                //    // FoV kick
-                //    {
-                //        // Clamp current
-                //        characterWeaponVisualFeedback.TargetRecoilFOVKick = math.clamp(characterWeaponVisualFeedback.TargetRecoilFOVKick, 0f, weaponFeedback.RecoilMaxFOVKick);
-
-                //        // FoV go towards recoil
-                //        if (characterWeaponVisualFeedback.CurrentRecoilFOVKick <= characterWeaponVisualFeedback.TargetRecoilFOVKick * 0.99f)
-                //        {
-                //            characterWeaponVisualFeedback.CurrentRecoilFOVKick = math.lerp(characterWeaponVisualFeedback.CurrentRecoilFOVKick, characterWeaponVisualFeedback.TargetRecoilFOVKick, math.saturate(weaponFeedback.RecoilFOVKickSharpness * DeltaTime));
-                //        }
-                //        // FoV go towards restitution
-                //        else
-                //        {
-                //            characterWeaponVisualFeedback.CurrentRecoilFOVKick = math.lerp(characterWeaponVisualFeedback.CurrentRecoilFOVKick, 0f, math.saturate(weaponFeedback.RecoilFOVKickRestitutionSharpness * DeltaTime));
-                //            characterWeaponVisualFeedback.TargetRecoilFOVKick = characterWeaponVisualFeedback.CurrentRecoilFOVKick;
-                //        }
-                //    }
-
-                //    // Aiming
-                //    if (WeaponControlLookup.TryGetComponent(activeWeapon.Entity, out WeaponControl weaponControl))
-                //    {
-                //        float targetFOV = weaponControl.AimHeld ? (entityCamera.BaseFoV * weaponFeedback.AimFOVRatio) : entityCamera.BaseFoV;
-                //        entityCamera.CurrentFoV = math.lerp(entityCamera.CurrentFoV, targetFOV + characterWeaponVisualFeedback.CurrentRecoilFOVKick, math.saturate(weaponFeedback.AimFOVSharpness * DeltaTime));
-                //    }
-
-                //    MainEntityCameraLookup[character.ViewEntity] = entityCamera;
-                //}
             }
         }
     }

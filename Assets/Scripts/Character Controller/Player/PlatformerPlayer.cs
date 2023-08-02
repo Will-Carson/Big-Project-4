@@ -14,11 +14,6 @@ public struct PlatformerPlayer : IComponentData
     public Entity ControlledCharacter;
 }
 
-public struct ControlledCameraComponent : IComponentData
-{
-    public Entity ControlledCamera;
-}
-
 [Serializable]
 public struct PlatformerPlayerInputs : IInputComponentData
 {

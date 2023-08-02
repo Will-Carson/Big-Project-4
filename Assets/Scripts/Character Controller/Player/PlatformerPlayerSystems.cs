@@ -7,6 +7,7 @@ using Unity.Physics;
 using Unity.Transforms;
 using Unity.Collections;
 using Vector2 = UnityEngine.Vector2;
+using Cinemachine;
 
 [UpdateInGroup(typeof(GhostInputSystemGroup))]
 public partial class PlatformerPlayerInputsSystem : SystemBase
@@ -26,71 +27,26 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
     protected override void OnUpdate()
     {
         var defaultActionsMap = _defaultActionsMap;
-
-        var prefabs = SystemAPI.GetSingletonBuffer<PrefabContainer>(true);
-        var cameraPrefab = PrefabContainer.GetEntityWithId(prefabs, "OrbitCamera");
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
-
-        Entities
-        .WithNone<ControlledCameraComponent>()
-        .WithAll<GhostOwnerIsLocal, PlatformerPlayer>()
-        .ForEach((
-        Entity entity,
-        in PlatformerPlayer player) =>
-        {
-            // Exit early if we don't have a controlled character yet.
-            if (player.ControlledCharacter == Entity.Null) return;
-
-            var camera = commandBuffer.Instantiate(cameraPrefab);
-            commandBuffer.AddComponent<MainEntityCamera>(camera);
-            commandBuffer.AddComponent(entity, new ControlledCameraComponent
-            {
-                ControlledCamera = camera
-            });
-            commandBuffer.AddComponent(camera, new OrbitCameraControl { FollowedCharacterEntity = player.ControlledCharacter });
-        })
-        .Run();
-
-        Entities
-        .ForEach((
-            Entity entity,
-            in PlatformerPlayerInputs inputs,
-            in ControlledCameraComponent camera,
-            in PlatformerPlayer player) =>
-        {
-            if (SystemAPI.HasComponent<OrbitCameraControl>(camera.ControlledCamera))
-            {
-                var cameraControl = SystemAPI.GetComponent<OrbitCameraControl>(camera.ControlledCamera);
-
-                cameraControl.FollowedCharacterEntity = player.ControlledCharacter;
-                cameraControl.Look = default;
-
-                // Here we check if ToggleCameraRotation is active and only update camera rotation if it is.
-                if (defaultActionsMap.CameraRotation.IsPressed())
-                {
-                    cameraControl.Look = defaultActionsMap.LookDelta.ReadValue<Vector2>();
-                    if (math.lengthsq(defaultActionsMap.LookConst.ReadValue<Vector2>()) > math.lengthsq(defaultActionsMap.LookDelta.ReadValue<Vector2>()))
-                    {
-                        cameraControl.Look = defaultActionsMap.LookConst.ReadValue<Vector2>() * SystemAPI.Time.DeltaTime;
-                    }
-                }
-                cameraControl.Zoom = defaultActionsMap.CameraZoom.ReadValue<float>();
-
-                SystemAPI.SetComponent(camera.ControlledCamera, cameraControl);
-            }
-        })
-        .WithoutBurst()
-        .Run();
-
         var mousePosition = UnityEngine.Input.mousePosition;
         var raycastParameters = UnityEngine.Camera.main.ScreenPointToRay(mousePosition);
-
         var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
+        UnityEngine.GameObject characterFollower = null;
+        UnityEngine.GameObject targetFollower = null;
+        CinemachineVirtualCamera virtualCamera = null;
+
+        foreach (var targets in SystemAPI.Query<CameraGameObjects>())
+        {
+            characterFollower = targets.characterFollower;
+            targetFollower = targets.targetFollower;
+            virtualCamera = targets.virtualCamera;
+            break;
+        }
 
         RaycastInput input = new RaycastInput()
         {
             Start = raycastParameters.origin,
-            End = raycastParameters.origin + (raycastParameters.direction * 200),
+            End = raycastParameters.origin + (raycastParameters.direction * 200_000),
             Filter = new CollisionFilter()
             {
                 BelongsTo = ~0u,
@@ -102,19 +58,45 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         collisionWorld.CastRay(input, out var targetHit);
         var targetPosition = targetHit.Position;
 
+        var characterPosition = new float3();
+
+        foreach (var localTransform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<PlatformerCharacterComponent, GhostOwnerIsLocal>())
+        {
+            characterPosition = localTransform.ValueRO.Position;
+            characterFollower.transform.position = localTransform.ValueRO.Position;
+        }
+
+        var modifiedTargetPosition = targetPosition - characterPosition;
+
+        if (math.length(new float2(modifiedTargetPosition.x, modifiedTargetPosition.z)) > 20)
+        {
+            modifiedTargetPosition = characterPosition + math.normalizesafe(targetPosition - characterPosition) * 20;
+        }
+
+        modifiedTargetPosition *= new float3(1, 1, 1.3f);
+        modifiedTargetPosition += characterPosition;
+        modifiedTargetPosition.y = characterPosition.y;
+        targetFollower.transform.position = modifiedTargetPosition;
+
+        CinemachineComponentBase componentBase = virtualCamera.GetCinemachineComponent(CinemachineCore.Stage.Body);
+        if (componentBase is CinemachineFramingTransposer)
+        {
+            (componentBase as CinemachineFramingTransposer).m_CameraDistance += defaultActionsMap.CameraZoom.ReadValue<float>(); // your value
+        }
+
+        var camForward = (float3)virtualCamera.transform.forward;
+        var camRight = (float3)virtualCamera.transform.right;
+
         Entities
         .WithAll<GhostOwnerIsLocal>()
         .ForEach((
         Entity entity,
         ref PlatformerPlayerInputs inputs,
-        in ControlledCameraComponent camera,
         in PlatformerPlayer player) =>
         {
             inputs = default;
 
             var moveInput = defaultActionsMap.Move.ReadValue<Vector2>();
-            var camForward = SystemAPI.GetComponent<LocalTransform>(camera.ControlledCamera).Forward();
-            var camRight = SystemAPI.GetComponent<LocalTransform>(camera.ControlledCamera).Right();
 
             // Ignore vertical (y) component of the camera's vectors for a more traditional control scheme.
             camForward.y = 0;
