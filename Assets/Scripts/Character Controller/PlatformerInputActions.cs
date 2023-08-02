@@ -152,15 +152,6 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""CameraRotation"",
-                    ""type"": ""Button"",
-                    ""id"": ""6fab347d-cc7e-4bae-a48e-2041fbe9cb7a"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -471,17 +462,6 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
                     ""action"": ""Fire1"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""f0d58b39-321f-4e81-8460-5480e96315ff"",
-                    ""path"": ""<Keyboard>/Q"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""CameraRotation"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -504,7 +484,6 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
         m_GameplayMap_FlyNoCollisions = m_GameplayMap.FindAction("FlyNoCollisions", throwIfNotFound: true);
         m_GameplayMap_Fire1 = m_GameplayMap.FindAction("Fire1", throwIfNotFound: true);
         m_GameplayMap_Fire2 = m_GameplayMap.FindAction("Fire2", throwIfNotFound: true);
-        m_GameplayMap_CameraRotation = m_GameplayMap.FindAction("CameraRotation", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -580,7 +559,6 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
     private readonly InputAction m_GameplayMap_FlyNoCollisions;
     private readonly InputAction m_GameplayMap_Fire1;
     private readonly InputAction m_GameplayMap_Fire2;
-    private readonly InputAction m_GameplayMap_CameraRotation;
     public struct GameplayMapActions
     {
         private @PlatformerInputActions m_Wrapper;
@@ -599,7 +577,6 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
         public InputAction @FlyNoCollisions => m_Wrapper.m_GameplayMap_FlyNoCollisions;
         public InputAction @Fire1 => m_Wrapper.m_GameplayMap_Fire1;
         public InputAction @Fire2 => m_Wrapper.m_GameplayMap_Fire2;
-        public InputAction @CameraRotation => m_Wrapper.m_GameplayMap_CameraRotation;
         public InputActionMap Get() { return m_Wrapper.m_GameplayMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -651,9 +628,6 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
             @Fire2.started += instance.OnFire2;
             @Fire2.performed += instance.OnFire2;
             @Fire2.canceled += instance.OnFire2;
-            @CameraRotation.started += instance.OnCameraRotation;
-            @CameraRotation.performed += instance.OnCameraRotation;
-            @CameraRotation.canceled += instance.OnCameraRotation;
         }
 
         private void UnregisterCallbacks(IGameplayMapActions instance)
@@ -700,9 +674,6 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
             @Fire2.started -= instance.OnFire2;
             @Fire2.performed -= instance.OnFire2;
             @Fire2.canceled -= instance.OnFire2;
-            @CameraRotation.started -= instance.OnCameraRotation;
-            @CameraRotation.performed -= instance.OnCameraRotation;
-            @CameraRotation.canceled -= instance.OnCameraRotation;
         }
 
         public void RemoveCallbacks(IGameplayMapActions instance)
@@ -736,6 +707,5 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
         void OnFlyNoCollisions(InputAction.CallbackContext context);
         void OnFire1(InputAction.CallbackContext context);
         void OnFire2(InputAction.CallbackContext context);
-        void OnCameraRotation(InputAction.CallbackContext context);
     }
 }

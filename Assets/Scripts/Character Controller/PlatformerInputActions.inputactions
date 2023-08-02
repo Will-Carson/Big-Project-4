@@ -130,15 +130,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "CameraRotation",
-                    "type": "Button",
-                    "id": "6fab347d-cc7e-4bae-a48e-2041fbe9cb7a",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -447,17 +438,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "Fire1",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "f0d58b39-321f-4e81-8460-5480e96315ff",
-                    "path": "<Keyboard>/Q",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "CameraRotation",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
