@@ -29,6 +29,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3510221285191686762}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -36,7 +37,6 @@ Transform:
   m_Children:
   - {fileID: 3510221286250963479}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3510221285191686768
 MeshFilter:
@@ -113,7 +113,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FiringMecanism:
-    AutoFire: 0
+    AutoFire: 1
     FiringRate: 2
   VisualFeedback:
     WeaponBobHAmount: 0.08
@@ -141,39 +141,6 @@ MonoBehaviour:
   Damage: 1000
   SpreadDegrees: 10
   ProjectilesCount: 10
-  HitCollisionFilter:
-    Category00: 1
-    Category01: 1
-    Category02: 1
-    Category03: 1
-    Category04: 1
-    Category05: 1
-    Category06: 1
-    Category07: 1
-    Category08: 1
-    Category09: 1
-    Category10: 1
-    Category11: 1
-    Category12: 1
-    Category13: 1
-    Category14: 1
-    Category15: 1
-    Category16: 1
-    Category17: 1
-    Category18: 1
-    Category19: 1
-    Category20: 1
-    Category21: 1
-    Category22: 1
-    Category23: 1
-    Category24: 1
-    Category25: 1
-    Category26: 1
-    Category27: 1
-    Category28: 1
-    Category29: 1
-    Category30: 1
-    Category31: 1
 --- !u!114 &3510221285191686764
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -210,7 +177,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ComponentOverrides:
   - FullTypeName: Unity.Transforms.LocalTransform
-    GameObject: {fileID: 3510221285191686762}
+    EntityIndex: 0
     PrefabType: -1
     SendTypeOptimization: 0
     VariantHash: 10188360468653526834
@@ -237,11 +204,11 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3510221286250963476}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.127, z: 0.487}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3510221285191686771}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

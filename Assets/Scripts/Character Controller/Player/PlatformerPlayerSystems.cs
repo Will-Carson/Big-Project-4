@@ -56,6 +56,7 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         };
 
         collisionWorld.CastRay(input, out var targetHit);
+
         var targetPosition = targetHit.Position;
 
         var characterPosition = new float3();
@@ -68,12 +69,6 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
 
         var modifiedTargetPosition = targetPosition - characterPosition;
 
-        if (math.length(new float2(modifiedTargetPosition.x, modifiedTargetPosition.z)) > 20)
-        {
-            modifiedTargetPosition = characterPosition + math.normalizesafe(targetPosition - characterPosition) * 20;
-        }
-
-        modifiedTargetPosition *= new float3(1, 1, 1.3f);
         modifiedTargetPosition += characterPosition;
         modifiedTargetPosition.y = characterPosition.y;
         targetFollower.transform.position = modifiedTargetPosition;
@@ -82,6 +77,7 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
         if (componentBase is CinemachineFramingTransposer)
         {
             (componentBase as CinemachineFramingTransposer).m_CameraDistance += defaultActionsMap.CameraZoom.ReadValue<float>(); // your value
+            (componentBase as CinemachineFramingTransposer).m_CameraDistance = math.clamp((componentBase as CinemachineFramingTransposer).m_CameraDistance, 5, 15);
         }
 
         var camForward = (float3)virtualCamera.transform.forward;
