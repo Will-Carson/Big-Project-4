@@ -69,9 +69,10 @@ public partial class PlatformerPlayerInputsSystem : SystemBase
 
         var modifiedTargetPosition = targetPosition - characterPosition;
 
-        if (math.length(modifiedTargetPosition) > 20)
+        var leash = 20f;
+        if (math.length(modifiedTargetPosition) > leash)
         {
-            modifiedTargetPosition = characterPosition + (math.normalizesafe(modifiedTargetPosition) * 19.9f);
+            modifiedTargetPosition = characterPosition + (math.normalizesafe(modifiedTargetPosition) * leash - .1f);
         }
 
         modifiedTargetPosition += characterPosition;
