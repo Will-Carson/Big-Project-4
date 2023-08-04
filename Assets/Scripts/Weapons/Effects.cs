@@ -172,4 +172,9 @@ public struct Health : IComponentData
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;
     }
+
+    public float Percentage()
+    {
+        return currentHealth / maxHealth;
+    }
 }

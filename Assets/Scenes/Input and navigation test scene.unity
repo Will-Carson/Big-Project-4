@@ -155,7 +155,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PanelSettings: {fileID: 11400000, guid: b2affd5f78b23194dad1dd3dc18020ec, type: 2}
   m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: d36ad859bfead1b4b9ddb25909a92a65,
+  sourceAsset: {fileID: 9197481963319205126, guid: ed4e022921df12147b796a0a1e868fe4,
     type: 3}
   m_SortingOrder: 0
 --- !u!4 &335767309
@@ -182,9 +182,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 335767307}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 550761ead6a14d14b926a84e4cc6bbaa, type: 3}
+  m_Script: {fileID: 11500000, guid: 8f487d546dfdeb644b6d5efe2aa1d47e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameUI: {fileID: 335767308}
+  healthBarTemplate: {fileID: 9197481963319205126, guid: 41c930a69fcc2174eb9a25980f38ba44,
+    type: 3}
 --- !u!1 &1088029609
 GameObject:
   m_ObjectHideFlags: 0

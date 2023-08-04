@@ -1,0 +1,96 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+public class GameUIManager : MonoBehaviour
+{
+    /// X Health bar
+    /// Focus bar
+    /// Experience bar
+    /// Inventory screen
+    /// Talent screen
+    /// Menu screen
+
+    public UIDocument gameUI;
+    public VisualTreeAsset healthBarTemplate;
+}
+
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
+public partial class HealthBarManagerSystem : SystemBase
+{
+    UIDocument gameUI;
+    VisualTreeAsset healthBarTemplate;
+
+    protected override void OnStartRunning()
+    {
+        var gm = UnityEngine.Object.FindObjectOfType<GameUIManager>();
+
+        gameUI = gm.gameUI;
+        healthBarTemplate = gm.healthBarTemplate;
+    }
+
+    protected override void OnUpdate()
+    {
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+        var localToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
+
+        var nameplateHolder = gameUI.rootVisualElement.Q<VisualElement>("nameplate-holder");
+
+        foreach (var localToWorld in SystemAPI.Query<LocalToWorld>())
+        {
+            break;
+        }
+
+        foreach (var (health, entity) in SystemAPI.Query<RefRO<Health>>().WithEntityAccess().WithNone<HealthBarUIElement>())
+        {
+            VisualElement healthBarInstance = healthBarTemplate.Instantiate();
+            nameplateHolder.Add(healthBarInstance);
+
+            commandBuffer.AddComponent(entity, new HealthBarUIElement
+            {
+                healthBarUIElement = healthBarInstance.Q<ProgressBar>("progress-bar")
+            });
+        }
+
+        foreach (var (health, healthUIElement, namePlate) in SystemAPI.Query<RefRO<Health>, HealthBarUIElement, RefRO<NamePlateTargetEntity>>())
+        {
+            healthUIElement.SetHealth(health.ValueRO);
+
+            localToWorldLookup.TryGetComponent(namePlate.ValueRO.entity, out var namePlateTransform);
+            MoveElementToWorldPosition(healthUIElement.healthBarUIElement.parent, namePlateTransform.Position, new float2(1, 1));
+        }
+    }
+
+    public void MoveElementToWorldPosition(VisualElement element, float3 worldPosition, float2 worldSize)
+    {
+        Rect rect = RuntimePanelUtils.CameraTransformWorldToPanelRect(element.panel, worldPosition, worldSize, Camera.main);
+        Vector2 layoutSize = element.layout.size;
+
+        // Don't set scale to 0 or a negative number.
+        Vector2 scale = layoutSize.x > 0 && layoutSize.y > 0 ? rect.size / layoutSize : Vector2.one * 1e-5f;
+
+        element.transform.position = rect.position;
+        //element.transform.scale = new Vector3(scale.x, scale.y, 1);
+    }
+}
+
+public class HealthBarUIElement : IComponentData, IDisposable 
+{ 
+    public ProgressBar healthBarUIElement;
+
+    public void Dispose()
+    {
+        healthBarUIElement.RemoveFromHierarchy();
+    }
+
+    public void SetHealth(Health health)
+    {
+        healthBarUIElement.highValue = health.maxHealth;
+        healthBarUIElement.value = health.currentHealth;
+    }
+}
