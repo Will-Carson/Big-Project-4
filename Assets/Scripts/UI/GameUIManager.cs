@@ -1,8 +1,10 @@
+using MyUILibrary;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.NetCode;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -92,5 +94,55 @@ public class HealthBarUIElement : IComponentData, IDisposable
     {
         healthBarUIElement.highValue = health.maxHealth;
         healthBarUIElement.value = health.currentHealth;
+    }
+}
+
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
+public partial class FocusBarManagerSystem : SystemBase
+{
+    UIDocument gameUI;
+    RadialProgress focusBar;
+
+    protected override void OnStartRunning()
+    {
+        var gm = UnityEngine.Object.FindObjectOfType<GameUIManager>();
+
+        gameUI = gm.gameUI;
+
+        focusBar = new RadialProgress()
+        {
+            style = {
+                position = Position.Absolute,
+                left = 20, top = 20, width = 200, height = 200
+            }
+        };
+
+        gameUI.rootVisualElement.Add(focusBar);
+    }
+
+    protected override void OnUpdate()
+    {
+        var focus = default(Focus);
+        foreach (var focusRef in SystemAPI.Query<RefRO<Focus>>().WithAll<GhostOwnerIsLocal>())
+        {
+            focus = focusRef.ValueRO;
+            break;
+        }
+
+        focus.maxFocus = 100;
+        focus.currentFocus = 20;
+
+        focusBar.progress = focus.Percentage() * 100;
+    }
+}
+
+public struct Focus : IComponentData
+{
+    public float currentFocus;
+    public float maxFocus;
+
+    public float Percentage()
+    {
+        return (maxFocus == 0) ? 1 : currentFocus / maxFocus;
     }
 }
