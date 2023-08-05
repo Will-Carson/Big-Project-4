@@ -19,21 +19,22 @@ public class GameUIManager : MonoBehaviour
     /// Menu screen
 
     public UIDocument gameUI;
-    public VisualTreeAsset healthBarTemplate;
+    public VisualTreeAsset namePlateTemplate;
+    public VisualTreeAsset focusBarTemplate;
 }
 
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
 public partial class HealthBarManagerSystem : SystemBase
 {
     UIDocument gameUI;
-    VisualTreeAsset healthBarTemplate;
+    VisualTreeAsset namePlateTemplate;
 
     protected override void OnStartRunning()
     {
         var gm = UnityEngine.Object.FindObjectOfType<GameUIManager>();
 
         gameUI = gm.gameUI;
-        healthBarTemplate = gm.healthBarTemplate;
+        namePlateTemplate = gm.namePlateTemplate;
     }
 
     protected override void OnUpdate()
@@ -48,52 +49,52 @@ public partial class HealthBarManagerSystem : SystemBase
             break;
         }
 
-        foreach (var (health, entity) in SystemAPI.Query<RefRO<Health>>().WithEntityAccess().WithNone<HealthBarUIElement>())
+        foreach (var (health, entity) in SystemAPI.Query<RefRO<Health>>().WithEntityAccess().WithNone<NamePlateComponent>())
         {
-            VisualElement healthBarInstance = healthBarTemplate.Instantiate();
+            VisualElement healthBarInstance = namePlateTemplate.Instantiate();
             nameplateHolder.Add(healthBarInstance);
 
-            commandBuffer.AddComponent(entity, new HealthBarUIElement
+            commandBuffer.AddComponent(entity, new NamePlateComponent
             {
-                healthBarUIElement = healthBarInstance.Q<ProgressBar>("progress-bar")
+                namePlate = healthBarInstance.Q<NamePlate>("name-plate")
             });
         }
 
-        foreach (var (health, healthUIElement, namePlate) in SystemAPI.Query<RefRO<Health>, HealthBarUIElement, RefRO<NamePlateTargetEntity>>())
+        foreach (var (health, healthUIElement, namePlate) in SystemAPI.Query<RefRO<Health>, NamePlateComponent, RefRO<NamePlateTargetEntity>>())
         {
             healthUIElement.SetHealth(health.ValueRO);
 
             localToWorldLookup.TryGetComponent(namePlate.ValueRO.entity, out var namePlateTransform);
-            MoveElementToWorldPosition(healthUIElement.healthBarUIElement.parent, namePlateTransform.Position, new float2(1, 1));
+            MoveElementToWorldPosition(healthUIElement.namePlate.parent, namePlateTransform.Position, new float2(1, 1));
         }
     }
 
     public void MoveElementToWorldPosition(VisualElement element, float3 worldPosition, float2 worldSize)
     {
         Rect rect = RuntimePanelUtils.CameraTransformWorldToPanelRect(element.panel, worldPosition, worldSize, Camera.main);
-        Vector2 layoutSize = element.layout.size;
+        //Vector2 layoutSize = element.layout.size;
 
         // Don't set scale to 0 or a negative number.
-        Vector2 scale = layoutSize.x > 0 && layoutSize.y > 0 ? rect.size / layoutSize : Vector2.one * 1e-5f;
+        //Vector2 scale = layoutSize.x > 0 && layoutSize.y > 0 ? rect.size / layoutSize : Vector2.one * 1e-5f;
 
         element.transform.position = rect.position;
         //element.transform.scale = new Vector3(scale.x, scale.y, 1);
     }
 }
 
-public class HealthBarUIElement : IComponentData, IDisposable 
+public class NamePlateComponent : IComponentData, IDisposable 
 { 
-    public ProgressBar healthBarUIElement;
+    public NamePlate namePlate;
 
     public void Dispose()
     {
-        healthBarUIElement.RemoveFromHierarchy();
+        namePlate.RemoveFromHierarchy();
     }
 
     public void SetHealth(Health health)
     {
-        healthBarUIElement.highValue = health.maxHealth;
-        healthBarUIElement.value = health.currentHealth;
+        namePlate.MaximumHealth = health.maxHealth;
+        namePlate.CurrentHealth = health.currentHealth;
     }
 }
 
@@ -109,17 +110,25 @@ public partial class FocusBarManagerSystem : SystemBase
 
         gameUI = gm.gameUI;
 
-        focusBar = new RadialProgress()
-        {
-            style = {
-                position = Position.Absolute,
-                left = 20, top = 20, width = 200, height = 200
-            }
-        };
+        //focusBar = new RadialProgress()
+        //{
+        //    style = {
+        //        color = Color.yellow,
+        //        position = Position.Absolute,
+        //        left = 20, top = 20, width = 40, height = 40
+        //    }
+        //};
 
-        gameUI.rootVisualElement.Add(focusBar);
+        var focusBarInstance = gm.focusBarTemplate.Instantiate();
+        focusBar = focusBarInstance.Q<RadialProgress>();
+
+        //var label = focusBar.Q<Label>();
+        //label.style.opacity = 0;
+
+        gameUI.rootVisualElement.Q<VisualElement>("nameplate-holder").Add(focusBarInstance);
     }
 
+    float currentFocus = 0;
     protected override void OnUpdate()
     {
         var focus = default(Focus);
@@ -129,10 +138,15 @@ public partial class FocusBarManagerSystem : SystemBase
             break;
         }
 
-        focus.maxFocus = 100;
-        focus.currentFocus = 20;
+        var mousePosition = RuntimePanelUtils.ScreenToPanel(gameUI.rootVisualElement.panel, Input.mousePosition);
+        var mousePositionCorrected = new Vector2(mousePosition.x, Screen.height - mousePosition.y);
+        mousePositionCorrected = RuntimePanelUtils.ScreenToPanel(gameUI.rootVisualElement.panel, mousePositionCorrected);
+        focusBar.transform.position = mousePositionCorrected;
 
         focusBar.progress = focus.Percentage() * 100;
+        focusBar.progress = currentFocus;
+        currentFocus += .1f;
+        if (currentFocus >= 100) currentFocus = 0;
     }
 }
 

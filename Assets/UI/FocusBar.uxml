@@ -1,3 +1,5 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <MyUILibrary.RadialProgress progress="87.1" />
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/focusBar.uss?fileID=7433441132597879392&amp;guid=1573f37b2e8dad9488b0065f779dea1e&amp;type=3#focusBar" />
+    <Style src="project://database/Assets/Scripts/UI/radial-progress-vector-api/RadialProgress.uss?fileID=7433441132597879392&amp;guid=b75b44b453ccccd48bbf16591df375a4&amp;type=3#RadialProgress" />
+    <MyUILibrary.RadialProgress progress="11.6" name="focus-bar" style="opacity: 0.5; color: rgba(255, 255, 255, 0); transform-origin: left top; width: 40px; height: 40px; margin-left: 40px; margin-top: 40px;" />
 </ui:UXML>

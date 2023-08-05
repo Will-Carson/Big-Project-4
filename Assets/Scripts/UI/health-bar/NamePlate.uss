@@ -1,0 +1,58 @@
+.name-plate__container {
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.name-plate__background {
+    background-color: rgba(120, 100, 100, 255);
+    height: 31px;
+    width: 300px;
+    align-items: flex-start;
+    justify-content: center;
+    -unity-background-scale-mode: stretch-to-fill;
+    flex-direction: column;
+}
+
+.name-plate__progress {
+    background-color: rgba(0, 255, 0, 255);
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    justify-content: flex-start;
+    flex-direction: row;
+    align-items: flex-start;
+    height: 100%;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+}
+
+.name-plate__label {
+    color: rgb(255, 255, 255);
+    font-size: 6px;
+    -unity-text-align: middle-left;
+    justify-content: space-around;
+}
+
+.name-plate__title_background {
+    -unity-background-scale-mode: scale-and-crop;
+    width: 627px;
+    height: 84px;
+    align-items: center;
+    left: auto;
+    justify-content: center;
+}
+
+.name-plate__title {
+    color: rgb(252, 240, 219);
+    font-size: 60px;
+    align-items: flex-start;
+    -unity-text-align: upper-center;
+}

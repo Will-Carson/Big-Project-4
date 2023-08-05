@@ -2,7 +2,7 @@
     min-width: 26px;
     min-height: 20px;
     --track-color: rgb(130, 130, 130);
-    --progress-color: rgb(46, 132, 24);
+    --progress-color: rgb(217, 201, 24);
     --percentage-color: white;
     margin-left: 5px;
     margin-right: 5px;
@@ -10,11 +10,13 @@
     margin-bottom: 5px;
     flex-direction: row;
     justify-content: center;
-    width: 100px; 
+    width: 100px;
     height: 100px;
 }
 
 .radial-progress__label {
     -unity-text-align: middle-left;
-    color: var(--percentage-color);
+    color: rgba(27, 27, 27, 0);
+    margin-left: 40px;
+    margin-top: 40px;
 }

@@ -186,7 +186,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameUI: {fileID: 335767308}
-  healthBarTemplate: {fileID: 9197481963319205126, guid: 41c930a69fcc2174eb9a25980f38ba44,
+  namePlateTemplate: {fileID: 9197481963319205126, guid: cf13e95cb783f564e87f6a2e7a3f8e66,
+    type: 3}
+  focusBarTemplate: {fileID: 9197481963319205126, guid: 8effd8e3fd1e1de4fbb4b7f270126411,
     type: 3}
 --- !u!1 &1088029609
 GameObject:
