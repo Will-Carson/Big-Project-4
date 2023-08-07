@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" Current_Health="33" editor-extension-mode="False">
     <ui:VisualElement style="align-items: center; width: 0; transform-origin: bottom;">
-        <NamePlate Health_Color="#229A0CFF" Current_Health="31" Bar_Color="#334F33FF" name="name-plate" style="width: 69px; translate: 0 -125px; height: 20px;" />
+        <NamePlate Maximum_Health="100" Current_Health="33" Health_Color="#FF0000FF" Bar_Color="#261010FF" Name_Plate_Title="Hello" name="name-plate" style="width: 120px; translate: 0 -68px;" />
     </ui:VisualElement>
 </ui:UXML>

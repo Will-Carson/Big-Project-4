@@ -190,6 +190,10 @@ MonoBehaviour:
     type: 3}
   focusBarTemplate: {fileID: 9197481963319205126, guid: 8effd8e3fd1e1de4fbb4b7f270126411,
     type: 3}
+  talentColumnTemplate: {fileID: 9197481963319205126, guid: 0207e36b65c03a04c988ec8e9b0e7329,
+    type: 3}
+  talentPlateTemplate: {fileID: 9197481963319205126, guid: 3160c8fdef918314f8f12029364e9f7f,
+    type: 3}
 --- !u!1 &1088029609
 GameObject:
   m_ObjectHideFlags: 0

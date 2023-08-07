@@ -298,10 +298,9 @@ public partial struct CombinedStatCalculationSystem : ISystem
         var statDefinitions = SystemAPI.GetSingleton<StatDefinitions.Singleton>();
 
         // Build StatContainers on CombinedStatResultContainers.
-        foreach (var (combinedStatResults, stats, entity) in SystemAPI.Query<
+        foreach (var (combinedStatResults, stats) in SystemAPI.Query<
             DynamicBuffer<StatFlavors>, 
             RefRO<StatContainer>>()
-            .WithEntityAccess()
             .WithAll<StatRecalculationTag>())
         {
             for (var i = 0; i < combinedStatResults.Length; i++)
@@ -583,9 +582,9 @@ public struct StatRanges
         }
     }
 
-    public void AddRange((Stat, float, float) range)
+    public void AddRange(Requirement req)
     {
-        AddRange(range.Item1, new Range(range.Item2, range.Item3));
+        AddRange(req.stat, req.range);
     }
 
     public bool StatInRange(Stat stat, float value)

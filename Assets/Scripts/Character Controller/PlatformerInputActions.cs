@@ -152,6 +152,15 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""TalentMenu"",
+                    ""type"": ""Button"",
+                    ""id"": ""4156654f-e64b-4bbe-8860-86aedde41557"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -462,6 +471,17 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
                     ""action"": ""Fire1"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7fa13078-1055-4987-8991-33db1c46d6c5"",
+                    ""path"": ""<Keyboard>/t"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""TalentMenu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -484,6 +504,7 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
         m_GameplayMap_FlyNoCollisions = m_GameplayMap.FindAction("FlyNoCollisions", throwIfNotFound: true);
         m_GameplayMap_Fire1 = m_GameplayMap.FindAction("Fire1", throwIfNotFound: true);
         m_GameplayMap_Fire2 = m_GameplayMap.FindAction("Fire2", throwIfNotFound: true);
+        m_GameplayMap_TalentMenu = m_GameplayMap.FindAction("TalentMenu", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -559,6 +580,7 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
     private readonly InputAction m_GameplayMap_FlyNoCollisions;
     private readonly InputAction m_GameplayMap_Fire1;
     private readonly InputAction m_GameplayMap_Fire2;
+    private readonly InputAction m_GameplayMap_TalentMenu;
     public struct GameplayMapActions
     {
         private @PlatformerInputActions m_Wrapper;
@@ -577,6 +599,7 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
         public InputAction @FlyNoCollisions => m_Wrapper.m_GameplayMap_FlyNoCollisions;
         public InputAction @Fire1 => m_Wrapper.m_GameplayMap_Fire1;
         public InputAction @Fire2 => m_Wrapper.m_GameplayMap_Fire2;
+        public InputAction @TalentMenu => m_Wrapper.m_GameplayMap_TalentMenu;
         public InputActionMap Get() { return m_Wrapper.m_GameplayMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -628,6 +651,9 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
             @Fire2.started += instance.OnFire2;
             @Fire2.performed += instance.OnFire2;
             @Fire2.canceled += instance.OnFire2;
+            @TalentMenu.started += instance.OnTalentMenu;
+            @TalentMenu.performed += instance.OnTalentMenu;
+            @TalentMenu.canceled += instance.OnTalentMenu;
         }
 
         private void UnregisterCallbacks(IGameplayMapActions instance)
@@ -674,6 +700,9 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
             @Fire2.started -= instance.OnFire2;
             @Fire2.performed -= instance.OnFire2;
             @Fire2.canceled -= instance.OnFire2;
+            @TalentMenu.started -= instance.OnTalentMenu;
+            @TalentMenu.performed -= instance.OnTalentMenu;
+            @TalentMenu.canceled -= instance.OnTalentMenu;
         }
 
         public void RemoveCallbacks(IGameplayMapActions instance)
@@ -707,5 +736,6 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
         void OnFlyNoCollisions(InputAction.CallbackContext context);
         void OnFire1(InputAction.CallbackContext context);
         void OnFire2(InputAction.CallbackContext context);
+        void OnTalentMenu(InputAction.CallbackContext context);
     }
 }

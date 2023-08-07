@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 
 public class NamePlate : VisualElement
 {
-    private static class ClassNames
+    static class ClassNames
     {
         public static string NamePlateBackground = "name-plate__background";
         public static string NamePlateProgress = "name-plate__progress";
@@ -22,9 +22,6 @@ public class NamePlate : VisualElement
     {
         readonly UxmlIntAttributeDescription _currentHealth = new UxmlIntAttributeDescription
         { name = "Current_Health", defaultValue = 0 };
-
-        readonly UxmlIntAttributeDescription _mininumHealth = new UxmlIntAttributeDescription
-        { name = "Minimum_Health", defaultValue = 0 };
 
         readonly UxmlIntAttributeDescription _maximumHealth = new UxmlIntAttributeDescription
         { name = "Maximum_Health", defaultValue = 100 };

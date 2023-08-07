@@ -35,7 +35,7 @@
 }
 
 .name-plate__label {
-    color: rgb(255, 255, 255);
+    color: rgba(255, 255, 255, 0);
     font-size: 6px;
     -unity-text-align: middle-left;
     justify-content: space-around;

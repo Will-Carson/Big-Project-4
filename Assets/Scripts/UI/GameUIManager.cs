@@ -21,10 +21,12 @@ public class GameUIManager : MonoBehaviour
     public UIDocument gameUI;
     public VisualTreeAsset namePlateTemplate;
     public VisualTreeAsset focusBarTemplate;
+    public VisualTreeAsset talentColumnTemplate;
+    public VisualTreeAsset talentPlateTemplate;
 }
 
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
-public partial class HealthBarManagerSystem : SystemBase
+public partial class NameplateManagerSystem : SystemBase
 {
     UIDocument gameUI;
     VisualTreeAsset namePlateTemplate;
@@ -65,20 +67,15 @@ public partial class HealthBarManagerSystem : SystemBase
             healthUIElement.SetHealth(health.ValueRO);
 
             localToWorldLookup.TryGetComponent(namePlate.ValueRO.entity, out var namePlateTransform);
-            MoveElementToWorldPosition(healthUIElement.namePlate.parent, namePlateTransform.Position, new float2(1, 1));
+            MoveElementToWorldPosition(healthUIElement.namePlate.parent, namePlateTransform.Position);
         }
     }
 
-    public void MoveElementToWorldPosition(VisualElement element, float3 worldPosition, float2 worldSize)
+    public void MoveElementToWorldPosition(VisualElement element, float3 worldPosition)
     {
-        Rect rect = RuntimePanelUtils.CameraTransformWorldToPanelRect(element.panel, worldPosition, worldSize, Camera.main);
-        //Vector2 layoutSize = element.layout.size;
-
-        // Don't set scale to 0 or a negative number.
-        //Vector2 scale = layoutSize.x > 0 && layoutSize.y > 0 ? rect.size / layoutSize : Vector2.one * 1e-5f;
-
-        element.transform.position = rect.position;
-        //element.transform.scale = new Vector3(scale.x, scale.y, 1);
+        var screen = Camera.main.WorldToScreenPoint(worldPosition);
+        element.style.left = screen.x - (element.layout.width / 2);
+        element.style.top = (Screen.height - screen.y) - 100;
     }
 }
 
@@ -158,5 +155,79 @@ public struct Focus : IComponentData
     public float Percentage()
     {
         return (maxFocus == 0) ? 1 : currentFocus / maxFocus;
+    }
+}
+
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
+public partial class TalentUIManager : SystemBase
+{
+    UIDocument gameUI;
+    VisualTreeAsset talentColumnTemplate;
+    VisualTreeAsset talentPlateTemplate;
+
+    PlatformerInputActions.GameplayMapActions _defaultActionsMap;
+
+    Dictionary<int, VisualElement> columnsByLevel = new Dictionary<int, VisualElement>();
+
+    protected override void OnCreate()
+    {
+        PlatformerInputActions inputActions = new PlatformerInputActions();
+        inputActions.Enable();
+        inputActions.GameplayMap.Enable();
+        _defaultActionsMap = inputActions.GameplayMap;
+    }
+
+    protected override void OnStartRunning()
+    {
+        var gm = UnityEngine.Object.FindObjectOfType<GameUIManager>();
+
+        gameUI = gm.gameUI;
+        talentColumnTemplate = gm.talentColumnTemplate;
+        talentPlateTemplate = gm.talentPlateTemplate;
+
+        var talentScreen = gameUI.rootVisualElement.Q<VisualElement>("talent-screen");
+        var talentColumnParent = talentScreen.Q<VisualElement>("talent-column-parent");
+
+        var Talents = UnityEngine.Resources.LoadAll<TalentDefinition>("Talent definitions");
+
+        foreach (var talent in Talents)
+        {
+            Debug.Log(talent.talentName);
+            var talentPlateInstance = talentPlateTemplate.Instantiate();
+            var talentButton = talentPlateInstance.Q<Button>("talent-button");
+            talentButton.text = talent.talentName;
+
+            if (columnsByLevel.TryGetValue(talent.levelRequirement, out var talentColumn))
+            {
+                talentColumn.Q<VisualElement>("talent-parent").Add(talentPlateInstance);
+            }
+            else
+            {
+                var newTalentColumn = talentColumnTemplate.Instantiate();
+                newTalentColumn.Q<Label>("level-label").text = talent.levelRequirement.ToString();
+                talentColumnParent.Add(newTalentColumn);
+                columnsByLevel.Add(talent.levelRequirement, newTalentColumn);
+                newTalentColumn.Q<VisualElement>("talent-parent").Add(talentPlateInstance);
+            }
+        }
+    }
+
+    protected override void OnUpdate()
+    {
+        if (_defaultActionsMap.TalentMenu.WasPressedThisFrame())
+        {
+            Debug.Log("Nobody fucks with Mr. T!");
+
+            var talentScreen = gameUI.rootVisualElement.Q<VisualElement>("talent-screen");
+
+            if (talentScreen.style.display == DisplayStyle.None)
+            {
+                talentScreen.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                talentScreen.style.display = DisplayStyle.None;
+            }
+        }
     }
 }

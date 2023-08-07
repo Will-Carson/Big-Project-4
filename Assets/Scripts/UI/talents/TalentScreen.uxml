@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/Talents/Talents.uss?fileID=7433441132597879392&amp;guid=c7198d70045fe764c893a0434cbb8f58&amp;type=3#Talents" />
+    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row;">
+        <ui:VisualElement style="background-color: rgb(38, 38, 38); width: 300px;" />
+        <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
+            <ui:ScrollView style="flex-grow: 1;">
+                <ui:VisualElement name="talent-column-parent" style="background-color: rgb(154, 154, 154); flex-direction: row; align-items: stretch; flex-grow: 1; align-self: flex-start;" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
