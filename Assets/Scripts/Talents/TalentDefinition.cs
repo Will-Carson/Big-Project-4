@@ -17,6 +17,37 @@ public class TalentDefinition : ScriptableObject
 
     // Stats granted by allocating a talent
     public Granted[] grants;
+
+    public string GenerateTooltip()
+    {
+        var tooltip = $"{talentName}\n" +
+            $"\n" +
+            $"Cost: {pointCost}\n" +
+            $"\n";
+
+        if (requires.Length > 0)
+        {
+            tooltip += "Requirements:\n";
+            foreach (var requirement in requires)
+            {
+                tooltip += $"{requirement.stat}: at least {requirement.range.min}";
+                tooltip += (requirement.range.max == float.MaxValue) ? "\n" : $", at most {requirement.range.max}\n";
+            }
+        }
+
+        if (grants.Length > 0)
+        {
+            tooltip += "Grants:\n";
+
+            foreach (var granted in grants)
+            {
+                tooltip += $"{granted.stat} - {granted.value}\n";
+            }
+        }
+
+        Debug.Log(tooltip);
+        return tooltip;
+    }
 }
 
 [Serializable]

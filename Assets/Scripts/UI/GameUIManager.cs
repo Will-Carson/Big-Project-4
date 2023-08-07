@@ -23,6 +23,54 @@ public class GameUIManager : MonoBehaviour
     public VisualTreeAsset focusBarTemplate;
     public VisualTreeAsset talentColumnTemplate;
     public VisualTreeAsset talentPlateTemplate;
+
+    List<VisualElement> exclusiveGameScreens = new List<VisualElement>();
+    VisualElement defaultGameScreen;
+    VisualElement talentScreen;
+
+    PlatformerInputActions.GameplayMapActions _defaultActionsMap;
+
+    private void Start()
+    {
+        PlatformerInputActions inputActions = new PlatformerInputActions();
+        inputActions.Enable();
+        inputActions.GameplayMap.Enable();
+        _defaultActionsMap = inputActions.GameplayMap;
+
+        defaultGameScreen = gameUI.rootVisualElement.Q<VisualElement>("game-screen");
+        talentScreen = gameUI.rootVisualElement.Q<VisualElement>("talent-screen");
+
+        exclusiveGameScreens.Add(defaultGameScreen);
+        exclusiveGameScreens.Add(talentScreen);
+    }
+
+    private void Update()
+    {
+        if (_defaultActionsMap.TalentMenu.WasPressedThisFrame())
+        {
+            ToggleTalentScreen();
+        }
+    }
+
+    public void ToggleTalentScreen()
+    {
+        foreach (var s in exclusiveGameScreens)
+        {
+            if (s == talentScreen)
+            {
+                s.style.display = (s.style.display == DisplayStyle.Flex) ? DisplayStyle.None : DisplayStyle.Flex;
+            }
+            else
+            {
+                s.style.display = DisplayStyle.None;
+            }
+        }
+
+        if (talentScreen.style.display == DisplayStyle.None)
+        {
+            defaultGameScreen.style.display = DisplayStyle.Flex;
+        }
+    }
 }
 
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
@@ -44,7 +92,7 @@ public partial class NameplateManagerSystem : SystemBase
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
         var localToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
 
-        var nameplateHolder = gameUI.rootVisualElement.Q<VisualElement>("nameplate-holder");
+        var nameplateHolder = gameUI.rootVisualElement.Q<VisualElement>("game-screen");
 
         foreach (var localToWorld in SystemAPI.Query<LocalToWorld>())
         {
@@ -107,22 +155,10 @@ public partial class FocusBarManagerSystem : SystemBase
 
         gameUI = gm.gameUI;
 
-        //focusBar = new RadialProgress()
-        //{
-        //    style = {
-        //        color = Color.yellow,
-        //        position = Position.Absolute,
-        //        left = 20, top = 20, width = 40, height = 40
-        //    }
-        //};
-
         var focusBarInstance = gm.focusBarTemplate.Instantiate();
         focusBar = focusBarInstance.Q<RadialProgress>();
 
-        //var label = focusBar.Q<Label>();
-        //label.style.opacity = 0;
-
-        gameUI.rootVisualElement.Q<VisualElement>("nameplate-holder").Add(focusBarInstance);
+        gameUI.rootVisualElement.Q<VisualElement>("game-screen").Add(focusBarInstance);
     }
 
     float currentFocus = 0;
@@ -168,6 +204,7 @@ public partial class TalentUIManager : SystemBase
     PlatformerInputActions.GameplayMapActions _defaultActionsMap;
 
     Dictionary<int, VisualElement> columnsByLevel = new Dictionary<int, VisualElement>();
+    Dictionary<Stat, TalentPlate> talents = new Dictionary<Stat, TalentPlate>();
 
     protected override void OnCreate()
     {
@@ -179,23 +216,23 @@ public partial class TalentUIManager : SystemBase
 
     protected override void OnStartRunning()
     {
-        var gm = UnityEngine.Object.FindObjectOfType<GameUIManager>();
+        var gameUIManager = UnityEngine.Object.FindObjectOfType<GameUIManager>();
 
-        gameUI = gm.gameUI;
-        talentColumnTemplate = gm.talentColumnTemplate;
-        talentPlateTemplate = gm.talentPlateTemplate;
+        gameUI = gameUIManager.gameUI;
+        talentColumnTemplate = gameUIManager.talentColumnTemplate;
+        talentPlateTemplate = gameUIManager.talentPlateTemplate;
 
         var talentScreen = gameUI.rootVisualElement.Q<VisualElement>("talent-screen");
-        var talentColumnParent = talentScreen.Q<VisualElement>("talent-column-parent");
+        var talentColumnParent = talentScreen.Q<VisualElement>("unity-content-container");
 
         var Talents = UnityEngine.Resources.LoadAll<TalentDefinition>("Talent definitions");
 
         foreach (var talent in Talents)
         {
-            Debug.Log(talent.talentName);
             var talentPlateInstance = talentPlateTemplate.Instantiate();
-            var talentButton = talentPlateInstance.Q<Button>("talent-button");
-            talentButton.text = talent.talentName;
+            var talentPlate = talentPlateInstance.Q<TalentPlate>();
+            talents.Add(talent.stat, talentPlate);
+            talentPlate.Talent = talent;
 
             if (columnsByLevel.TryGetValue(talent.levelRequirement, out var talentColumn))
             {
@@ -214,20 +251,6 @@ public partial class TalentUIManager : SystemBase
 
     protected override void OnUpdate()
     {
-        if (_defaultActionsMap.TalentMenu.WasPressedThisFrame())
-        {
-            Debug.Log("Nobody fucks with Mr. T!");
 
-            var talentScreen = gameUI.rootVisualElement.Q<VisualElement>("talent-screen");
-
-            if (talentScreen.style.display == DisplayStyle.None)
-            {
-                talentScreen.style.display = DisplayStyle.Flex;
-            }
-            else
-            {
-                talentScreen.style.display = DisplayStyle.None;
-            }
-        }
     }
 }

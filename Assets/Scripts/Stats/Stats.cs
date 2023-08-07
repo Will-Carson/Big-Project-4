@@ -626,8 +626,8 @@ public struct StatRanges
 
 public struct Range
 {
-    private float min;
-    private float max;
+    public float min;
+    public float max;
 
     public Range(float min, float max)
     {
