@@ -10,8 +10,8 @@ public class BasicStatStickAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-            AddComponent<StatContainerTag>(entity);
-            AddComponent<StatRequirementsTag>(entity);
+            AddBuffer<StatElement>(entity);
+            AddComponent<StatRequirementElement>(entity);
             AddBuffer<EquippedTo>(entity);
         }
     }

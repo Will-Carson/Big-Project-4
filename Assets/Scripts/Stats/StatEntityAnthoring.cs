@@ -12,12 +12,11 @@ public class StatEntityAnthoring : MonoBehaviour
 
             var baseStatStick = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
             AddBuffer<EquippedTo>(baseStatStick);
-            var baseStatStickStats = new Stats(3, Allocator.Persistent);
+            var baseStatStickStats = AddBuffer<StatElement>(baseStatStick);
 
-            baseStatStickStats.AddStat(Stat.AdditionalLife, 100);
-            baseStatStickStats.AddStat(Stat.TalentPoint, 10);
-            baseStatStickStats.AddStat(Stat.Level, 10);
-            AddComponent(baseStatStick, new StatsContainer(baseStatStickStats));
+            StatElement.AddStat(baseStatStickStats, Stat.AdditionalLife, 100);
+            StatElement.AddStat(baseStatStickStats, Stat.TalentPoint, 10);
+            StatElement.AddStat(baseStatStickStats, Stat.Level, 10);
 
             var equipTo = AddBuffer<EquipStatStickRequest>(entity);
             equipTo.Add(new EquipStatStickRequest
@@ -26,7 +25,7 @@ public class StatEntityAnthoring : MonoBehaviour
                 unequip = false
             });
 
-            AddComponent<StatContainerTag>(entity);
+            AddBuffer<StatElement>(entity);
             AddBuffer<DerivedStat>(entity);
             AddBuffer<StatStickContainer>(entity);
             AddComponent<StatRecalculationTag>(entity);

@@ -10,8 +10,6 @@ public class PlayerCharacterAuthoring : MonoBehaviour
         public override void Bake(PlayerCharacterAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
-
-            AddComponent<TalentsComponent>(entity);
         }
     }
 }

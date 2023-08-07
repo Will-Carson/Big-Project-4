@@ -68,7 +68,7 @@ public static class BaseItemDefinitions
             var baseStatsStatStickEntity = em.Instantiate(rawStatStickPrefab);
 
             // Configure the entity
-            var baseStats = em.AddComponent<StatsContainer>(baseStatsStatStickEntity);
+            var baseStats = em.AddBuffer<StatElement>(baseStatsStatStickEntity);
 
             //foreach (var stat in baseItem.grants)
             //{

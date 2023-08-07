@@ -443,14 +443,14 @@ public partial class StatDefinitions : SystemBase
         /// <param name="inputFlavorFlags"></param>
         /// <param name="results"></param>
         [BurstCompile]
-        public void TotalStatsWithFlavor(in Stats stats, StatFlavorFlag inputFlavorFlags, ref Stats results)
+        public void TotalStatsWithFlavor(in DynamicBuffer<StatElement> stats, StatFlavorFlag inputFlavorFlags, ref NativeHashMap<uint, float> results)
         {
             var statsEnumerator = stats.GetEnumerator();
 
             while (statsEnumerator.MoveNext())
             {
-                var stat = statsEnumerator.Current.Key;
-                var value = statsEnumerator.Current.Value;
+                var stat = (uint)statsEnumerator.Current.stat;
+                var value = statsEnumerator.Current.value;
 
                 if (!StatToStatFlavorFlags.TryGetValue(stat, out var statFlavorFlags))
                 {
@@ -469,7 +469,7 @@ public partial class StatDefinitions : SystemBase
                 }
 
                 // Combine the stat into the hashmap.
-                results.AddStat(grants, value);
+                results.Add((uint)grants, value);
             }
         }
     }

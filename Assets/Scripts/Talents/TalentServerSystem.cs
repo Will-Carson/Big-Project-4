@@ -45,12 +45,6 @@ public partial class TalentServerSystem : SystemBase
                 }
             }
         }
-
-        foreach (var (talents, stats) in SystemAPI.Query<RefRW<TalentsComponent>, RefRO<StatsContainer>>().WithChangeFilter<StatsContainer>())
-        {
-            UnityEngine.Debug.Log("Talents updated!");
-            talents.ValueRW.Update(stats.ValueRO.stats);
-        }
     }
 
     public void CreateTalentsAsEntities(EntityManager em)
@@ -71,39 +65,34 @@ public partial class TalentServerSystem : SystemBase
             });
 
             // Add requirements
-            var requirementsLength = (talent.requires == null) ? 3 : talent.requires.Length + 3;
-            var requirements = new StatRanges(requirementsLength, Allocator.Persistent);
+            var requirements = em.AddBuffer<StatRequirementElement>(talentEntity);
 
             /// Do not allow players to take the talent if they do not meet level requirements, or if
             /// they already have too many points allocated in this talent. Next add the talent points
             /// requirement. Then add the addition requirements that are specific to a talent.
-            requirements.AddRange(Stat.Level, Range.FromMin(talent.levelRequirement));
-            requirements.AddRange(talent.stat, Range.FromMax(talent.maxTalentLevel));
-            requirements.AddRange(Stat.TalentPoint, Range.FromMin(talent.pointCost));
+            requirements.Add(new StatRequirementElement(Stat.Level, Range.FromMin(talent.levelRequirement)));
+            requirements.Add(new StatRequirementElement(talent.stat, Range.FromMax(talent.maxTalentLevel)));
+            requirements.Add(new StatRequirementElement(Stat.TalentPoint, Range.FromMin(talent.pointCost)));
 
             if (talent.requires != null)
             {
                 foreach (var req in talent.requires)
                 {
-                    requirements.AddRange(req);
+                    requirements.Add(new StatRequirementElement(req));
                 }
             }
 
-            em.AddComponentData(talentEntity, new StatRequirements(requirements));
-
             // Add granted stats
-            var stats = new Stats(talent.grants.Length + 2, Allocator.Persistent);
+            var stats = em.AddBuffer<StatElement>(talentEntity);
 
             /// Add the talent to the granted stats buffer, the talent point cost, and then add 
             /// the regular granted stats.
-            stats.AddStat(talent.stat, 1);
-            stats.AddStat(Stat.TalentPoint, -talent.pointCost);
+            StatElement.AddStat(stats, talent.stat, 1);
+            StatElement.AddStat(stats, Stat.TalentPoint, -talent.pointCost);
             foreach (var grants in talent.grants)
             {
-                stats.AddStat(grants.stat, grants.value);
+                StatElement.AddStat(stats, grants.stat, grants.value);
             }
-
-            em.AddComponentData(talentEntity, new StatsContainer(stats));
 
             em.AddBuffer<EquippedTo>(talentEntity);
         }
@@ -119,42 +108,4 @@ public struct TalentAllocationRequestRpc : IRpcCommand
 public struct TalentComponent : IComponentData
 {
     public Stat stat;
-}
-
-[GhostComponent(OwnerSendType = SendToOwnerType.SendToOwner)]
-public struct TalentsComponent : IComponentData, IStatDerived
-{
-    [GhostField] public byte TalentPhysique;
-    [GhostField] public byte TalentReason;
-    [GhostField] public byte TalentDexterity;
-    [GhostField] public byte TalentPerception;
-    [GhostField] public byte TalentMelee;
-    [GhostField] public byte TalentRanged;
-    [GhostField] public byte TalentEngineering;
-    [GhostField] public byte TalentMysticism;
-    [GhostField] public byte TalentMedicine;
-    [GhostField] public byte TalentDefense;
-
-    [GhostField] public byte TalentTechnique;
-
-    public void Update(Stats stats)
-    {
-        TalentPhysique = (byte)stats.GetStatValue(Stat.TalentPhysique);
-        TalentReason = (byte)stats.GetStatValue(Stat.TalentReason);
-        TalentDexterity = (byte)stats.GetStatValue(Stat.TalentDexterity);
-        TalentPerception = (byte)stats.GetStatValue(Stat.TalentPerception);
-        TalentMelee = (byte)stats.GetStatValue(Stat.TalentMelee);
-        TalentRanged = (byte)stats.GetStatValue(Stat.TalentRanged);
-        TalentEngineering = (byte)stats.GetStatValue(Stat.TalentEngineering);
-        TalentMysticism = (byte)stats.GetStatValue(Stat.TalentMysticism);
-        TalentMedicine = (byte)stats.GetStatValue(Stat.TalentMedicine);
-        TalentDefense = (byte)stats.GetStatValue(Stat.TalentDefense);
-
-        TalentTechnique = (byte)stats.GetStatValue(Stat.TalentTechnique);
-    }
-}
-
-public interface IStatDerived
-{
-    public void Update(Stats stats);
 }

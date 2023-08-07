@@ -14,15 +14,13 @@ public class StatsTestAuthoring : MonoBehaviour
 
             var extraStatStickEntity = CreateAdditionalEntity(TransformUsageFlags.None, entityName: "Extra stats");
             AddBuffer<EquippedTo>(extraStatStickEntity);
-            var extraStatStickStats = new Stats(1, Allocator.Persistent);
-            extraStatStickStats.AddStat(Stat.AdditionalStrength, 100);
-            AddComponent(extraStatStickEntity, new StatsContainer(extraStatStickStats));
+            var extraStatStickStats = AddBuffer<StatElement>(extraStatStickEntity);
+            StatElement.AddStat(extraStatStickStats, Stat.AdditionalStrength, 100);
 
             var baseStatStickEntity = CreateAdditionalEntity(TransformUsageFlags.None, entityName: "Base stats");
             AddBuffer<EquippedTo>(baseStatStickEntity);
-            var baseStatStickStats = new Stats(1, Allocator.Persistent);
-            baseStatStickStats.AddStat(Stat.AdditionalLife, 100);
-            AddComponent(baseStatStickEntity, new StatsContainer(baseStatStickStats));
+            var baseStatStickStats = AddBuffer<StatElement>(baseStatStickEntity);
+            StatElement.AddStat(baseStatStickStats, Stat.AdditionalLife, 100);
 
             var equipStatSticks = AddBuffer<EquipStatStickRequest>(entity);
             equipStatSticks.Add(new EquipStatStickRequest { unequip = false, entity = extraStatStickEntity });
@@ -36,7 +34,7 @@ public class StatsTestAuthoring : MonoBehaviour
                 toValue = 2,
             });
 
-            AddComponent(entity, new StatsContainer(100, Allocator.Persistent));
+            AddBuffer<StatElement>(entity);
             AddComponent<StatRecalculationTag>(entity);
         }
     }
