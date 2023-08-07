@@ -45,7 +45,6 @@ public class TalentDefinition : ScriptableObject
             }
         }
 
-        Debug.Log(tooltip);
         return tooltip;
     }
 }

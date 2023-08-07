@@ -1,8 +1,17 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 public class TalentScreen : VisualElement
 {
+    public Action<TalentAllocationRequestRpc> talentClicked;
+
+    Dictionary<int, VisualElement> columnsByLevel = new Dictionary<int, VisualElement>();
+    Dictionary<Stat, TalentPlate> talents = new Dictionary<Stat, TalentPlate>();
+
+    Toggle refundToggle;
+
     public new class UxmlFactory : UxmlFactory<TalentScreen, UxmlTraits> { }
 
     public new class UxmlTraits : VisualElement.UxmlTraits
@@ -32,6 +41,19 @@ public class TalentScreen : VisualElement
         leftPanel.style.backgroundColor = Color.gray;
         background.Add(leftPanel);
 
+        var refundToggleBackground = new VisualElement { name = "refund-toggle-background" };
+        refundToggleBackground.style.flexDirection = FlexDirection.Row;
+        refundToggleBackground.style.width = 100;
+        refundToggleBackground.style.height = 40;
+        leftPanel.Add(refundToggleBackground);
+
+        var refundToggleLabel = new Label { name = "refund-toggle-label" };
+        refundToggleLabel.text = "Refund";
+        refundToggleBackground.Add(refundToggleLabel);
+
+        refundToggle = new Toggle { name = "refund-toggle" };
+        refundToggleBackground.Add(refundToggle);
+
         var talentScrollView = new ScrollView { name = "talent-scroll-view" };
         talentScrollView.style.flexGrow = 1;
         background.Add(talentScrollView);
@@ -42,5 +64,40 @@ public class TalentScreen : VisualElement
         talentColumnParent.style.alignItems = Align.Stretch;
         talentColumnParent.style.alignSelf = Align.Stretch;
         talentColumnParent.style.backgroundColor = Color.white;
+    }
+
+    public void BuildTalentScreen(TalentDefinition[] talentDefinitions, VisualTreeAsset talentColumnTemplate, VisualTreeAsset talentPlateTemplate)
+    {
+        var talentColumnParent = this.Q<VisualElement>("unity-content-container");
+        foreach (var talent in talentDefinitions)
+        {
+            var talentPlateInstance = talentPlateTemplate.Instantiate();
+            var talentPlate = talentPlateInstance.Q<TalentPlate>();
+            talents.Add(talent.stat, talentPlate);
+            talentPlate.Talent = talent;
+            talentPlate.clicked += TalentPlate_clicked;
+
+            if (columnsByLevel.TryGetValue(talent.levelRequirement, out var talentColumn))
+            {
+                talentColumn.Q<VisualElement>("talent-parent").Add(talentPlateInstance);
+            }
+            else
+            {
+                var newTalentColumn = talentColumnTemplate.Instantiate();
+                newTalentColumn.Q<Label>("level-label").text = talent.levelRequirement.ToString();
+                talentColumnParent.Add(newTalentColumn);
+                columnsByLevel.Add(talent.levelRequirement, newTalentColumn);
+                newTalentColumn.Q<VisualElement>("talent-parent").Add(talentPlateInstance);
+            }
+        }
+    }
+
+    private void TalentPlate_clicked(Stat stat)
+    {
+        talentClicked.Invoke(new TalentAllocationRequestRpc
+        {
+            stat = stat,
+            refund = refundToggle.value,
+        });
     }
 }

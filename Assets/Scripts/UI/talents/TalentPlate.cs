@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +14,15 @@ using UnityEngine.UIElements;
 
 public class TalentPlate : VisualElement
 {
+    public Action<Stat> clicked;
+
+    TalentDefinition talent;
+    int pointsAllocated;
+    VisualElement background;
+    Label talentAllocation;
+    Button talentButton;
+    string talentTooltip;
+
     public new class UxmlFactory : UxmlFactory<TalentPlate, UxmlTraits> { }
 
     public new class UxmlTraits : VisualElement.UxmlTraits
@@ -28,13 +38,6 @@ public class TalentPlate : VisualElement
             base.Init(ve, bag, cc);
         }
     }
-
-    TalentDefinition talent;
-    int pointsAllocated;
-    VisualElement background;
-    Label talentAllocation;
-    Button talentButton;
-    string talentTooltip;
 
     public TalentDefinition Talent
     {
@@ -71,18 +74,24 @@ public class TalentPlate : VisualElement
         talentAllocation.text = "0/0";
         background.Add(talentAllocation);
 
-        talentButton = new Button { name = "TalentButton" };
+        talentButton = new Button { name = "talent-button" };
         talentButton.style.width = 240;
         talentButton.style.height = 40;
         talentButton.text = "Test";
+        talentButton.clicked += TalentButton_clicked;
         talentButton.RegisterCallback<MouseOverEvent>((type) =>
         {
-            Debug.Log($"In {talent.talentName}!");
+
         });
         talentButton.RegisterCallback<MouseOutEvent>((type) =>
         {
-            Debug.Log($"Out {talent.talentName}!");
+
         });
         background.Add(talentButton);
+    }
+
+    private void TalentButton_clicked()
+    {
+        clicked.Invoke(talent.stat);
     }
 }

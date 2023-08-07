@@ -198,59 +198,34 @@ public struct Focus : IComponentData
 public partial class TalentUIManager : SystemBase
 {
     UIDocument gameUI;
-    VisualTreeAsset talentColumnTemplate;
-    VisualTreeAsset talentPlateTemplate;
-
-    PlatformerInputActions.GameplayMapActions _defaultActionsMap;
-
-    Dictionary<int, VisualElement> columnsByLevel = new Dictionary<int, VisualElement>();
-    Dictionary<Stat, TalentPlate> talents = new Dictionary<Stat, TalentPlate>();
-
-    protected override void OnCreate()
-    {
-        PlatformerInputActions inputActions = new PlatformerInputActions();
-        inputActions.Enable();
-        inputActions.GameplayMap.Enable();
-        _defaultActionsMap = inputActions.GameplayMap;
-    }
+    List<TalentAllocationRequestRpc> requests = new List<TalentAllocationRequestRpc>();
 
     protected override void OnStartRunning()
     {
         var gameUIManager = UnityEngine.Object.FindObjectOfType<GameUIManager>();
 
         gameUI = gameUIManager.gameUI;
-        talentColumnTemplate = gameUIManager.talentColumnTemplate;
-        talentPlateTemplate = gameUIManager.talentPlateTemplate;
 
-        var talentScreen = gameUI.rootVisualElement.Q<VisualElement>("talent-screen");
-        var talentColumnParent = talentScreen.Q<VisualElement>("unity-content-container");
+        var talentScreen = gameUI.rootVisualElement.Q<TalentScreen>();
+        var talents = UnityEngine.Resources.LoadAll<TalentDefinition>("Talent definitions");
+        talentScreen.BuildTalentScreen(talents, gameUIManager.talentColumnTemplate, gameUIManager.talentPlateTemplate);
+        talentScreen.talentClicked += TalentScreen_talentClicked;
+    }
 
-        var Talents = UnityEngine.Resources.LoadAll<TalentDefinition>("Talent definitions");
-
-        foreach (var talent in Talents)
-        {
-            var talentPlateInstance = talentPlateTemplate.Instantiate();
-            var talentPlate = talentPlateInstance.Q<TalentPlate>();
-            talents.Add(talent.stat, talentPlate);
-            talentPlate.Talent = talent;
-
-            if (columnsByLevel.TryGetValue(talent.levelRequirement, out var talentColumn))
-            {
-                talentColumn.Q<VisualElement>("talent-parent").Add(talentPlateInstance);
-            }
-            else
-            {
-                var newTalentColumn = talentColumnTemplate.Instantiate();
-                newTalentColumn.Q<Label>("level-label").text = talent.levelRequirement.ToString();
-                talentColumnParent.Add(newTalentColumn);
-                columnsByLevel.Add(talent.levelRequirement, newTalentColumn);
-                newTalentColumn.Q<VisualElement>("talent-parent").Add(talentPlateInstance);
-            }
-        }
+    private void TalentScreen_talentClicked(TalentAllocationRequestRpc request)
+    {
+        requests.Add(request);
     }
 
     protected override void OnUpdate()
     {
-
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+        foreach (var request in requests)
+        {
+            var entity = commandBuffer.CreateEntity();
+            commandBuffer.AddComponent<SendRpcCommandRequest>(entity);
+            commandBuffer.AddComponent(entity, request);
+        }
+        requests.Clear();
     }
 }

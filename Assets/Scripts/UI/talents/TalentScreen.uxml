@@ -1,4 +1,4 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Scripts/Talents/Talents.uss?fileID=7433441132597879392&amp;guid=c7198d70045fe764c893a0434cbb8f58&amp;type=3#Talents" />
-    <TalentScreen style="flex-grow: 1;" />
+    <TalentScreen name="talent-screen" style="flex-grow: 1;" />
 </ui:UXML>

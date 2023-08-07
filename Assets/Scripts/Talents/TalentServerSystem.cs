@@ -22,32 +22,29 @@ public partial class TalentServerSystem : SystemBase
         var talentEntities = talentQuery.ToEntityArray(Allocator.Temp);
         var talentComponents = talentQuery.ToComponentDataArray<TalentComponent>(Allocator.Temp);
 
-        Entities
-        .ForEach((
-        in TalentAllocationRequestRpc rpc,
-        in ReceiveRpcCommandRequest receive,
-        in Entity entity) =>
+        foreach (var (rpc, receive, entity) in SystemAPI.Query<RefRO<TalentAllocationRequestRpc>, RefRO<ReceiveRpcCommandRequest>>().WithEntityAccess())
         {
             commandBuffer.DestroyEntity(entity);
-            var targetEntity = SystemAPI.GetComponent<CommandTarget>(receive.SourceConnection).targetEntity;
+            var targetEntity = SystemAPI.GetComponent<CommandTarget>(receive.ValueRO.SourceConnection).targetEntity;
+            var characterEntity = SystemAPI.GetComponent<PlatformerPlayer>(targetEntity).ControlledCharacter;
 
             for (var i = 0; i < talentComponents.Length; i++)
             {
                 var talentComponent = talentComponents[i];
                 var talentEntity = talentEntities[i];
 
-                if (talentComponent.stat == rpc.stat)
+                if (talentComponent.stat == rpc.ValueRO.stat)
                 {
                     // Allocate or deallocate here
-                    commandBuffer.AppendToBuffer(targetEntity, new EquipStatStickRequest
+                    commandBuffer.AppendToBuffer(characterEntity, new EquipStatStickRequest
                     {
-                        unequip = rpc.deallocate,
+                        unequip = rpc.ValueRO.refund,
                         entity = talentEntity
                     });
+                    break;
                 }
             }
-        })
-        .Run();
+        }
     }
 
     public void CreateTalentsAsEntities(EntityManager em)
@@ -106,10 +103,22 @@ public partial class TalentServerSystem : SystemBase
 public struct TalentAllocationRequestRpc : IRpcCommand
 {
     public Stat stat;
-    public bool deallocate;
+    public bool refund;
 }
 
 public struct TalentComponent : IComponentData
 {
     public Stat stat;
+}
+
+[GhostComponent(OwnerSendType = SendToOwnerType.SendToOwner)]
+public struct TalentsComponent : IComponentData
+{
+    [GhostField] byte talentDefense;
+
+
+    public void SetValues(Stats stats)
+    {
+        talentDefense = (byte)stats.GetStatValue(Stat.TalentDefense);
+    }
 }
