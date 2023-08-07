@@ -8,8 +8,6 @@ using Unity.Transforms;
 [assembly: RegisterGenericComponentType(typeof(PressContainerSlotRpc))]
 [assembly: RegisterGenericComponentType(typeof(TalentAllocationRequestRpc))]
 
-public struct LocalPlayerTag : IComponentData { }
-
 [BurstCompile]
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
 public partial struct GoInGameClientSystem : ISystem

@@ -45,6 +45,12 @@ public partial class TalentServerSystem : SystemBase
                 }
             }
         }
+
+        foreach (var (talents, stats) in SystemAPI.Query<RefRW<TalentsComponent>, RefRO<StatsContainer>>().WithChangeFilter<StatsContainer>())
+        {
+            UnityEngine.Debug.Log("Talents updated!");
+            talents.ValueRW.Update(stats.ValueRO.stats);
+        }
     }
 
     public void CreateTalentsAsEntities(EntityManager em)
@@ -96,6 +102,10 @@ public partial class TalentServerSystem : SystemBase
             {
                 stats.AddStat(grants.stat, grants.value);
             }
+
+            em.AddComponentData(talentEntity, new StatsContainer(stats));
+
+            em.AddBuffer<EquippedTo>(talentEntity);
         }
     }
 }
@@ -112,13 +122,39 @@ public struct TalentComponent : IComponentData
 }
 
 [GhostComponent(OwnerSendType = SendToOwnerType.SendToOwner)]
-public struct TalentsComponent : IComponentData
+public struct TalentsComponent : IComponentData, IStatDerived
 {
-    [GhostField] byte talentDefense;
+    [GhostField] public byte TalentPhysique;
+    [GhostField] public byte TalentReason;
+    [GhostField] public byte TalentDexterity;
+    [GhostField] public byte TalentPerception;
+    [GhostField] public byte TalentMelee;
+    [GhostField] public byte TalentRanged;
+    [GhostField] public byte TalentEngineering;
+    [GhostField] public byte TalentMysticism;
+    [GhostField] public byte TalentMedicine;
+    [GhostField] public byte TalentDefense;
 
+    [GhostField] public byte TalentTechnique;
 
-    public void SetValues(Stats stats)
+    public void Update(Stats stats)
     {
-        talentDefense = (byte)stats.GetStatValue(Stat.TalentDefense);
+        TalentPhysique = (byte)stats.GetStatValue(Stat.TalentPhysique);
+        TalentReason = (byte)stats.GetStatValue(Stat.TalentReason);
+        TalentDexterity = (byte)stats.GetStatValue(Stat.TalentDexterity);
+        TalentPerception = (byte)stats.GetStatValue(Stat.TalentPerception);
+        TalentMelee = (byte)stats.GetStatValue(Stat.TalentMelee);
+        TalentRanged = (byte)stats.GetStatValue(Stat.TalentRanged);
+        TalentEngineering = (byte)stats.GetStatValue(Stat.TalentEngineering);
+        TalentMysticism = (byte)stats.GetStatValue(Stat.TalentMysticism);
+        TalentMedicine = (byte)stats.GetStatValue(Stat.TalentMedicine);
+        TalentDefense = (byte)stats.GetStatValue(Stat.TalentDefense);
+
+        TalentTechnique = (byte)stats.GetStatValue(Stat.TalentTechnique);
     }
+}
+
+public interface IStatDerived
+{
+    public void Update(Stats stats);
 }

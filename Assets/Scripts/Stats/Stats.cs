@@ -67,7 +67,7 @@ public partial struct ApplyStatSticks : ISystem
         foreach (var (requests, statSticks, stats, entity) in SystemAPI.Query<
             DynamicBuffer<EquipStatStickRequest>,
             DynamicBuffer<StatStickContainer>,
-            RefRO<StatContainer>>()
+            RefRO<StatsContainer>>()
             .WithEntityAccess())
         {
             var wasChanged = false;
@@ -149,13 +149,13 @@ public struct EquipStatStickRequest : IBufferElementData
 [BurstCompile]
 public partial struct StatTotaller : ISystem
 {
-    private ComponentLookup<StatContainer> statsLookup;
+    private ComponentLookup<StatsContainer> statsLookup;
     private BufferLookup<StatStickContainer> statSticksLookup;
 
     //[BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        statsLookup = state.GetComponentLookup<StatContainer>(true);
+        statsLookup = state.GetComponentLookup<StatsContainer>(true);
         statSticksLookup = state.GetBufferLookup<StatStickContainer>(true);
 
         state.RequireForUpdate(state.GetEntityQuery(typeof(StatRecalculationTag)));
@@ -174,7 +174,7 @@ public partial struct StatTotaller : ISystem
         // Total stats from stat sticks and write that to the entities StatContainer buffer
         foreach (var (tag, stats, entity) in SystemAPI.Query<
             StatRecalculationTag,
-            RefRW<StatContainer>>()
+            RefRW<StatsContainer>>()
             .WithEntityAccess())
         {
             if (!statSticksLookup.HasBuffer(entity)) return;
@@ -254,7 +254,7 @@ public partial struct DerivedStatHandlerSystem : ISystem
         derivedStatsLookup.Update(ref state);
 
         foreach (var (stats, entity) in SystemAPI.Query<
-            RefRW<StatContainer>>()
+            RefRW<StatsContainer>>()
             .WithEntityAccess()
             .WithAll<StatRecalculationTag>())
         {
@@ -300,7 +300,7 @@ public partial struct CombinedStatCalculationSystem : ISystem
         // Build StatContainers on CombinedStatResultContainers.
         foreach (var (combinedStatResults, stats) in SystemAPI.Query<
             DynamicBuffer<StatFlavors>, 
-            RefRO<StatContainer>>()
+            RefRO<StatsContainer>>()
             .WithAll<StatRecalculationTag>())
         {
             for (var i = 0; i < combinedStatResults.Length; i++)
@@ -391,9 +391,9 @@ public partial struct StatCleanupAndInitializationSystem : ISystem
 
         foreach (var (tag, entity) in SystemAPI.Query<RefRO<StatContainerTag>>()
             .WithEntityAccess()
-            .WithNone<StatContainer>())
+            .WithNone<StatsContainer>())
         {
-            commandBuffer.AddComponent(entity, new StatContainer(100, Allocator.Persistent));
+            commandBuffer.AddComponent(entity, new StatsContainer(100, Allocator.Persistent));
         }
 
         foreach (var (tag, entity) in SystemAPI.Query<RefRO<StatRequirementsTag>>()
@@ -404,12 +404,12 @@ public partial struct StatCleanupAndInitializationSystem : ISystem
         }
 
         foreach (var (stats, entity) in SystemAPI.Query<
-            RefRW<StatContainer>>()
+            RefRW<StatsContainer>>()
             .WithEntityAccess()
             .WithNone<StatContainerTag>())
         {
             stats.ValueRW.Dispose();
-            commandBuffer.RemoveComponent<StatContainer>(entity);
+            commandBuffer.RemoveComponent<StatsContainer>(entity);
         }
 
         foreach (var (requirements, entity) in SystemAPI.Query<
@@ -540,16 +540,16 @@ public struct Stats
     }
 }
 
-public struct StatContainer : ICleanupComponentData
+public struct StatsContainer : ICleanupComponentData
 {
     public Stats stats;
 
-    public StatContainer(Stats baseStatStickStats)
+    public StatsContainer(Stats stats)
     {
-        stats = baseStatStickStats;
+        this.stats = stats;
     }
 
-    public StatContainer(int size, Allocator allocator)
+    public StatsContainer(int size, Allocator allocator)
     {
         stats = new Stats(size, allocator);
     }
@@ -690,7 +690,7 @@ public struct StatRequirementsTag : IComponentData { }
 public readonly partial struct StatStickAspect : IAspect
 {
     public readonly Entity entity;
-    public readonly RefRW<StatContainer> stats;
+    public readonly RefRW<StatsContainer> stats;
     public readonly RefRW<StatRequirements> requirements;
     public readonly DynamicBuffer<EquippedTo> equippedTo;
 }
@@ -698,7 +698,7 @@ public readonly partial struct StatStickAspect : IAspect
 public readonly partial struct AdvancedStatStick : IAspect
 {
     public readonly Entity entity;
-    public readonly RefRW<StatContainer> stats;
+    public readonly RefRW<StatsContainer> stats;
     public readonly RefRW<StatRequirements> requirements;
     public readonly DynamicBuffer<EquippedTo> equippedTo;
     public readonly DynamicBuffer<StatStickContainer> statSticks;
@@ -708,7 +708,7 @@ public readonly partial struct AdvancedStatStick : IAspect
 public readonly partial struct StatEntityAspect : IAspect
 {
     public readonly Entity entity;
-    public readonly RefRW<StatContainer> stats;
+    public readonly RefRW<StatsContainer> stats;
     public readonly DynamicBuffer<DerivedStat> derivedStats;
     public readonly DynamicBuffer<StatStickContainer> statSticks;
     public readonly DynamicBuffer<EquipStatStickRequest> equipRequests;

@@ -10,7 +10,7 @@ public class RawStatStickAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-            AddComponent(entity, new StatContainer(100, Allocator.Persistent));
+            AddComponent(entity, new StatsContainer(100, Allocator.Persistent));
             AddBuffer<EquippedTo>(entity);
         }
     }

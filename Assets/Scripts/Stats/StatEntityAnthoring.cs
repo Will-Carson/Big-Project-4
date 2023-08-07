@@ -12,10 +12,12 @@ public class StatEntityAnthoring : MonoBehaviour
 
             var baseStatStick = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
             AddBuffer<EquippedTo>(baseStatStick);
-            var baseStatStickStats = new Stats(1, Allocator.Persistent);
+            var baseStatStickStats = new Stats(3, Allocator.Persistent);
 
             baseStatStickStats.AddStat(Stat.AdditionalLife, 100);
-            AddComponent(baseStatStick, new StatContainer(baseStatStickStats));
+            baseStatStickStats.AddStat(Stat.TalentPoint, 10);
+            baseStatStickStats.AddStat(Stat.Level, 10);
+            AddComponent(baseStatStick, new StatsContainer(baseStatStickStats));
 
             var equipTo = AddBuffer<EquipStatStickRequest>(entity);
             equipTo.Add(new EquipStatStickRequest
