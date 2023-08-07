@@ -43,8 +43,7 @@ public partial struct StatStickEquipper : ISystem
         equippedToLookup = state.GetBufferLookup<EquippedTo>();
         statStickRequirementLookup = state.GetBufferLookup<StatRequirementElement>(true);
     }
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
+
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -92,27 +91,15 @@ public partial struct StatStickEquipper : ISystem
                 }
                 else
                 {
-                    var requirementsMet = true;
                     // Check if this stat stick can be equipped. If the stat stick has no requirements, skip this step
                     if (statStickRequirementLookup.TryGetBuffer(req.entity, out var requirementsBuffer))
                     {
-                        for (var j = 0; j < requirementsBuffer.Length; j++)
+                        if (!StatRequirementElement.StatsMeetRequirements(requirementsBuffer, stats))
                         {
-                            var requirement = requirementsBuffer[j];
-                            for (var k = 0; k < stats.Length; k++)
-                            {
-                                var stat = stats[k];
-                                if (requirement.stat == stat.stat && !requirement.range.IsInRange(stat.value))
-                                {
-                                    requirementsMet = false;
-                                    break;
-                                }
-                            }
-                            // If we have already figured out we don't meet requirements, exit early
-                            if (!requirementsMet) break;
+                            continue;
                         }
                     }
-                    if (!requirementsMet) continue;
+
                     // Equip the statstick
                     statSticks.Add(new StatStickContainer { entity = req.entity });
                     // Add to the EquippedTo buffer on the stat stick
@@ -129,11 +116,13 @@ public partial struct StatStickEquipper : ISystem
         commandBuffer.Playback(state.EntityManager);
     }
 }
+
 public struct EquipStatStickRequest : IBufferElementData
 {
     public Entity entity;
     public bool unequip;
 }
+
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(StatRecalculationSystemGroup))]
 [BurstCompile]
@@ -141,6 +130,7 @@ public partial struct StatTotaller : ISystem
 {
     private BufferLookup<StatElement> statsLookup;
     private BufferLookup<StatStickContainer> statSticksLookup;
+
     //[BurstCompile]
     public void OnCreate(ref SystemState state)
     {
@@ -148,8 +138,7 @@ public partial struct StatTotaller : ISystem
         statSticksLookup = state.GetBufferLookup<StatStickContainer>(true);
         state.RequireForUpdate(state.GetEntityQuery(typeof(StatRecalculationTag)));
     }
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
+
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -162,30 +151,19 @@ public partial struct StatTotaller : ISystem
             DynamicBuffer<StatElement>>()
             .WithEntityAccess())
         {
-            if (!statSticksLookup.HasBuffer(entity)) return;
+            if (!statSticksLookup.HasBuffer(entity)) continue;
             stats.Clear();
             var statSticks = statSticksLookup[entity];
+
             var statTotals = new NativeHashMap<uint, float>(10, Allocator.Temp);
             for (var i = 0; i < statSticks.Length; i++)
             {
                 var statStick = statSticks[i];
-                if (!statsLookup.HasBuffer(statStick.entity)) return;
+                if (!statsLookup.HasBuffer(statStick.entity)) continue;
                 var statStickStats = statsLookup[statStick.entity];
-                for (var j = 0; j < statStickStats.Length; j++)
-                {
-                    var statStickStat = statStickStats[j];
-                    var statKey = (uint)statStickStat.stat;
-                    var statValue = statStickStat.value;
-                    if (statTotals.ContainsKey(statKey))
-                    {
-                        statTotals[statKey] = statTotals[statKey] + statValue;
-                    }
-                    else
-                    {
-                        statTotals.Add(statKey, statValue);
-                    }
-                }
+                AddStats(ref statTotals, statStickStats);
             }
+
             // Add all stats to the StatContainer buffer
             var keyArray = statTotals.GetKeyArray(Allocator.Temp);
             for (var i = 0; i < keyArray.Length; i++)
@@ -193,33 +171,55 @@ public partial struct StatTotaller : ISystem
                 var key = keyArray[i];
                 stats.Add(new StatElement((Stat)key, statTotals[key]));
             }
+
             // Dispose of Native* types
             keyArray.Dispose();
             statTotals.Dispose();
         }
     }
+
+    private static void AddStats(ref NativeHashMap<uint, float> statTotals, DynamicBuffer<StatElement> statStickStats)
+    {
+        for (var j = 0; j < statStickStats.Length; j++)
+        {
+            var statStickStat = statStickStats[j];
+            var statKey = (uint)statStickStat.stat;
+            var statValue = statStickStat.value;
+            if (statTotals.ContainsKey(statKey))
+            {
+                statTotals[statKey] = statTotals[statKey] + statValue;
+            }
+            else
+            {
+                statTotals.Add(statKey, statValue);
+            }
+        }
+    }
 }
+
 public struct StatStickContainer : IBufferElementData
 {
     public Entity entity;
 }
+
 public struct EquippedTo : IBufferElementData
 {
     public Entity entity;
 }
+
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(StatRecalculationSystemGroup))]
 [BurstCompile]
 public partial struct DerivedStatHandlerSystem : ISystem
 {
     BufferLookup<DerivedStat> derivedStatsLookup;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         derivedStatsLookup = state.GetBufferLookup<DerivedStat>(true);
     }
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
+
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -268,6 +268,7 @@ public partial struct DerivedStatHandlerSystem : ISystem
         }
     }
 }
+
 public struct DerivedStat : IBufferElementData
 {
     public Stat fromStat;
@@ -275,6 +276,7 @@ public struct DerivedStat : IBufferElementData
     public Stat toStat;
     public int toValue;
 }
+
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(StatRecalculationSystemGroup))]
 [UpdateAfter(typeof(DerivedStatHandlerSystem))]
@@ -315,17 +317,20 @@ public partial class CombinedStatCalculationSystem : SystemBase
         .Run();
     }
 }
+
 public struct CombinedStatResultsContainer : IBufferElementData
 {
     public StatFlavorFlag statFlavorFlags;
     public Entity entity;
 }
+
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(StatRecalculationSystemGroup))]
 [UpdateBefore(typeof(StatRecalculationTagCleanUpSystem))]
 public partial class CustomStatHandlingSystemGroup : ComponentSystemGroup
 {
 }
+
 /// <summary>
 /// Cleans up StatRecalculationTag components. Should by definition be run at the end of a simulation tick.
 /// Only needs to be ran on the server.
@@ -365,11 +370,13 @@ public partial struct StatRecalculationTagCleanUpSystem : ISystem
         commandBuffer.Playback(state.EntityManager);
     }
 }
+
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 public partial class StatRecalculationSystemGroup : ComponentSystemGroup
 {
 }
+
 /// <summary>
 /// Marks entities for stat recalculation
 /// </summary>
@@ -413,6 +420,31 @@ public struct StatElement : IBufferElementData
         AddStat(stats, new StatElement(stat, value));
     }
 
+    public static void AddStats(DynamicBuffer<StatElement> stats, DynamicBuffer<StatElement> statsToAdd)
+    {
+        for (var i = 0; i < statsToAdd.Length; i++)
+        {
+            var s = statsToAdd[i];
+
+            AddStat(stats, s);
+        }
+    }
+
+    public static float GetStatValue(DynamicBuffer<StatElement> stats, Stat stat)
+    {
+        for (var i = 0; i < stats.Length; i++)
+        {
+            var s = stats[i];
+
+            if (s.stat == stat)
+            {
+                return s.value;
+            }
+        }
+
+        return 0;
+    }
+
     public static StatElement operator +(StatElement a, StatElement b)
     {
         if (a.stat == b.stat) return new StatElement();
@@ -441,6 +473,22 @@ public struct StatRequirementElement : IBufferElementData
         this.stat = stat;
         this.range = range;
     }
+
+    public static bool StatsMeetRequirements(DynamicBuffer<StatRequirementElement> requirements, DynamicBuffer<StatElement> stats)
+    {
+        for (var i = 0; i < requirements.Length; i++)
+        {
+            var req = requirements[i];
+
+            var statValue = StatElement.GetStatValue(stats, req.stat);
+            if (!req.range.IsInRange(statValue))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public override string ToString()
     {
         return $"{stat} : {range.min}, {range.max}";
@@ -472,7 +520,7 @@ public struct Range
 
     public bool IsInRange(float value)
     {
-        return value > min && value < max;
+        return value >= min && value <= max;
     }
 }
 
