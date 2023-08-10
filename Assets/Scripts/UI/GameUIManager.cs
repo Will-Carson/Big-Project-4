@@ -2,6 +2,7 @@ using MyUILibrary;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
@@ -12,10 +13,10 @@ using UnityEngine.UIElements;
 public class GameUIManager : MonoBehaviour
 {
     /// X Health bar
-    /// Focus bar
+    /// X Focus bar
     /// Experience bar
     /// Inventory screen
-    /// Talent screen
+    /// X Talent screen
     /// Menu screen
 
     public UIDocument gameUI;
@@ -28,6 +29,13 @@ public class GameUIManager : MonoBehaviour
     VisualElement defaultGameScreen;
     VisualElement talentScreen;
 
+    VisualElement rightPanel;
+    List<VisualElement> exclusiveRightPanels = new List<VisualElement>();
+    VisualElement inventoryPanel;
+
+    VisualElement leftPanel;
+    List<VisualElement> exclusiveLeftPanels = new List<VisualElement>();
+
     PlatformerInputActions.GameplayMapActions _defaultActionsMap;
 
     private void Start()
@@ -39,9 +47,14 @@ public class GameUIManager : MonoBehaviour
 
         defaultGameScreen = gameUI.rootVisualElement.Q<VisualElement>("game-screen");
         talentScreen = gameUI.rootVisualElement.Q<VisualElement>("talent-screen");
-
         exclusiveGameScreens.Add(defaultGameScreen);
         exclusiveGameScreens.Add(talentScreen);
+
+        rightPanel = gameUI.rootVisualElement.Q<VisualElement>("right-panel");
+        inventoryPanel = gameUI.rootVisualElement.Q<VisualElement>("inventory-panel");
+        exclusiveRightPanels.Add(inventoryPanel);
+
+        leftPanel = gameUI.rootVisualElement.Q<VisualElement>("left-panel");
     }
 
     private void Update()
@@ -49,6 +62,26 @@ public class GameUIManager : MonoBehaviour
         if (_defaultActionsMap.TalentMenu.WasPressedThisFrame())
         {
             ToggleTalentScreen();
+        }
+        if (_defaultActionsMap.Inventory.WasPressedThisFrame())
+        {
+            ToggleInventoryScreen();
+        }
+    }
+
+    public void ToggleDefaultScreen(bool activate)
+    {
+        foreach (var s in exclusiveGameScreens)
+        {
+            if (s == defaultGameScreen)
+            {
+                s.style.display = (activate) ? DisplayStyle.Flex : DisplayStyle.None;
+                //s.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                s.style.display = DisplayStyle.None;
+            }
         }
     }
 
@@ -69,6 +102,23 @@ public class GameUIManager : MonoBehaviour
         if (talentScreen.style.display == DisplayStyle.None)
         {
             defaultGameScreen.style.display = DisplayStyle.Flex;
+        }
+    }
+
+    public void ToggleInventoryScreen()
+    {
+        foreach (var p in exclusiveRightPanels)
+        {
+            if (p == inventoryPanel)
+            {
+                //ToggleDefaultScreen(p.style.display == DisplayStyle.Flex);
+                p.style.display = (p.style.display == DisplayStyle.Flex) ? DisplayStyle.None : DisplayStyle.Flex;
+                rightPanel.style.display = p.style.display;
+            }
+            else
+            {
+                p.style.display = DisplayStyle.None;
+            }
         }
     }
 }
@@ -92,7 +142,7 @@ public partial class NameplateManagerSystem : SystemBase
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
         var localToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
 
-        var nameplateHolder = gameUI.rootVisualElement.Q<VisualElement>("game-screen");
+        var nameplateHolder = gameUI.rootVisualElement.Q<VisualElement>("world-space");
 
         foreach (var localToWorld in SystemAPI.Query<LocalToWorld>())
         {
@@ -158,7 +208,7 @@ public partial class FocusBarManagerSystem : SystemBase
         var focusBarInstance = gm.focusBarTemplate.Instantiate();
         focusBar = focusBarInstance.Q<RadialProgress>();
 
-        gameUI.rootVisualElement.Q<VisualElement>("game-screen").Add(focusBarInstance);
+        gameUI.rootVisualElement.Q<VisualElement>("world-space").Add(focusBarInstance);
     }
 
     float currentFocus = 0;
@@ -198,6 +248,7 @@ public struct Focus : IComponentData
 public partial class TalentUIManager : SystemBase
 {
     UIDocument gameUI;
+    TalentScreen talentScreen;
     List<TalentAllocationRequestRpc> requests = new List<TalentAllocationRequestRpc>();
 
     protected override void OnStartRunning()
@@ -206,7 +257,7 @@ public partial class TalentUIManager : SystemBase
 
         gameUI = gameUIManager.gameUI;
 
-        var talentScreen = gameUI.rootVisualElement.Q<TalentScreen>();
+        talentScreen = gameUI.rootVisualElement.Q<TalentScreen>();
         var talents = UnityEngine.Resources.LoadAll<TalentDefinition>("Talent definitions");
         talentScreen.BuildTalentScreen(talents, gameUIManager.talentColumnTemplate, gameUIManager.talentPlateTemplate);
         talentScreen.talentClicked += TalentScreen_talentClicked;
@@ -227,5 +278,146 @@ public partial class TalentUIManager : SystemBase
             commandBuffer.AddComponent(entity, request);
         }
         requests.Clear();
+
+        // TODO runs every frame...
+        foreach (var stats in SystemAPI.Query<DynamicBuffer<StatElement>>()
+            .WithAll<GhostOwnerIsLocal, PlatformerCharacterComponent>())
+        {
+            talentScreen.OnStatsChange(stats);
+        }
     }
+}
+
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
+public partial class InventoryUIManager : SystemBase
+{
+    ClientContainer inventory;
+    ClientContainer equipment;
+
+    private void Container_clicked(int index, GhostInstance containerSessionId)
+    {
+        Debug.Log($"{index} // {containerSessionId}");
+    }
+
+    protected override void OnUpdate()
+    {
+        if (inventory == null) // For now this will work fine
+        {
+            foreach (var container in SystemAPI.Query<DynamicBuffer<ContainerChild>>().WithAll<GhostOwnerIsLocal, PlatformerPlayer>())
+            {
+                var gameUIManager = UnityEngine.Object.FindObjectOfType<GameUIManager>();
+                var gameUI = gameUIManager.gameUI;
+                var inventoryPanel = gameUI.rootVisualElement.Q<VisualElement>("inventory-panel");
+
+                var inventoryEntity = container[0].child;
+                var inventorySessionId = SystemAPI.GetComponent<GhostInstance>(inventoryEntity);
+                var inventorySlotIds = new string[16];
+                for (var i = 0; i < inventorySlotIds.Length; i++)
+                {
+                    inventorySlotIds[i] = $"item-slot-{i}";
+                }
+
+                var equipmentEntity = container[1].child;
+                var equipmentSessionId = SystemAPI.GetComponent<GhostInstance>(equipmentEntity);
+                string[] equipmentSlotIds = new string[]
+                {
+                    "helm-slot",
+                    "body-slot",
+                    "belt-slot",
+                    "boots-slot",
+                    "gloves-slot",
+                    "main-hand-slot",
+                    "off-hand-slot",
+                    "amulet-slot",
+                    "left-ring-slot",
+                    "right-ring-slot",
+                };
+
+                inventory = new ClientContainer(inventorySessionId, inventoryPanel, inventorySlotIds);
+                equipment = new ClientContainer(equipmentSessionId, inventoryPanel, equipmentSlotIds);
+
+                inventory.clicked += Container_clicked;
+                equipment.clicked += Container_clicked;
+            }
+
+            Debug.Log("Containers set up.");
+        }
+
+        foreach (var container in SystemAPI.Query<DynamicBuffer<ContainerChild>>().WithAll<GhostOwnerIsLocal, PlatformerPlayer>())
+        {
+            var inventoryEntity = container[0].child;
+            var equipmentEntity = container[1].child;
+            var inventoryContainer = SystemAPI.GetBuffer<ContainerChild>(inventoryEntity);
+            var equipmentContainer = SystemAPI.GetBuffer<ContainerChild>(equipmentEntity);
+
+            UpdateContainer(inventory, inventoryContainer);
+            UpdateContainer(equipment, equipmentContainer);
+        }
+    }
+
+    public void UpdateContainer(ClientContainer clientContainer, DynamicBuffer<ContainerChild> container)
+    {
+        for (var i = 0; i < container.Length; i++)
+        {
+            var child = container[i].child;
+            var plate = clientContainer.containerSlots[i];
+            UpdateItemPlate(plate, child);
+        }
+    }
+
+    public void UpdateItemPlate(ClientItemPlate itemPlate, Entity entity)
+    {
+        var item = itemPlate.item;
+        //item.name = SystemAPI.GetComponent<ItemName>(entity).name.ToString();
+    }
+}
+
+public class ClientContainer
+{
+    public Action<int, GhostInstance> clicked;
+    public GhostInstance containerSessionId;
+    public Dictionary<int, ClientItemPlate> containerSlots = new Dictionary<int, ClientItemPlate>();
+
+    public ClientContainer(GhostInstance containerSessionId, VisualElement slotParent, string[] slotIds)
+    {
+        this.containerSessionId = containerSessionId;
+        for (var i = 0; i < slotIds.Length; i++)
+        {
+            var slotId = slotIds[i];
+            var button = slotParent.Q<VisualElement>(slotId).Q<Button>();
+            var containerSlotPlate = new ClientItemPlate(button, i);
+            containerSlotPlate.clicked += ContainerSlotPlate_clicked;
+            containerSlots.Add(i, containerSlotPlate);
+        }
+    }
+
+    private void ContainerSlotPlate_clicked(int slot)
+    {
+        clicked.Invoke(slot, containerSessionId);
+    }
+}
+
+public class ClientItemPlate
+{
+    public Action<int> clicked;
+    public int index;
+    public ItemData item;
+    Button button;
+
+    public ClientItemPlate(Button button, int index)
+    {
+        this.button = button;
+        this.index = index;
+        button.clicked += Button_clicked;
+    }
+
+    private void Button_clicked()
+    {
+        clicked.Invoke(index);
+    }
+}
+
+public class ItemData
+{
+    public string name;
 }

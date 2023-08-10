@@ -1,230 +1,200 @@
-/// Containers are where items exist in the world. Containers have several important
-/// features. The first is nesting; Containers hold items, but items can themselves
-/// be containers. The second is stat propagation. Some containers should be able to
-/// effect their owning entities stats.
-
+using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 
-/// <summary>
-/// Maintains a hashmaps of container ids to containers
-/// Processes PressContainerSlotRpcs into item swap requests 
-/// Checks if items can be swaped before swaping
-/// Triggers stat recalculation on parents when an item is "equipped"
-/// </summary>
-public partial class ServerContainerSystem : SystemBase
+[BurstCompile]
+public partial struct ContainerServerSystem : ISystem
 {
-    private NativeHashMap<uint, Entity> idToContainerEntity = new NativeHashMap<uint, Entity>(100, Allocator.Persistent);
-    private uint nextContainerId;
-
-    protected override void OnDestroy()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        idToContainerEntity.Dispose();
-    }
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
 
-    protected override void OnUpdate()
-    {
-        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
-        var containerLookup = SystemAPI.GetBufferLookup<ContainerSlot>(false);
-        var idToContainerEntity = this.idToContainerEntity;
-
-        // TODO this needs another pass
-        // Set up containers
-        //Entities
-        //.WithAll<DynamicBuffer<ContainerSlot>>()
-        //.WithNone<ContainerSetupTag>()
-        //.ForEach((
-        //in Entity entity) =>
-        //{
-        //    commandBuffer.SetComponent(entity, new ContainerId
-        //    {
-        //        id = nextContainerId++
-        //    });
-        //    idToContainerEntity.Add(nextContainerId, entity);
-        //})
-        //.Run();
-
-        //Entities
-        //.WithNone<DynamicBuffer<ContainerSlot>>()
-        //.WithAll<ContainerSetupTag>()
-        //.ForEach((
-        //in ContainerId containerId,
-        //in Entity entity) =>
-        //{
-        //    commandBuffer.DestroyEntity(entity);
-        //    idToContainerEntity.Remove(containerId.id);
-        //})
-        //.Run();
-
-        // Process rpcs
-        Entities
-        .ForEach((
-        in PressContainerSlotRpc rpc,
-        in ReceiveRpcCommandRequest receive,
-        in Entity entity) =>
+        foreach (var (request, rpc, rpcEntity) in SystemAPI
+            .Query<RefRO<ClickItemRpc>, RefRO<ReceiveRpcCommandRequest>>()
+            .WithEntityAccess())
         {
-            commandBuffer.DestroyEntity(entity);
-            var targetEntity = SystemAPI.GetComponent<CommandTarget>(receive.SourceConnection).targetEntity;
+            commandBuffer.DestroyEntity(rpcEntity);
 
-            // Get the item in the hand slot
-            var heldItem = SystemAPI.GetComponent<HandSlot>(targetEntity).item;
+            var playerEntity = SystemAPI.GetComponent<CommandTarget>(rpc.ValueRO.SourceConnection).targetEntity;
 
-            // Get the target container
-            if (!idToContainerEntity.TryGetValue(rpc.containerId, out var selectedContainerEntity))
+            var clickedContainerEntity = Entity.Null;
+            var clickedItemEntity = Entity.Null;
+            foreach (var (containerSessionId, children, entity) in SystemAPI
+                .Query<RefRO<GhostInstance>, DynamicBuffer<ContainerChild>>()
+                .WithAll<ContainerChild>()
+                .WithEntityAccess())
             {
-                return;
-            }
-
-            if (!containerLookup.TryGetBuffer(selectedContainerEntity, out var selectedContainer))
-            {
-                return;
-            }
-
-            // Get the index of the selected slot
-            var selectedSlotIndex = -1;
-            var selectedSlotItem = Entity.Null;
-            for (var i = 0; i < selectedContainer.Length; i++)
-            {
-                var slot = selectedContainer[i];
-                if (slot.id == rpc.slotId)
+                if (containerSessionId.ValueRO.ghostId == request.ValueRO.containerSessionId.ghostId &&
+                    containerSessionId.ValueRO.ghostType == request.ValueRO.containerSessionId.ghostType &&
+                    containerSessionId.ValueRO.spawnTick == request.ValueRO.containerSessionId.spawnTick)
                 {
-                    selectedSlotIndex = i;
-                    selectedSlotItem = slot.item;
+                    clickedContainerEntity = entity;
+                    clickedItemEntity = children.ElementAt(request.ValueRO.slot).child;
+                    break;
                 }
             }
-
-            if (selectedSlotIndex == -1)
+            if (clickedContainerEntity == Entity.Null ||
+                clickedItemEntity == Entity.Null)
             {
-                return;
+                continue;
             }
 
-            // Check if the handSlotItem can be put in the target container / slot
-            var heldItemRestriction = SystemAPI.GetComponent<ItemSlotRestriction>(heldItem).restriction;
-
-            if (selectedContainer[selectedSlotIndex].metaData.restriction != heldItemRestriction)
+            var selectedItem = SystemAPI.GetComponent<SelectedItem>(playerEntity);
+            if (selectedItem.entity == Entity.Null)
             {
-                return;
+                selectedItem.entity = clickedItemEntity;
+                SystemAPI.SetComponent(playerEntity, selectedItem);
             }
-
-            // If all checks pass, swap the items between the handSlot and the selected slot
-            commandBuffer.SetComponent(targetEntity, new HandSlot
+            else
             {
-                item = selectedSlotItem
-            });
+                var selectedContainerEntity = SystemAPI.GetComponent<ContainerParent>(selectedItem.entity).entity;
 
-            selectedContainer[selectedSlotIndex] = new ContainerSlot
-            {
-                id = rpc.slotId,
-                item = heldItem
-            };
+                // Check if the item meets the ContainerRestrictions
+                var selectedItemRestrictions = SystemAPI.GetComponent<ItemRestrictions>(selectedItem.entity);
+                var clickedItemRestrictions = SystemAPI.GetComponent<ItemRestrictions>(clickedItemEntity);
 
-            // If the selected container is equipment, equip the item to it.
-            if (SystemAPI.HasBuffer<EquippedTo>(selectedContainerEntity))
-            {
-                // Equip the new item
-                commandBuffer.AppendToBuffer(selectedContainerEntity, new EquipStatStickRequest
+                var selectedContainerRestrictions = SystemAPI.GetComponent<ContainerRestrictions>(selectedContainerEntity).restrictions;
+                var clickedContainerRestrictions = SystemAPI.GetComponent<ContainerRestrictions>(clickedItemEntity).restrictions;
+
+                if (!selectedItemRestrictions.ItemMeetsRestrictions(clickedContainerRestrictions) ||
+                    !clickedItemRestrictions.ItemMeetsRestrictions(selectedContainerRestrictions))
                 {
-                    unequip = false,
-                    entity = heldItem
-                });
+                    continue;
+                }
+ 
+                var selectedItemContainer = SystemAPI.GetBuffer<ContainerChild>(selectedContainerEntity);
+                var clickedItemContainer = SystemAPI.GetBuffer<ContainerChild>(clickedItemEntity);
 
-                // Unequip the old item
-                commandBuffer.AppendToBuffer(selectedContainerEntity, new EquipStatStickRequest
+                ContainerChild.TryGetIndexOfChild(selectedItemContainer, selectedItem.entity, out var selectedItemSlot);
+                ContainerChild.TryGetIndexOfChild(clickedItemContainer, clickedItemEntity, out var clickedItemSlot);
+
+                // Check if the item meets the slot specific restrictuions
+                var selectedItemMeetsRestrictions = ContainerChildRestrictions.RestrictionsMet(
+                    SystemAPI.GetBuffer<ContainerChildRestrictions>(clickedItemEntity),
+                    clickedItemSlot,
+                    selectedItemRestrictions);
+                var clickedItemMeetsRestrictions = ContainerChildRestrictions.RestrictionsMet(
+                    SystemAPI.GetBuffer<ContainerChildRestrictions>(selectedContainerEntity), 
+                    selectedItemSlot, 
+                    clickedItemRestrictions);
+
+                if (!selectedItemMeetsRestrictions || !clickedItemMeetsRestrictions)
                 {
-                    unequip = true,
-                    entity = selectedSlotItem
-                });
+                    continue;
+                }
+
+                // Check if the player has permissions for the item/container
+                // TODO
+
+                // Swap the items
+                ContainerChild.PlaceItemInSlot(selectedItemContainer, selectedItemSlot, clickedItemEntity);
+                ContainerChild.PlaceItemInSlot(clickedItemContainer, clickedItemSlot, selectedItem.entity);
+                SystemAPI.SetComponent(selectedItem.entity, new ContainerParent { entity = clickedItemEntity });
+                SystemAPI.SetComponent(clickedItemEntity, new ContainerParent { entity = selectedContainerEntity });
+
+                // Set selectedItem back to null
+                SystemAPI.SetComponent(playerEntity, new SelectedItem { entity = Entity.Null });
             }
-        })
-        .Run();
+        }
     }
 }
 
-public struct ItemSlotRestriction : IComponentData
+public struct SelectedItem : IComponentData
 {
-    public SlotRestriction restriction;
+    public Entity entity;
 }
 
-public struct PressContainerSlotRpc : IRpcCommand
+public struct Item : IComponentData { }
+
+public struct ItemRestrictions : IComponentData
 {
-    public uint containerId;
-    public uint slotId;
+    public Restrictions restrictions;
+
+    public bool ItemMeetsRestrictions(Restrictions otherRestrictions)
+    {
+        return (otherRestrictions & restrictions) == restrictions;
+    }
 }
 
-[GhostComponent(OwnerSendType = SendToOwnerType.SendToOwner)]
-public struct ContainerSlot : IBufferElementData
+public struct ClickItemRpc : IRpcCommand
 {
-    [GhostField]
-    public uint id;
-    [GhostField]
-    public Entity item;
-    [GhostField]
-    public SlotMetaData metaData;
+    public GhostInstance containerSessionId;
+    public int slot;
 }
 
-[GhostComponent]
-public struct ItemSessionId : IComponentData
+public struct ContainerParent : IComponentData
 {
-    [GhostField]
-    public uint id;
-}
-
-public struct ContainerSetupTag : ICleanupComponentData { }
-
-[GhostComponent]
-public struct HandSlot : IComponentData
-{
-    [GhostField]
-    public Entity item;
-}
-
-public struct SlotMetaData
-{
-    public SlotRestriction restriction;
-    public FixedString64Bytes label;
-}
-
-public enum SlotRestriction
-{
-    None,
-    MainHand,
-    OffHand,
-    MainHandOrOffHand,
-    Head,
-    Chest,
-    Hands,
-    Feet,
-    Neck,
-    Waist,
-    Ring,
-    Ability,
-    AbilityAugmnet
+    public Entity entity;
 }
 
 [GhostComponent]
-public struct ItemIcon : IComponentData
+public struct ContainerChild : IBufferElementData
 {
-    [GhostField]
+    [GhostField] public Entity child;
+
+    public static bool TryGetIndexOfChild(DynamicBuffer<ContainerChild> container, Entity child, out int index)
+    {
+        index = 0;
+        for (var i = 0; i < container.Length; i++)
+        {
+            var c = container[i];
+            if (c.child == child)
+            {
+                index = i;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static void PlaceItemInSlot(DynamicBuffer<ContainerChild> container, int slot, Entity newChild)
+    {
+        container.Insert(slot, new ContainerChild { child = newChild });
+    }
+}
+
+public struct ContainerChildRestrictions : IBufferElementData
+{
+    public Restrictions restrictions;
+
+    public ContainerChildRestrictions(Restrictions restrictions) : this()
+    {
+        this.restrictions = restrictions;
+    }
+
+    public static bool RestrictionsMet(DynamicBuffer<ContainerChildRestrictions> containerChildRestrictions, int index, ItemRestrictions itemRestrictions)
+    {
+        var restrictionsAtIndex = containerChildRestrictions.ElementAt(index).restrictions;
+        return itemRestrictions.ItemMeetsRestrictions(restrictionsAtIndex);
+    }
+}
+
+public struct ContainerRestrictions : IComponentData
+{
+    public Restrictions restrictions;
+}
+
+[Flags]
+public enum Restrictions
+{
+    None = 0,
+    Helm = 1,
+    Body = 1 << 1,
+    Belt = 1 << 2,
+    Boots = 1 << 3,
+    Gloves = 1 << 4,
+    HainHand = 1 << 5,
+    OffHand = 1 << 6,
+    Amulet = 1 << 7,
+    LeftRing = 1 << 8,
+    RightRing = 1 << 9,
+}
+
+public struct ItemName : IComponentData
+{
     public FixedString64Bytes name;
-}
-
-/// <summary>
-/// Used to pick out which uielement this entity writes to
-/// </summary>
-[GhostComponent]
-public struct ContainerDisplayId : IComponentData
-{
-    [GhostField]
-    public FixedString64Bytes displayId;
-}
-
-public readonly partial struct ItemAspect : IAspect
-{
-    public readonly Entity entity;
-    public readonly DynamicBuffer<ContainerSlot> container;
-    public readonly RefRW<ItemSlotRestriction> restriction;
-    public readonly RefRW<ItemSessionId> sessionId;
-    public readonly RefRW<ItemIcon> icon;
-    public readonly RefRW<ContainerDisplayId> displayId;
 }

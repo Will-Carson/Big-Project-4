@@ -347,8 +347,7 @@ public partial struct StatRecalculationTagCleanUpSystem : ISystem
     {
         equippedToLookup = state.GetBufferLookup<EquippedTo>();
     }
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
+
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {

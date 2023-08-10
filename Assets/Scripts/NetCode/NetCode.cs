@@ -5,7 +5,6 @@ using Unity.Entities;
 using Unity.NetCode;
 using Unity.Transforms;
 
-[assembly: RegisterGenericComponentType(typeof(PressContainerSlotRpc))]
 [assembly: RegisterGenericComponentType(typeof(TalentAllocationRequestRpc))]
 
 [BurstCompile]
@@ -114,215 +113,52 @@ public partial struct GoInGameServerSystem : ISystem
 
             {
                 // Set up the players containers
-                var rootContainer = commandBuffer.AddBuffer<ContainerSlot>(player);
+                var rootContainer = commandBuffer.AddBuffer<ContainerChild>(player);
 
                 var inventory = commandBuffer.Instantiate(itemPrefab);
                 var equipment = commandBuffer.Instantiate(itemPrefab);
                 var abilities = commandBuffer.Instantiate(itemPrefab);
                 var foreign = commandBuffer.Instantiate(itemPrefab);
 
-                commandBuffer.SetComponent(inventory, new ContainerDisplayId
+                rootContainer.Add(new ContainerChild
                 {
-                    displayId = "inventory-container"
+                    child = inventory,
                 });
-                commandBuffer.SetComponent(equipment, new ContainerDisplayId
+                rootContainer.Add(new ContainerChild
                 {
-                    displayId = "equipment-container"
+                    child = equipment,
                 });
-                commandBuffer.SetComponent(abilities, new ContainerDisplayId
+                rootContainer.Add(new ContainerChild
                 {
-                    displayId = "abilities-container"
+                    child = abilities,
                 });
-                commandBuffer.SetComponent(foreign, new ContainerDisplayId
+                rootContainer.Add(new ContainerChild
                 {
-                    displayId = "foreign-container"
-                });
-
-                rootContainer.Add(new ContainerSlot
-                {
-                    id = 0,
-                    item = inventory,
-                });
-                rootContainer.Add(new ContainerSlot
-                {
-                    id = 1,
-                    item = equipment,
-                });
-                rootContainer.Add(new ContainerSlot
-                {
-                    id = 2,
-                    item = abilities,
-                });
-                rootContainer.Add(new ContainerSlot
-                {
-                    id = 3,
-                    item = foreign,
+                    child = foreign,
                 });
 
                 // Give the different containers their stats
-                var inventoryContainer = commandBuffer.AddBuffer<ContainerSlot>(inventory);
-                for (uint i = 0; i < 16; i++)
+                var inventoryContainer = commandBuffer.AddBuffer<ContainerChild>(inventory);
+                for (int i = 0; i < 16; i++)
                 {
-                    inventoryContainer.Add(new ContainerSlot
-                    {
-                        id = i
-                    });
+                    inventoryContainer.Add(new ContainerChild());
                 }
-                var equipmentContainer = commandBuffer.AddBuffer<ContainerSlot>(equipment);
-                equipmentContainer.Add(new ContainerSlot
+                var equipmentContainer = commandBuffer.AddBuffer<ContainerChild>(equipment);
+                for (var i = 0; i < 10; i++)
                 {
-                    id = 0,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Main Hand",
-                        restriction = SlotRestriction.MainHand
-                    }
-                });
-                equipmentContainer.Add(new ContainerSlot
-                {
-                    id = 1,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Head",
-                        restriction = SlotRestriction.Head
-                    }
-                });
-                equipmentContainer.Add(new ContainerSlot
-                {
-                    id = 2,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Hands",
-                        restriction = SlotRestriction.Hands
-                    }
-                });
-                equipmentContainer.Add(new ContainerSlot
-                {
-                    id = 3,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Neck",
-                        restriction = SlotRestriction.Neck
-                    }
-                });
-                equipmentContainer.Add(new ContainerSlot
-                {
-                    id = 4,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Left Ring",
-                        restriction = SlotRestriction.Ring
-                    }
-                });
-                equipmentContainer.Add(new ContainerSlot
-                {
-                    id = 5,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Off Hand",
-                        restriction = SlotRestriction.OffHand
-                    }
-                });
-                equipmentContainer.Add(new ContainerSlot
-                {
-                    id = 6,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Chest",
-                        restriction = SlotRestriction.Chest
-                    }
-                });
-                equipmentContainer.Add(new ContainerSlot
-                {
-                    id = 7,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Hands",
-                        restriction = SlotRestriction.Hands
-                    }
-                });
-                equipmentContainer.Add(new ContainerSlot
-                {
-                    id = 8,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Feet",
-                        restriction = SlotRestriction.Feet
-                    }
-                });
-                equipmentContainer.Add(new ContainerSlot
-                {
-                    id = 9,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Right Ring",
-                        restriction = SlotRestriction.Ring
-                    }
-                });
-                var abilitiesContainer = commandBuffer.AddBuffer<ContainerSlot>(abilities);
-                abilitiesContainer.Add(new ContainerSlot
-                {
-                    id = 0,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Ability",
-                        restriction = SlotRestriction.Ability
-                    }
-                });
-                abilitiesContainer.Add(new ContainerSlot
-                {
-                    id = 1,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Ability",
-                        restriction = SlotRestriction.Ability
-                    }
-                });
-                abilitiesContainer.Add(new ContainerSlot
-                {
-                    id = 2,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Ability",
-                        restriction = SlotRestriction.Ability
-                    }
-                });
-                abilitiesContainer.Add(new ContainerSlot
-                {
-                    id = 3,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Ability",
-                        restriction = SlotRestriction.Ability
-                    }
-                });
-                abilitiesContainer.Add(new ContainerSlot
-                {
-                    id = 4,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Ability",
-                        restriction = SlotRestriction.Ability
-                    }
-                });
-                abilitiesContainer.Add(new ContainerSlot
-                {
-                    id = 5,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Ability",
-                        restriction = SlotRestriction.Ability
-                    }
-                });
-                abilitiesContainer.Add(new ContainerSlot
-                {
-                    id = 6,
-                    metaData = new SlotMetaData
-                    {
-                        label = "Ability",
-                        restriction = SlotRestriction.Ability
-                    }
-                });
+                    equipmentContainer.Add(new ContainerChild());
+                }
+                var equipmentRestrictionsBuffer = commandBuffer.AddBuffer<ContainerChildRestrictions>(equipment);
+                equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.Helm));
+                equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.Body));
+                equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.Belt));
+                equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.Boots));
+                equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.Gloves));
+                equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.HainHand));
+                equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.OffHand));
+                equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.Amulet));
+                equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.LeftRing));
+                equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.RightRing));
 
                 // Set the owner for the container
                 commandBuffer.SetComponent(inventory, new GhostOwner { NetworkId = networkId });

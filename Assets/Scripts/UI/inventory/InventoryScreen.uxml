@@ -1,0 +1,43 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="ItemPlate" src="project://database/Assets/Scripts/UI/inventory/ItemPlate.uxml?fileID=9197481963319205126&amp;guid=b8d2baba1aaa08c4ca493fed8bfa1f4a&amp;type=3#ItemPlate" />
+    <ui:VisualElement style="flex-grow: 1; background-color: rgb(48, 48, 48); flex-direction: column; align-items: center; justify-content: space-around; width: 600px;">
+        <ui:VisualElement name="equipment-container" style="background-color: rgb(89, 89, 89); width: 306px; height: 430px; flex-direction: row;">
+            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: space-around; flex-direction: column-reverse;">
+                <ui:Instance template="ItemPlate" name="gloves-slot" />
+                <ui:Instance template="ItemPlate" name="left-ring-slot" />
+                <ui:Instance template="ItemPlate" name="main-hand-slot" />
+                <ui:VisualElement name="Spacer" style="background-color: rgba(0, 0, 0, 0); height: 106px;" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: space-around;">
+                <ui:Instance template="ItemPlate" name="helm-slot" />
+                <ui:Instance template="ItemPlate" name="body-slot" />
+                <ui:Instance template="ItemPlate" name="belt-slot" />
+                <ui:Instance template="ItemPlate" name="boots-slot" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: column; justify-content: space-around;">
+                <ui:Instance template="ItemPlate" name="amulet-slot" />
+                <ui:Instance template="ItemPlate" name="off-hand-slot" />
+                <ui:Instance template="ItemPlate" name="right-ring-slot" />
+                <ui:VisualElement name="Spacer" style="background-color: rgba(0, 0, 0, 0); height: 106px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="item-container" style="background-color: rgba(0, 0, 0, 0); flex-direction: row; flex-wrap: wrap; width: 466px; height: 208px;">
+            <ui:Instance template="ItemPlate" name="item-slot-0" />
+            <ui:Instance template="ItemPlate" name="item-slot-1" />
+            <ui:Instance template="ItemPlate" name="item-slot-2" />
+            <ui:Instance template="ItemPlate" name="item-slot-3" />
+            <ui:Instance template="ItemPlate" name="item-slot-4" />
+            <ui:Instance template="ItemPlate" name="item-slot-5" />
+            <ui:Instance template="ItemPlate" name="item-slot-6" />
+            <ui:Instance template="ItemPlate" name="item-slot-7" />
+            <ui:Instance template="ItemPlate" name="item-slot-8" />
+            <ui:Instance template="ItemPlate" name="item-slot-9" />
+            <ui:Instance template="ItemPlate" name="item-slot-10" />
+            <ui:Instance template="ItemPlate" name="item-slot-11" />
+            <ui:Instance template="ItemPlate" name="item-slot-12" />
+            <ui:Instance template="ItemPlate" name="item-slot-13" />
+            <ui:Instance template="ItemPlate" name="item-slot-14" />
+            <ui:Instance template="ItemPlate" name="item-slot-15" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

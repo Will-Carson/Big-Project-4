@@ -17,7 +17,7 @@ public class TalentPlate : VisualElement
     public Action<Stat> clicked;
 
     TalentDefinition talent;
-    int pointsAllocated;
+    float pointsAllocated;
     VisualElement background;
     Label talentAllocation;
     Button talentButton;
@@ -49,17 +49,19 @@ public class TalentPlate : VisualElement
             talent = value;
             talentButton.text = talent.name;
             talentTooltip = talent.GenerateTooltip();
-            PointsAllocated = 0;
+            talentAllocation.text = $"{(int)PointsAllocated} / {talent.maxTalentLevel}";
         }
     }
 
-    public int PointsAllocated
+    public float PointsAllocated
     {
         get => pointsAllocated;
         set
         {
+            if (value == pointsAllocated)
+                return;
             pointsAllocated = value;
-            talentAllocation.text = $"{pointsAllocated} / {talent.maxTalentLevel}";
+            talentAllocation.text = $"{(int)pointsAllocated} / {talent.maxTalentLevel}";
         }
     }
 

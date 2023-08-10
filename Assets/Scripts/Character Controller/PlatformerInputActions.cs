@@ -161,6 +161,15 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Inventory"",
+                    ""type"": ""Button"",
+                    ""id"": ""a6956188-ea25-4a7c-84cf-0f07c1973318"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -482,6 +491,17 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
                     ""action"": ""TalentMenu"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6ed7db2c-545f-45b6-966a-da377200dae0"",
+                    ""path"": ""<Keyboard>/i"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Inventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -505,6 +525,7 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
         m_GameplayMap_Fire1 = m_GameplayMap.FindAction("Fire1", throwIfNotFound: true);
         m_GameplayMap_Fire2 = m_GameplayMap.FindAction("Fire2", throwIfNotFound: true);
         m_GameplayMap_TalentMenu = m_GameplayMap.FindAction("TalentMenu", throwIfNotFound: true);
+        m_GameplayMap_Inventory = m_GameplayMap.FindAction("Inventory", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -581,6 +602,7 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
     private readonly InputAction m_GameplayMap_Fire1;
     private readonly InputAction m_GameplayMap_Fire2;
     private readonly InputAction m_GameplayMap_TalentMenu;
+    private readonly InputAction m_GameplayMap_Inventory;
     public struct GameplayMapActions
     {
         private @PlatformerInputActions m_Wrapper;
@@ -600,6 +622,7 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
         public InputAction @Fire1 => m_Wrapper.m_GameplayMap_Fire1;
         public InputAction @Fire2 => m_Wrapper.m_GameplayMap_Fire2;
         public InputAction @TalentMenu => m_Wrapper.m_GameplayMap_TalentMenu;
+        public InputAction @Inventory => m_Wrapper.m_GameplayMap_Inventory;
         public InputActionMap Get() { return m_Wrapper.m_GameplayMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -654,6 +677,9 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
             @TalentMenu.started += instance.OnTalentMenu;
             @TalentMenu.performed += instance.OnTalentMenu;
             @TalentMenu.canceled += instance.OnTalentMenu;
+            @Inventory.started += instance.OnInventory;
+            @Inventory.performed += instance.OnInventory;
+            @Inventory.canceled += instance.OnInventory;
         }
 
         private void UnregisterCallbacks(IGameplayMapActions instance)
@@ -703,6 +729,9 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
             @TalentMenu.started -= instance.OnTalentMenu;
             @TalentMenu.performed -= instance.OnTalentMenu;
             @TalentMenu.canceled -= instance.OnTalentMenu;
+            @Inventory.started -= instance.OnInventory;
+            @Inventory.performed -= instance.OnInventory;
+            @Inventory.canceled -= instance.OnInventory;
         }
 
         public void RemoveCallbacks(IGameplayMapActions instance)
@@ -737,5 +766,6 @@ public partial class @PlatformerInputActions: IInputActionCollection2, IDisposab
         void OnFire1(InputAction.CallbackContext context);
         void OnFire2(InputAction.CallbackContext context);
         void OnTalentMenu(InputAction.CallbackContext context);
+        void OnInventory(InputAction.CallbackContext context);
     }
 }

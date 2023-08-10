@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -99,5 +100,19 @@ public class TalentScreen : VisualElement
             stat = stat,
             refund = refundToggle.value,
         });
+    }
+
+    public void OnStatsChange(DynamicBuffer<StatElement> stats)
+    {
+        var talentsEnum = talents.GetEnumerator();
+
+        while (talentsEnum.MoveNext())
+        {
+            var talent = talentsEnum.Current.Key;
+            var plate = talentsEnum.Current.Value;
+
+            var value = StatElement.GetStatValue(stats, talent);
+            plate.PointsAllocated = value;
+        }
     }
 }
