@@ -46,7 +46,7 @@ public struct RopeSwingState : IPlatformerCharacterState
         // Move
         float3 moveVectorOnPlane = math.normalizesafe(MathUtilities.ProjectOnPlane(characterControl.MoveVector, characterBody.GroundingUp)) * math.length(characterControl.MoveVector);
         float3 acceleration = moveVectorOnPlane * character.RopeSwingAcceleration;
-        CharacterControlUtilities.StandardAirMove(ref characterBody.RelativeVelocity, acceleration, character.RopeSwingMaxSpeed, characterBody.GroundingUp, deltaTime, false);
+        //CharacterControlUtilities.StandardAirMove(ref characterBody.RelativeVelocity, acceleration, character.RopeSwingMaxSpeed, characterBody.GroundingUp, deltaTime, false);
 
         // Gravity
         CharacterControlUtilities.AccelerateVelocity(ref characterBody.RelativeVelocity, customGravity.Gravity, deltaTime);

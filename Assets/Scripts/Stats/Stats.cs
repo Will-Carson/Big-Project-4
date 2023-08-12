@@ -252,8 +252,7 @@ public partial struct DerivedStatHandlerSystem : ISystem
             DynamicBuffer<StatElement>>()
             .WithEntityAccess())
         {
-            if (!derivedStatsLookup.HasBuffer(entity)) return;
-            var derivedStats = derivedStatsLookup[entity];
+            if (!derivedStatsLookup.TryGetBuffer(entity, out var derivedStats)) return;
             for (var i = 0; i < derivedStats.Length; i++)
             {
                 var derivedStat = derivedStats[i];

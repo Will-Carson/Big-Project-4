@@ -296,7 +296,10 @@ public partial class InventoryUIManager : SystemBase
 
     private void Container_clicked(int index, GhostInstance containerSessionId)
     {
-        Debug.Log($"{index} // {containerSessionId}");
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+        var entity = commandBuffer.CreateEntity();
+        commandBuffer.AddComponent<SendRpcCommandRequest>(entity);
+        commandBuffer.AddComponent(entity, new ClickItemRpc { slot = index, containerSessionId = containerSessionId });
     }
 
     protected override void OnUpdate()
@@ -310,6 +313,9 @@ public partial class InventoryUIManager : SystemBase
                 var inventoryPanel = gameUI.rootVisualElement.Q<VisualElement>("inventory-panel");
 
                 var inventoryEntity = container[0].child;
+
+                if (inventoryEntity == Entity.Null) return;
+
                 var inventorySessionId = SystemAPI.GetComponent<GhostInstance>(inventoryEntity);
                 var inventorySlotIds = new string[16];
                 for (var i = 0; i < inventorySlotIds.Length; i++)
@@ -368,6 +374,14 @@ public partial class InventoryUIManager : SystemBase
     public void UpdateItemPlate(ClientItemPlate itemPlate, Entity entity)
     {
         var item = itemPlate.item;
+        if (entity != Entity.Null)
+        {
+            itemPlate.button.text = "WHAT!";
+        }
+        else
+        {
+            itemPlate.button.text = "";
+        }
         //item.name = SystemAPI.GetComponent<ItemName>(entity).name.ToString();
     }
 }
@@ -402,7 +416,7 @@ public class ClientItemPlate
     public Action<int> clicked;
     public int index;
     public ItemData item;
-    Button button;
+    public Button button;
 
     public ClientItemPlate(Button button, int index)
     {

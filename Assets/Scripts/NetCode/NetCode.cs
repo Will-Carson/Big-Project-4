@@ -115,40 +115,34 @@ public partial struct GoInGameServerSystem : ISystem
                 // Set up the players containers
                 var rootContainer = commandBuffer.AddBuffer<ContainerChild>(player);
 
-                var inventory = commandBuffer.Instantiate(itemPrefab);
-                var equipment = commandBuffer.Instantiate(itemPrefab);
-                var abilities = commandBuffer.Instantiate(itemPrefab);
-                var foreign = commandBuffer.Instantiate(itemPrefab);
+                var inventoryEntity = commandBuffer.Instantiate(itemPrefab);
+                var equipmentEntity = commandBuffer.Instantiate(itemPrefab);
+                var abilitiesEntity = commandBuffer.Instantiate(itemPrefab);
+                var foreignEntity = commandBuffer.Instantiate(itemPrefab);
 
-                rootContainer.Add(new ContainerChild
-                {
-                    child = inventory,
-                });
-                rootContainer.Add(new ContainerChild
-                {
-                    child = equipment,
-                });
-                rootContainer.Add(new ContainerChild
-                {
-                    child = abilities,
-                });
-                rootContainer.Add(new ContainerChild
-                {
-                    child = foreign,
-                });
+                rootContainer.Add(new ContainerChild(inventoryEntity));
+                rootContainer.Add(new ContainerChild(equipmentEntity));
+                rootContainer.Add(new ContainerChild(abilitiesEntity));
+                rootContainer.Add(new ContainerChild(foreignEntity));
 
                 // Give the different containers their stats
-                var inventoryContainer = commandBuffer.AddBuffer<ContainerChild>(inventory);
+                var inventory = commandBuffer.AddBuffer<ContainerChild>(inventoryEntity);
                 for (int i = 0; i < 16; i++)
                 {
-                    inventoryContainer.Add(new ContainerChild());
+                    inventory.Add(new ContainerChild());
                 }
-                var equipmentContainer = commandBuffer.AddBuffer<ContainerChild>(equipment);
+
+                var testItem = commandBuffer.Instantiate(itemPrefab);
+                commandBuffer.AddComponent(testItem, new ItemRestrictions(Restrictions.Helm));
+                inventory[5] = new ContainerChild(testItem);
+                commandBuffer.SetComponent(testItem, new ContainerParent(inventoryEntity));
+
+                var equipment = commandBuffer.AddBuffer<ContainerChild>(equipmentEntity);
                 for (var i = 0; i < 10; i++)
                 {
-                    equipmentContainer.Add(new ContainerChild());
+                    equipment.Add(new ContainerChild());
                 }
-                var equipmentRestrictionsBuffer = commandBuffer.AddBuffer<ContainerChildRestrictions>(equipment);
+                var equipmentRestrictionsBuffer = commandBuffer.AddBuffer<ContainerChildRestrictions>(equipmentEntity);
                 equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.Helm));
                 equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.Body));
                 equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.Belt));
@@ -161,16 +155,16 @@ public partial struct GoInGameServerSystem : ISystem
                 equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.RightRing));
 
                 // Set the owner for the container
-                commandBuffer.SetComponent(inventory, new GhostOwner { NetworkId = networkId });
-                commandBuffer.SetComponent(equipment, new GhostOwner { NetworkId = networkId });
-                commandBuffer.SetComponent(abilities, new GhostOwner { NetworkId = networkId });
-                commandBuffer.SetComponent(foreign, new GhostOwner { NetworkId = networkId });
+                commandBuffer.SetComponent(inventoryEntity, new GhostOwner { NetworkId = networkId });
+                commandBuffer.SetComponent(equipmentEntity, new GhostOwner { NetworkId = networkId });
+                commandBuffer.SetComponent(abilitiesEntity, new GhostOwner { NetworkId = networkId });
+                commandBuffer.SetComponent(foreignEntity, new GhostOwner { NetworkId = networkId });
 
                 // Make sure these entities get destroyed when the player that holds them is destroyed.
-                commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = inventory });
-                commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = equipment });
-                commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = abilities });
-                commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = foreign });
+                commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = inventoryEntity });
+                commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = equipmentEntity });
+                commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = abilitiesEntity });
+                commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = foreignEntity });
             } // Container set up
 
             // Spawn & assign starting weapon

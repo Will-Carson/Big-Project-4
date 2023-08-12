@@ -7,10 +7,28 @@ using Unity.NetCode;
 [BurstCompile]
 public partial struct ContainerServerSystem : ISystem
 {
+    ComponentLookup<ContainerRestrictions> containerRestrictionsLookup;
+    ComponentLookup<ItemRestrictions> itemRestrictionsLookup;
+    ComponentLookup<ContainerParent> containerParentLookup;
+    BufferLookup<ContainerChildRestrictions> containerChildRestrictionsLookup;
+
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
+    {
+        containerRestrictionsLookup = SystemAPI.GetComponentLookup<ContainerRestrictions>(true);
+        itemRestrictionsLookup = SystemAPI.GetComponentLookup<ItemRestrictions>(true);
+        containerParentLookup = SystemAPI.GetComponentLookup<ContainerParent>();
+        containerChildRestrictionsLookup = SystemAPI.GetBufferLookup<ContainerChildRestrictions>();
+    }
+
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
+        containerRestrictionsLookup.Update(ref state);
+        itemRestrictionsLookup.Update(ref state);
+        containerParentLookup.Update(ref state);
+        containerChildRestrictionsLookup.Update(ref state);
 
         foreach (var (request, rpc, rpcEntity) in SystemAPI
             .Query<RefRO<ClickItemRpc>, RefRO<ReceiveRpcCommandRequest>>()
@@ -22,6 +40,7 @@ public partial struct ContainerServerSystem : ISystem
 
             var clickedContainerEntity = Entity.Null;
             var clickedItemEntity = Entity.Null;
+            var clickedItemSlot = request.ValueRO.slot;
             foreach (var (containerSessionId, children, entity) in SystemAPI
                 .Query<RefRO<GhostInstance>, DynamicBuffer<ContainerChild>>()
                 .WithAll<ContainerChild>()
@@ -36,8 +55,7 @@ public partial struct ContainerServerSystem : ISystem
                     break;
                 }
             }
-            if (clickedContainerEntity == Entity.Null ||
-                clickedItemEntity == Entity.Null)
+            if (clickedContainerEntity == Entity.Null)
             {
                 continue;
             }
@@ -50,34 +68,39 @@ public partial struct ContainerServerSystem : ISystem
             }
             else
             {
+                // Set selectedItem back to null
+                SystemAPI.SetComponent(playerEntity, new SelectedItem(Entity.Null));
+
                 var selectedContainerEntity = SystemAPI.GetComponent<ContainerParent>(selectedItem.entity).entity;
 
                 // Check if the item meets the ContainerRestrictions
-                var selectedItemRestrictions = SystemAPI.GetComponent<ItemRestrictions>(selectedItem.entity);
-                var clickedItemRestrictions = SystemAPI.GetComponent<ItemRestrictions>(clickedItemEntity);
+                itemRestrictionsLookup.TryGetComponent(selectedItem.entity, out var selectedItemRestrictions);
+                itemRestrictionsLookup.TryGetComponent(clickedItemEntity, out var clickedItemRestrictions);
 
-                var selectedContainerRestrictions = SystemAPI.GetComponent<ContainerRestrictions>(selectedContainerEntity).restrictions;
-                var clickedContainerRestrictions = SystemAPI.GetComponent<ContainerRestrictions>(clickedItemEntity).restrictions;
+                containerRestrictionsLookup.TryGetComponent(selectedContainerEntity, out var selectedContainerRestrictions);
+                containerRestrictionsLookup.TryGetComponent(clickedContainerEntity, out var clickedContainerRestrictions);
 
-                if (!selectedItemRestrictions.ItemMeetsRestrictions(clickedContainerRestrictions) ||
-                    !clickedItemRestrictions.ItemMeetsRestrictions(selectedContainerRestrictions))
+                if (!selectedItemRestrictions.ItemMeetsRestrictions(clickedContainerRestrictions.restrictions) ||
+                    !clickedItemRestrictions.ItemMeetsRestrictions(selectedContainerRestrictions.restrictions))
                 {
                     continue;
                 }
  
                 var selectedItemContainer = SystemAPI.GetBuffer<ContainerChild>(selectedContainerEntity);
-                var clickedItemContainer = SystemAPI.GetBuffer<ContainerChild>(clickedItemEntity);
+                var clickedItemContainer = SystemAPI.GetBuffer<ContainerChild>(clickedContainerEntity);
 
                 ContainerChild.TryGetIndexOfChild(selectedItemContainer, selectedItem.entity, out var selectedItemSlot);
-                ContainerChild.TryGetIndexOfChild(clickedItemContainer, clickedItemEntity, out var clickedItemSlot);
+
+                containerChildRestrictionsLookup.TryGetBuffer(selectedContainerEntity, out var selectedContainerChildRestrictions);
+                containerChildRestrictionsLookup.TryGetBuffer(clickedContainerEntity, out var clickedContainerChildRestrictions);
 
                 // Check if the item meets the slot specific restrictuions
                 var selectedItemMeetsRestrictions = ContainerChildRestrictions.RestrictionsMet(
-                    SystemAPI.GetBuffer<ContainerChildRestrictions>(clickedItemEntity),
+                    clickedContainerChildRestrictions,
                     clickedItemSlot,
                     selectedItemRestrictions);
                 var clickedItemMeetsRestrictions = ContainerChildRestrictions.RestrictionsMet(
-                    SystemAPI.GetBuffer<ContainerChildRestrictions>(selectedContainerEntity), 
+                    selectedContainerChildRestrictions, 
                     selectedItemSlot, 
                     clickedItemRestrictions);
 
@@ -92,11 +115,16 @@ public partial struct ContainerServerSystem : ISystem
                 // Swap the items
                 ContainerChild.PlaceItemInSlot(selectedItemContainer, selectedItemSlot, clickedItemEntity);
                 ContainerChild.PlaceItemInSlot(clickedItemContainer, clickedItemSlot, selectedItem.entity);
-                SystemAPI.SetComponent(selectedItem.entity, new ContainerParent { entity = clickedItemEntity });
-                SystemAPI.SetComponent(clickedItemEntity, new ContainerParent { entity = selectedContainerEntity });
 
-                // Set selectedItem back to null
-                SystemAPI.SetComponent(playerEntity, new SelectedItem { entity = Entity.Null });
+                // These could just be Entity.Null checks...
+                if (containerParentLookup.HasComponent(selectedItem.entity))
+                {
+                    containerParentLookup[selectedItem.entity] = new ContainerParent(clickedContainerEntity);
+                }
+                if (containerParentLookup.HasComponent(clickedItemEntity))
+                {
+                    containerParentLookup[clickedItemEntity] = new ContainerParent(selectedContainerEntity);
+                }
             }
         }
     }
@@ -105,6 +133,11 @@ public partial struct ContainerServerSystem : ISystem
 public struct SelectedItem : IComponentData
 {
     public Entity entity;
+
+    public SelectedItem(Entity entity) : this()
+    {
+        this.entity = entity;
+    }
 }
 
 public struct Item : IComponentData { }
@@ -113,9 +146,14 @@ public struct ItemRestrictions : IComponentData
 {
     public Restrictions restrictions;
 
+    public ItemRestrictions(Restrictions restrictions) : this()
+    {
+        this.restrictions = restrictions;
+    }
+
     public bool ItemMeetsRestrictions(Restrictions otherRestrictions)
     {
-        return (otherRestrictions & restrictions) == restrictions;
+        return (otherRestrictions == Restrictions.None) ? true : (otherRestrictions & restrictions) == restrictions;
     }
 }
 
@@ -128,12 +166,22 @@ public struct ClickItemRpc : IRpcCommand
 public struct ContainerParent : IComponentData
 {
     public Entity entity;
+
+    public ContainerParent(Entity entity) : this()
+    {
+        this.entity = entity;
+    }
 }
 
 [GhostComponent]
 public struct ContainerChild : IBufferElementData
 {
     [GhostField] public Entity child;
+
+    public ContainerChild(Entity child) : this()
+    {
+        this.child = child;
+    }
 
     public static bool TryGetIndexOfChild(DynamicBuffer<ContainerChild> container, Entity child, out int index)
     {
@@ -153,7 +201,7 @@ public struct ContainerChild : IBufferElementData
 
     public static void PlaceItemInSlot(DynamicBuffer<ContainerChild> container, int slot, Entity newChild)
     {
-        container.Insert(slot, new ContainerChild { child = newChild });
+        container[slot] = new ContainerChild { child = newChild };
     }
 }
 
@@ -168,6 +216,7 @@ public struct ContainerChildRestrictions : IBufferElementData
 
     public static bool RestrictionsMet(DynamicBuffer<ContainerChildRestrictions> containerChildRestrictions, int index, ItemRestrictions itemRestrictions)
     {
+        if (!containerChildRestrictions.IsCreated || containerChildRestrictions.Length < index + 1) return true;
         var restrictionsAtIndex = containerChildRestrictions.ElementAt(index).restrictions;
         return itemRestrictions.ItemMeetsRestrictions(restrictionsAtIndex);
     }
