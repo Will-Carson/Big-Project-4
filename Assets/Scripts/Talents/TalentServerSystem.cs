@@ -49,11 +49,11 @@ public partial class TalentServerSystem : SystemBase
 
     public void CreateTalentsAsEntities(EntityManager em)
     {
-        var Talents = UnityEngine.Resources.LoadAll<TalentDefinition>("Talent definitions");
+        var talents = UnityEngine.Resources.LoadAll<TalentDefinition>("Talent definitions");
 
-        for (var i = 0; i < Talents.Length; i++)
+        for (var i = 0; i < talents.Length; i++)
         {
-            var talent = Talents[i];
+            var talent = talents[i];
 
             var talentEntity = em.CreateEntity();
             em.SetName(talentEntity, "Talent-" + talent.name);

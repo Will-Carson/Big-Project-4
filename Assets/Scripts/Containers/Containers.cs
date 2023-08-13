@@ -173,7 +173,7 @@ public struct ContainerParent : IComponentData
     }
 }
 
-[GhostComponent]
+[GhostComponent(OwnerSendType = SendToOwnerType.SendToOwner)]
 public struct ContainerChild : IBufferElementData
 {
     [GhostField] public Entity child;
@@ -243,7 +243,11 @@ public enum Restrictions
     RightRing = 1 << 9,
 }
 
-public struct ItemName : IComponentData
+[GhostComponent(OwnerSendType = SendToOwnerType.SendToOwner)]
+public struct ItemData : IComponentData
 {
-    public FixedString64Bytes name;
+    [GhostField] public FixedString128Bytes name;
+    [GhostField] public FixedString512Bytes description;
+    [GhostField] public FixedString128Bytes artAddress2d;
+    [GhostField] public FixedString128Bytes artAddress3d;
 }

@@ -294,6 +294,13 @@ public partial class InventoryUIManager : SystemBase
     ClientContainer inventory;
     ClientContainer equipment;
 
+    ComponentLookup<ItemData> itemDataLookup;
+
+    protected override void OnCreate()
+    {
+        itemDataLookup = GetComponentLookup<ItemData>();
+    }
+
     private void Container_clicked(int index, GhostInstance containerSessionId)
     {
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
@@ -304,6 +311,8 @@ public partial class InventoryUIManager : SystemBase
 
     protected override void OnUpdate()
     {
+        itemDataLookup.Update(this);
+
         if (inventory == null) // For now this will work fine
         {
             foreach (var container in SystemAPI.Query<DynamicBuffer<ContainerChild>>().WithAll<GhostOwnerIsLocal, PlatformerPlayer>())
@@ -373,16 +382,9 @@ public partial class InventoryUIManager : SystemBase
 
     public void UpdateItemPlate(ClientItemPlate itemPlate, Entity entity)
     {
-        var item = itemPlate.item;
-        if (entity != Entity.Null)
-        {
-            itemPlate.button.text = "WHAT!";
-        }
-        else
-        {
-            itemPlate.button.text = "";
-        }
-        //item.name = SystemAPI.GetComponent<ItemName>(entity).name.ToString();
+        itemDataLookup.TryGetComponent(entity, out var itemData);
+
+        itemPlate.ItemData = itemData;
     }
 }
 
@@ -398,8 +400,8 @@ public class ClientContainer
         for (var i = 0; i < slotIds.Length; i++)
         {
             var slotId = slotIds[i];
-            var button = slotParent.Q<VisualElement>(slotId).Q<Button>();
-            var containerSlotPlate = new ClientItemPlate(button, i);
+            var slot = slotParent.Q<VisualElement>(slotId);
+            var containerSlotPlate = new ClientItemPlate(slot, i);
             containerSlotPlate.clicked += ContainerSlotPlate_clicked;
             containerSlots.Add(i, containerSlotPlate);
         }
@@ -415,23 +417,58 @@ public class ClientItemPlate
 {
     public Action<int> clicked;
     public int index;
-    public ItemData item;
-    public Button button;
 
-    public ClientItemPlate(Button button, int index)
+    ItemData itemData;
+    VisualElement visualElement;
+
+    public ClientItemPlate(VisualElement visualElement, int index)
     {
-        this.button = button;
+        this.visualElement = visualElement;
         this.index = index;
+
+        var button = visualElement.Q<Button>();
         button.clicked += Button_clicked;
+    }
+
+    public ItemData ItemData
+    {
+        get => itemData;
+        set
+        {
+            if (itemData.Equals(value))
+                return;
+
+            itemData = value;
+
+            SpriteAddress = value.artAddress2d.ToString();
+        }
+    }
+
+    string spriteAddress;
+    string SpriteAddress
+    {
+        get => spriteAddress;
+        set
+        {
+            if (spriteAddress == value)
+                return;
+
+            if (value.Length > 0)
+            {
+                var itemArt = Resources.Load<Sprite>($"Sprites/{value}");
+                visualElement.Q<Button>().style.backgroundImage = new StyleBackground(itemArt);
+            }
+            else
+            {
+                visualElement.Q<Button>().style.backgroundImage = new StyleBackground(StyleKeyword.None);
+            }
+
+            spriteAddress = value;
+        }
     }
 
     private void Button_clicked()
     {
         clicked.Invoke(index);
     }
-}
-
-public class ItemData
-{
-    public string name;
 }

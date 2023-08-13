@@ -134,6 +134,13 @@ public partial struct GoInGameServerSystem : ISystem
 
                 var testItem = commandBuffer.Instantiate(itemPrefab);
                 commandBuffer.AddComponent(testItem, new ItemRestrictions(Restrictions.Helm));
+                commandBuffer.AddComponent(testItem, new ItemData 
+                { 
+                    name = "bababooey",
+                    description = "This is a cool item",
+                    artAddress2d = "headgear_01",
+                });
+                commandBuffer.SetComponent(testItem, new GhostOwner { NetworkId = networkId });
                 inventory[5] = new ContainerChild(testItem);
                 commandBuffer.SetComponent(testItem, new ContainerParent(inventoryEntity));
 

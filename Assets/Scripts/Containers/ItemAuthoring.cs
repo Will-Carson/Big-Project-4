@@ -12,6 +12,8 @@ public class ItemAuthoring : MonoBehaviour
             AddComponent<Item>(entity);
             //AddComponent<ItemRestrictions>(entity);
             AddComponent<ContainerParent>(entity);
+
+            AddComponent<ItemData>(entity);
         }
     }
 }
