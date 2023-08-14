@@ -247,7 +247,6 @@ public struct Focus : IComponentData
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
 public partial class TalentUIManager : SystemBase
 {
-    UIDocument gameUI;
     TalentScreen talentScreen;
     List<TalentAllocationRequestRpc> requests = new List<TalentAllocationRequestRpc>();
 
@@ -255,7 +254,7 @@ public partial class TalentUIManager : SystemBase
     {
         var gameUIManager = UnityEngine.Object.FindObjectOfType<GameUIManager>();
 
-        gameUI = gameUIManager.gameUI;
+        var gameUI = gameUIManager.gameUI;
 
         talentScreen = gameUI.rootVisualElement.Q<TalentScreen>();
         var talents = UnityEngine.Resources.LoadAll<TalentDefinition>("Talent definitions");
@@ -413,12 +412,14 @@ public class ClientContainer
     }
 }
 
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
 public class ClientItemPlate
 {
+    public static event EventHandler<ItemData> MouseOver;
+    public static event EventHandler MouseOut;
     public Action<int> clicked;
     public int index;
 
-    ItemData itemData;
     VisualElement visualElement;
 
     public ClientItemPlate(VisualElement visualElement, int index)
@@ -428,8 +429,11 @@ public class ClientItemPlate
 
         var button = visualElement.Q<Button>();
         button.clicked += Button_clicked;
+        button.RegisterCallback<MouseOverEvent>((_) => { MouseOver?.Invoke(this, itemData); });
+        button.RegisterCallback<MouseOutEvent>((_) => { MouseOut?.Invoke(this, null); });
     }
 
+    ItemData itemData;
     public ItemData ItemData
     {
         get => itemData;
@@ -453,6 +457,8 @@ public class ClientItemPlate
             if (spriteAddress == value)
                 return;
 
+            spriteAddress = value;
+
             if (value.Length > 0)
             {
                 var itemArt = Resources.Load<Sprite>($"Sprites/{value}");
@@ -462,13 +468,98 @@ public class ClientItemPlate
             {
                 visualElement.Q<Button>().style.backgroundImage = new StyleBackground(StyleKeyword.None);
             }
-
-            spriteAddress = value;
         }
     }
 
     private void Button_clicked()
     {
         clicked.Invoke(index);
+    }
+}
+
+public partial class TooltipUIManager : SystemBase
+{
+    TooltipPlate leftTooltipPlate;
+    TooltipPlate rightTooltipPlate;
+
+    protected override void OnStartRunning()
+    {
+        var gameUIManager = UnityEngine.Object.FindObjectOfType<GameUIManager>();
+        var gameUI = gameUIManager.gameUI;
+
+        ClientItemPlate.MouseOver += ClientItemPlate_MouseOver;
+        ClientItemPlate.MouseOut += ClientItemPlate_MouseOut;
+        leftTooltipPlate = new TooltipPlate(gameUI.rootVisualElement.Q<VisualElement>("tooltip-left"));
+        rightTooltipPlate = new TooltipPlate(gameUI.rootVisualElement.Q<VisualElement>("tooltip-right"));
+    }
+
+    private void ClientItemPlate_MouseOver(object sender, ItemData itemData)
+    {
+        leftTooltipPlate.ItemData = default(ItemData);
+        rightTooltipPlate.ItemData = itemData;
+    }
+
+    private void ClientItemPlate_MouseOut(object sender, EventArgs _)
+    {
+        leftTooltipPlate.ItemData = default(ItemData);
+        rightTooltipPlate.ItemData = default(ItemData);
+    }
+
+    protected override void OnUpdate()
+    {
+
+    }
+}
+
+public class TooltipPlate
+{
+    VisualElement tooltipElement;
+    Label name;
+    Label baseItem;
+    Label baseStats;
+    Label requirements;
+    Label stats;
+    Label description;
+
+    public TooltipPlate(VisualElement tooltipElement)
+    {
+        this.tooltipElement = tooltipElement;
+        name = tooltipElement.Q<Label>("name");
+        baseItem = tooltipElement.Q<Label>("base-item");
+        baseStats = tooltipElement.Q<Label>("base-stats");
+        requirements = tooltipElement.Q<Label>("requirements");
+        stats = tooltipElement.Q<Label>("stats");
+        description = tooltipElement.Q<Label>("description");
+
+        tooltipElement.style.display = DisplayStyle.None;
+    }
+
+    ItemData itemData;
+    public ItemData ItemData
+    {
+        get => itemData;
+        set
+        {
+            if (itemData.Equals(value))
+                return;
+
+            itemData = value;
+            Display(value.name != "");
+
+            name.text = value.name.ToString();
+            description.text = value.description.ToString();
+        }
+    }
+
+    private void Display(bool display)
+    {
+        if (display)
+        {
+            tooltipElement.style.display = DisplayStyle.Flex;
+        }
+        else
+        {
+            tooltipElement.style.display = DisplayStyle.None;
+        }
     }
 }

@@ -2,10 +2,28 @@
     <ui:Template name="InventoryScreen" src="project://database/Assets/Scripts/UI/inventory/InventoryScreen.uxml?fileID=9197481963319205126&amp;guid=0234f7f592d9d0942a84d1643de7b7ab&amp;type=3#InventoryScreen" />
     <ui:Template name="TalentScreen" src="project://database/Assets/Scripts/UI/talents/TalentScreen.uxml?fileID=9197481963319205126&amp;guid=73e36c7232fd05a428f3ea5f9aafa038&amp;type=3#TalentScreen" />
     <ui:VisualElement name="game-screen" style="display: flex; flex-grow: 1; height: 100%; width: 100%;">
-        <ui:VisualElement name="world-space" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);" />
+        <ui:VisualElement name="world-space" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); min-height: 100%; min-width: 100%; position: absolute;" />
         <ui:VisualElement name="left-panel" style="position: absolute; width: 475px; height: 100%; left: 0; display: flex;" />
         <ui:VisualElement name="right-panel" style="position: absolute; right: 0; min-height: 100%; width: 600px; justify-content: space-around; align-items: center; height: 100%; display: flex;">
             <ui:Instance template="InventoryScreen" name="inventory-panel" style="width: 600px; height: 100%; display: none;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="tooltip" style="background-color: rgba(0, 0, 0, 0); min-width: auto; min-height: auto; align-items: flex-start; align-self: flex-start; flex-direction: row;">
+            <ui:VisualElement name="tooltip-left" style="background-color: rgb(87, 87, 87); align-self: flex-end;">
+                <ui:Label tabindex="-1" text="Kaom&apos;s Heart" display-tooltip-when-elided="true" name="name" />
+                <ui:Label tabindex="-1" text="Glorious plate" display-tooltip-when-elided="true" name="base-item" />
+                <ui:Label tabindex="-1" text="Quality: +20%&#10;Armour: 931" display-tooltip-when-elided="true" name="base-stats" />
+                <ui:Label tabindex="-1" text="Requires level 68, 191 Str" display-tooltip-when-elided="true" name="requirements" />
+                <ui:Label tabindex="-1" text="Has no sockets&#10;25% increased fire damage&#10;+500 maximum life" display-tooltip-when-elided="true" name="stats" />
+                <ui:Label tabindex="-1" text="The warrior who &#10;fears will fall." display-tooltip-when-elided="true" name="description" />
+            </ui:VisualElement>
+            <ui:VisualElement name="tooltip-right" style="background-color: rgb(87, 87, 87); align-self: flex-end;">
+                <ui:Label tabindex="-1" text="Kaom&apos;s Heart" display-tooltip-when-elided="true" name="name" />
+                <ui:Label tabindex="-1" text="Glorious plate" display-tooltip-when-elided="true" name="base-item" />
+                <ui:Label tabindex="-1" text="Quality: +20%&#10;Armour: 931" display-tooltip-when-elided="true" name="base-stats" />
+                <ui:Label tabindex="-1" text="Requires level 68, 191 Str" display-tooltip-when-elided="true" name="requirements" />
+                <ui:Label tabindex="-1" text="Has no sockets&#10;25% increased fire damage&#10;+500 maximum life" display-tooltip-when-elided="true" name="stats" />
+                <ui:Label tabindex="-1" text="The warrior who &#10;fears will fall." display-tooltip-when-elided="true" name="description" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
     <ui:Instance template="TalentScreen" name="talent-screen" style="flex-grow: 1; display: none;" />
