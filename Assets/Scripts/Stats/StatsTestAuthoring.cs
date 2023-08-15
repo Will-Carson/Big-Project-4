@@ -10,7 +10,7 @@ public class StatsTestAuthoring : MonoBehaviour
         public override void Bake(StatsTestAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
-            var statSticks = AddBuffer<StatStickContainer>(entity);
+            var statSticks = AddBuffer<StatStickElement>(entity);
 
             var extraStatStickEntity = CreateAdditionalEntity(TransformUsageFlags.None, entityName: "Extra stats");
             AddBuffer<EquippedTo>(extraStatStickEntity);

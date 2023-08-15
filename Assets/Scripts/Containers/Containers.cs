@@ -251,3 +251,19 @@ public struct ItemData : IComponentData
     [GhostField] public FixedString128Bytes artAddress2d;
     [GhostField] public FixedString128Bytes artAddress3d;
 }
+
+public struct EquipmentContainer : IComponentData { }
+
+public partial struct EquipmentContainerSystem : ISystem
+{
+    public void OnUpdate(SystemState state)
+    {
+        foreach (var (statSticks, container) in SystemAPI
+            .Query<DynamicBuffer<StatStickElement>, DynamicBuffer<ContainerChild>>()
+            .WithAll<StatRecalculationTag>())
+        {
+            statSticks.CopyFrom(container.Reinterpret<StatStickElement>());
+            // TODO This needs to create a bunch of EquipStatStickRequests instead
+        }
+    }
+}

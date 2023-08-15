@@ -52,7 +52,7 @@ public partial struct StatStickEquipper : ISystem
         var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
         foreach (var (requests, statSticks, stats, entity) in SystemAPI.Query<
             DynamicBuffer<EquipStatStickRequest>,
-            DynamicBuffer<StatStickContainer>,
+            DynamicBuffer<StatStickElement>,
             DynamicBuffer<StatElement>>()
             .WithEntityAccess())
         {
@@ -101,7 +101,7 @@ public partial struct StatStickEquipper : ISystem
                     }
 
                     // Equip the statstick
-                    statSticks.Add(new StatStickContainer { entity = req.entity });
+                    statSticks.Add(new StatStickElement { entity = req.entity });
                     // Add to the EquippedTo buffer on the stat stick
                     statStickEquippedToBuffer.Add(new EquippedTo { entity = entity });
                     wasChanged = true;
@@ -129,13 +129,13 @@ public struct EquipStatStickRequest : IBufferElementData
 public partial struct StatTotaller : ISystem
 {
     private BufferLookup<StatElement> statsLookup;
-    private BufferLookup<StatStickContainer> statSticksLookup;
+    private BufferLookup<StatStickElement> statSticksLookup;
 
     //[BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         statsLookup = state.GetBufferLookup<StatElement>(true);
-        statSticksLookup = state.GetBufferLookup<StatStickContainer>(true);
+        statSticksLookup = state.GetBufferLookup<StatStickElement>(true);
         state.RequireForUpdate(state.GetEntityQuery(typeof(StatRecalculationTag)));
     }
 
@@ -151,16 +151,14 @@ public partial struct StatTotaller : ISystem
             DynamicBuffer<StatElement>>()
             .WithEntityAccess())
         {
-            if (!statSticksLookup.HasBuffer(entity)) continue;
+            if (!statSticksLookup.TryGetBuffer(entity, out var statSticks)) continue;
             stats.Clear();
-            var statSticks = statSticksLookup[entity];
 
             var statTotals = new NativeHashMap<uint, float>(10, Allocator.Temp);
             for (var i = 0; i < statSticks.Length; i++)
             {
                 var statStick = statSticks[i];
-                if (!statsLookup.HasBuffer(statStick.entity)) continue;
-                var statStickStats = statsLookup[statStick.entity];
+                if (!statsLookup.TryGetBuffer(statStick.entity, out var statStickStats)) continue;
                 AddStats(ref statTotals, statStickStats);
             }
 
@@ -197,7 +195,7 @@ public partial struct StatTotaller : ISystem
     }
 }
 
-public struct StatStickContainer : IBufferElementData
+public struct StatStickElement : IBufferElementData
 {
     public Entity entity;
 }
@@ -536,7 +534,7 @@ public readonly partial struct AdvancedStatStick : IAspect
     public readonly DynamicBuffer<StatElement> stats;
     public readonly DynamicBuffer<StatRequirementElement> requirements;
     public readonly DynamicBuffer<EquippedTo> equippedTo;
-    public readonly DynamicBuffer<StatStickContainer> statSticks;
+    public readonly DynamicBuffer<StatStickElement> statSticks;
     public readonly DynamicBuffer<EquipStatStickRequest> equipRequests;
 }
 
@@ -545,6 +543,6 @@ public readonly partial struct StatEntityAspect : IAspect
     public readonly Entity entity;
     public readonly DynamicBuffer<StatElement> stats;
     public readonly DynamicBuffer<DerivedStat> derivedStats;
-    public readonly DynamicBuffer<StatStickContainer> statSticks;
+    public readonly DynamicBuffer<StatStickElement> statSticks;
     public readonly DynamicBuffer<EquipStatStickRequest> equipRequests;
 }

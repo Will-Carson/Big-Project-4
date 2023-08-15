@@ -27,7 +27,7 @@ public class StatEntityAnthoring : MonoBehaviour
 
             AddBuffer<StatElement>(entity);
             AddBuffer<DerivedStat>(entity);
-            AddBuffer<StatStickContainer>(entity);
+            AddBuffer<StatStickElement>(entity);
             AddComponent<StatRecalculationTag>(entity);
         }
     }
