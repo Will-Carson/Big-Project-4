@@ -120,6 +120,8 @@ public partial struct GoInGameServerSystem : ISystem
                 var abilitiesEntity = commandBuffer.Instantiate(itemPrefab);
                 var foreignEntity = commandBuffer.Instantiate(itemPrefab);
 
+                commandBuffer.AddComponent(equipmentEntity, new EquipmentContainer(character));
+
                 rootContainer.Add(new ContainerChild(inventoryEntity));
                 rootContainer.Add(new ContainerChild(equipmentEntity));
                 rootContainer.Add(new ContainerChild(abilitiesEntity));
@@ -143,6 +145,9 @@ public partial struct GoInGameServerSystem : ISystem
                 commandBuffer.SetComponent(testItem, new GhostOwner { NetworkId = networkId });
                 inventory[5] = new ContainerChild(testItem);
                 commandBuffer.SetComponent(testItem, new ContainerParent(inventoryEntity));
+                var itemStats = commandBuffer.AddBuffer<StatElement>(testItem);
+                itemStats.Add(new StatElement(Stat.IncreasedLife, 10));
+                itemStats.Add(new StatElement(Stat.MoreLife, 10));
 
                 var equipment = commandBuffer.AddBuffer<ContainerChild>(equipmentEntity);
                 for (var i = 0; i < 10; i++)

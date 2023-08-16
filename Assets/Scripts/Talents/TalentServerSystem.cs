@@ -27,20 +27,25 @@ public partial class TalentServerSystem : SystemBase
             commandBuffer.DestroyEntity(entity);
             var targetEntity = SystemAPI.GetComponent<CommandTarget>(receive.ValueRO.SourceConnection).targetEntity;
             var characterEntity = SystemAPI.GetComponent<PlatformerPlayer>(targetEntity).ControlledCharacter;
+            var characterStatEntity = SystemAPI.GetAspect<StatEntity>(characterEntity);
 
             for (var i = 0; i < talentComponents.Length; i++)
             {
                 var talentComponent = talentComponents[i];
-                var talentEntity = talentEntities[i];
 
                 if (talentComponent.stat == rpc.ValueRO.stat)
                 {
+                    var talentStatEntity = SystemAPI.GetAspect<StatEntity>(talentEntities[i]);
+
                     // Allocate or deallocate here
-                    commandBuffer.AppendToBuffer(characterEntity, new EquipStatStickRequest
+                    if (rpc.ValueRO.refund)
                     {
-                        unequip = rpc.ValueRO.refund,
-                        entity = talentEntity
-                    });
+                        characterStatEntity.TryUnequipStatStick(talentStatEntity);
+                    }
+                    else
+                    {
+                        characterStatEntity.TryEquipStatStick(talentStatEntity);
+                    }
                     break;
                 }
             }
@@ -78,7 +83,7 @@ public partial class TalentServerSystem : SystemBase
             {
                 foreach (var req in talent.requires)
                 {
-                    requirements.Add(new StatRequirementElement(req));
+                    requirements.Add(req);
                 }
             }
 
@@ -87,14 +92,16 @@ public partial class TalentServerSystem : SystemBase
 
             /// Add the talent to the granted stats buffer, the talent point cost, and then add 
             /// the regular granted stats.
-            StatElement.AddStat(stats, talent.stat, 1);
-            StatElement.AddStat(stats, Stat.TalentPoint, -talent.pointCost);
+            stats.Add(new StatElement(talent.stat, 1));
+            stats.Add(new StatElement(Stat.TalentPoint, -talent.pointCost));
+
             foreach (var grants in talent.grants)
             {
-                StatElement.AddStat(stats, grants.stat, grants.value);
+                stats.Add(new StatElement(grants.stat, grants.value));
             }
 
-            em.AddBuffer<EquippedTo>(talentEntity);
+            em.AddBuffer<EquippedToElement>(talentEntity);
+            em.AddBuffer<EquippedElement>(talentEntity);
         }
     }
 }

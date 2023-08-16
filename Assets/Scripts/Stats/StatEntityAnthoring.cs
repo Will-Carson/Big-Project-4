@@ -11,24 +11,24 @@ public class StatEntityAnthoring : MonoBehaviour
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
             var baseStatStick = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-            AddBuffer<EquippedTo>(baseStatStick);
+            AddBuffer<EquippedToElement>(baseStatStick);
             var baseStatStickStats = AddBuffer<StatElement>(baseStatStick);
 
-            StatElement.AddStat(baseStatStickStats, Stat.AdditionalLife, 100);
-            StatElement.AddStat(baseStatStickStats, Stat.TalentPoint, 10);
-            StatElement.AddStat(baseStatStickStats, Stat.Level, 10);
+            baseStatStickStats.Add(new StatElement(Stat.AdditionalLife, 100));
+            baseStatStickStats.Add(new StatElement(Stat.TalentPoint, 10));
+            baseStatStickStats.Add(new StatElement(Stat.Level, 10));
 
-            var equipTo = AddBuffer<EquipStatStickRequest>(entity);
-            equipTo.Add(new EquipStatStickRequest
-            {
-                entity = baseStatStick,
-                unequip = false
-            });
+            var equipped = AddBuffer<EquippedElement>(entity);
+            equipped.Add(new EquippedElement(baseStatStick));
 
-            AddBuffer<StatElement>(entity);
-            AddBuffer<DerivedStat>(entity);
-            AddBuffer<StatStickElement>(entity);
-            AddComponent<StatRecalculationTag>(entity);
+            var finalStats = AddBuffer<StatElement>(entity);
+
+            finalStats.Add(new StatElement(Stat.AdditionalLife, 100));
+            finalStats.Add(new StatElement(Stat.TalentPoint, 10));
+            finalStats.Add(new StatElement(Stat.Level, 10));
+
+            AddBuffer<EquippedToElement>(entity);
+            AddBuffer<StatRequirementElement>(entity);
         }
     }
 }

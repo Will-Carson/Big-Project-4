@@ -56,16 +56,15 @@ public static class BaseItemDefinitions
 
     public static void CreateBaseItemsAsEntities(EntityManager em, DynamicBuffer<PrefabContainer> prefabs)
     {
-        var baseItemPrefab = PrefabContainer.GetEntityWithId(prefabs, "StatItem");
-        var rawStatStickPrefab = PrefabContainer.GetEntityWithId(prefabs, "RawStatStick");
+        var itemPrefab = PrefabContainer.GetEntityWithId(prefabs, "Item");
         for (var i = 0; i < BaseItems.Length; i++)
         {
             var baseItem = BaseItems[i];
 
-            var baseItemEntity = em.Instantiate(baseItemPrefab);
+            var baseItemEntity = em.Instantiate(itemPrefab);
             em.SetName(baseItemEntity, "BaseItem-" + baseItem.name);
 
-            var baseStatsStatStickEntity = em.Instantiate(rawStatStickPrefab);
+            var baseStatsStatStickEntity = em.Instantiate(itemPrefab);
 
             // Configure the entity
             var baseStats = em.AddBuffer<StatElement>(baseStatsStatStickEntity);
@@ -79,12 +78,8 @@ public static class BaseItemDefinitions
             //    });
             //}
 
-            var equipStatStickRequestsBuffer = em.AddBuffer<EquipStatStickRequest>(baseItemEntity);
-            equipStatStickRequestsBuffer.Add(new EquipStatStickRequest
-            {
-                unequip = false,
-                entity = baseStatsStatStickEntity
-            });
+            var equipped = em.AddBuffer<EquippedElement>(baseItemEntity);
+            equipped.Add(new EquippedElement(baseStatsStatStickEntity));
 
             // Add it back to the dictionary
             baseItem.entity = baseItemEntity;

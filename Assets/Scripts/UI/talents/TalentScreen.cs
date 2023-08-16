@@ -102,7 +102,7 @@ public class TalentScreen : VisualElement
         });
     }
 
-    public void OnStatsChange(DynamicBuffer<StatElement> stats)
+    public void OnStatsChange(StatEntity stats)
     {
         var talentsEnum = talents.GetEnumerator();
 
@@ -111,7 +111,7 @@ public class TalentScreen : VisualElement
             var talent = talentsEnum.Current.Key;
             var plate = talentsEnum.Current.Value;
 
-            var value = StatElement.GetStatValue(stats, talent);
+            var value = stats.GetStat(talent);
             plate.PointsAllocated = value;
         }
     }

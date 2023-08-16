@@ -13,10 +13,10 @@ public class TalentDefinition : ScriptableObject
     public int maxTalentLevel;
 
     // Stats required to allocate a talent
-    public Requirement[] requires;
+    public StatRequirementElement[] requires;
 
     // Stats granted by allocating a talent
-    public Granted[] grants;
+    public StatElement[] grants;
 
     public string GenerateTooltip()
     {
@@ -47,18 +47,4 @@ public class TalentDefinition : ScriptableObject
 
         return tooltip;
     }
-}
-
-[Serializable]
-public struct Requirement
-{
-    public Stat stat;
-    public Range range;
-}
-
-[Serializable]
-public struct Granted
-{
-    public Stat stat;
-    public float value;
 }

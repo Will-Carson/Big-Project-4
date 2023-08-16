@@ -48,7 +48,7 @@ public partial struct EffectSystem : ISystem
 
                 if (healthLookup.TryGetComponent(targetEntity, out var targetHealth))
                 {
-                    targetHealth.currentHealth -= damageEffect.ValueRO.damageValue;
+                    targetHealth.current -= damageEffect.ValueRO.damageValue;
                     healthLookup[targetEntity] = targetHealth;
                 }
             }
@@ -160,21 +160,4 @@ public struct ApplyEffectToEntityBuffer : IBufferElementData
 public struct ApplyEffectAtPositionBuffer : IBufferElementData
 {
     public float3 position;
-}
-
-public struct Health : IComponentData
-{
-    public float maxHealth;
-    public float currentHealth;
-
-    public Health(float maxHealth)
-    {
-        this.maxHealth = maxHealth;
-        this.currentHealth = maxHealth;
-    }
-
-    public float Percentage()
-    {
-        return currentHealth / maxHealth;
-    }
 }

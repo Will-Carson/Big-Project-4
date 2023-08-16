@@ -50,7 +50,7 @@ public class PlatformerCharacterAuthoring : MonoBehaviour
             AddComponent(entity, new ActiveWeapon());
             AddComponent(entity, new CharacterWeaponVisualFeedback());
 
-            AddComponent(entity, new Health { currentHealth = 10000, maxHealth = 10000 });
+            AddComponent(entity, new Health { current = 10000, max = 10000 });
         }
     }
 

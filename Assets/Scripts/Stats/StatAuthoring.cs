@@ -551,7 +551,7 @@ public enum Stat
     IncreasedLife,
     IncreasedShield,
     IncreasedEnergy,
-    MoreLifeMax,
+    MoreLife,
     MoreShieldMax,
     MoreEnergyMax,
     BulwarkChargeMax,

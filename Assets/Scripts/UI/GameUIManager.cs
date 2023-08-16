@@ -188,8 +188,8 @@ public class NamePlateComponent : IComponentData, IDisposable
 
     public void SetHealth(Health health)
     {
-        namePlate.MaximumHealth = health.maxHealth;
-        namePlate.CurrentHealth = health.currentHealth;
+        namePlate.MaximumHealth = health.max;
+        namePlate.CurrentHealth = health.current;
     }
 }
 
@@ -279,10 +279,10 @@ public partial class TalentUIManager : SystemBase
         requests.Clear();
 
         // TODO runs every frame...
-        foreach (var stats in SystemAPI.Query<DynamicBuffer<StatElement>>()
+        foreach (var statEntity in SystemAPI.Query<StatEntity>()
             .WithAll<GhostOwnerIsLocal, PlatformerCharacterComponent>())
         {
-            talentScreen.OnStatsChange(stats);
+            talentScreen.OnStatsChange(statEntity);
         }
     }
 }

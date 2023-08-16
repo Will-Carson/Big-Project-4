@@ -252,18 +252,32 @@ public struct ItemData : IComponentData
     [GhostField] public FixedString128Bytes artAddress3d;
 }
 
-public struct EquipmentContainer : IComponentData { }
+public struct EquipmentContainer : IComponentData 
+{
+    public Entity target;
 
+    public EquipmentContainer(Entity target) : this()
+    {
+        this.target = target;
+    }
+}
+
+[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 public partial struct EquipmentContainerSystem : ISystem
 {
-    public void OnUpdate(SystemState state)
+    public void OnUpdate(ref SystemState state)
     {
-        foreach (var (statSticks, container) in SystemAPI
-            .Query<DynamicBuffer<StatStickElement>, DynamicBuffer<ContainerChild>>()
-            .WithAll<StatRecalculationTag>())
+        foreach (var (equipmentContainer, container) in SystemAPI
+            .Query<RefRO<EquipmentContainer>, DynamicBuffer<ContainerChild>>())
         {
-            statSticks.CopyFrom(container.Reinterpret<StatStickElement>());
-            // TODO This needs to create a bunch of EquipStatStickRequests instead
+            for (var i = 0; i < container.Length; i++)
+            {
+                var item = container[i].child;
+                if (item == Entity.Null) continue;
+                var statStickEntity = SystemAPI.GetAspect<StatEntity>(item);
+                var statEntity = SystemAPI.GetAspect<StatEntity>(equipmentContainer.ValueRO.target);
+                statEntity.TryEquipUniqueStatStick(statStickEntity);
+            }
         }
     }
 }

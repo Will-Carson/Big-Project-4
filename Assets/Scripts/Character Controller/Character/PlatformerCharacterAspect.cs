@@ -122,7 +122,7 @@ public readonly partial struct PlatformerCharacterAspect : IAspect, IKinematicCh
         ref var characterControl = ref CharacterControl.ValueRW;
 
         // If health is 0, transition to "dead" state.
-        if (stateMachine.CurrentState != CharacterState.Dead && Health.ValueRO.currentHealth <= 0)
+        if (stateMachine.CurrentState != CharacterState.Dead && Health.ValueRO.current <= 0)
         {
             stateMachine.TransitionToState(CharacterState.Dead, ref context, ref baseContext, in this);
             return true;

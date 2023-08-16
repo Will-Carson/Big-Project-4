@@ -14,6 +14,11 @@ public class ItemAuthoring : MonoBehaviour
             AddComponent<ContainerParent>(entity);
 
             AddComponent<ItemData>(entity);
+
+            AddBuffer<StatElement>(entity);
+            AddBuffer<EquippedElement>(entity);
+            AddBuffer<EquippedToElement>(entity);
+            AddBuffer<StatRequirementElement>(entity);
         }
     }
 }
