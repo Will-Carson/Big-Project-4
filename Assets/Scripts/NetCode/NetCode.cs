@@ -146,6 +146,7 @@ public partial struct GoInGameServerSystem : ISystem
                 inventory[5] = new ContainerChild(testItem);
                 commandBuffer.SetComponent(testItem, new ContainerParent(inventoryEntity));
                 var itemStats = commandBuffer.AddBuffer<StatElement>(testItem);
+                itemStats.Add(new StatElement(Stat.AdditionalLife, 10));
                 itemStats.Add(new StatElement(Stat.IncreasedLife, 10));
                 itemStats.Add(new StatElement(Stat.MoreLife, 10));
 

@@ -10,6 +10,7 @@ public partial struct ContainerServerSystem : ISystem
     ComponentLookup<ContainerRestrictions> containerRestrictionsLookup;
     ComponentLookup<ItemRestrictions> itemRestrictionsLookup;
     ComponentLookup<ContainerParent> containerParentLookup;
+    ComponentLookup<EquipmentContainer> equipmentContainerLookup;
     BufferLookup<ContainerChildRestrictions> containerChildRestrictionsLookup;
 
     [BurstCompile]
@@ -18,6 +19,7 @@ public partial struct ContainerServerSystem : ISystem
         containerRestrictionsLookup = SystemAPI.GetComponentLookup<ContainerRestrictions>(true);
         itemRestrictionsLookup = SystemAPI.GetComponentLookup<ItemRestrictions>(true);
         containerParentLookup = SystemAPI.GetComponentLookup<ContainerParent>();
+        equipmentContainerLookup = SystemAPI.GetComponentLookup<EquipmentContainer>(true);
         containerChildRestrictionsLookup = SystemAPI.GetBufferLookup<ContainerChildRestrictions>();
     }
 
@@ -28,6 +30,7 @@ public partial struct ContainerServerSystem : ISystem
         containerRestrictionsLookup.Update(ref state);
         itemRestrictionsLookup.Update(ref state);
         containerParentLookup.Update(ref state);
+        equipmentContainerLookup.Update(ref state);
         containerChildRestrictionsLookup.Update(ref state);
 
         foreach (var (request, rpc, rpcEntity) in SystemAPI
@@ -112,25 +115,56 @@ public partial struct ContainerServerSystem : ISystem
                 // Check if the player has permissions for the item/container
                 // TODO
 
+                var selectedItemStatEntity = default(StatEntity);
+                var clickedItemStatEntity = default(StatEntity);
+
+                if (selectedItem.entity != Entity.Null) selectedItemStatEntity = SystemAPI.GetAspect<StatEntity>(selectedItem.entity);
+                if (clickedItemEntity != Entity.Null) clickedItemStatEntity = SystemAPI.GetAspect<StatEntity>(clickedItemEntity);
+
+                // Check if the items can be put in their resepective slots and exit early if they cannot.
+                if (equipmentContainerLookup.TryGetComponent(selectedContainerEntity, out var selectedEquipmentContainer))
+                {
+                    var equipmentTarget = selectedEquipmentContainer.target;
+                    var targetStatEntity = SystemAPI.GetAspect<StatEntity>(equipmentTarget);
+
+                    if (targetStatEntity.IsEquipped(clickedItemStatEntity))
+                    {
+                        continue;
+                    }
+                }
+
+                if (equipmentContainerLookup.TryGetComponent(clickedContainerEntity, out var clickedEquipmentContainer))
+                {
+                    var equipmentTarget = clickedEquipmentContainer.target;
+                    var targetStatEntity = SystemAPI.GetAspect<StatEntity>(equipmentTarget);
+
+                    if (targetStatEntity.IsEquipped(selectedItemStatEntity))
+                    {
+                        continue;
+                    }
+                }
+
+                if (equipmentContainerLookup.HasComponent(selectedContainerEntity))
+                {
+                    var equipmentTarget = selectedEquipmentContainer.target;
+                    var targetStatEntity = SystemAPI.GetAspect<StatEntity>(equipmentTarget);
+
+                    targetStatEntity.TryEquipUniqueStatStick(clickedItemStatEntity);
+                    targetStatEntity.TryUnequipStatStick(selectedItemStatEntity);
+                }
+
+                if (equipmentContainerLookup.HasComponent(clickedContainerEntity))
+                {
+                    var equipmentTarget = clickedEquipmentContainer.target;
+                    var targetStatEntity = SystemAPI.GetAspect<StatEntity>(equipmentTarget);
+
+                    targetStatEntity.TryEquipUniqueStatStick(selectedItemStatEntity);
+                    targetStatEntity.TryUnequipStatStick(clickedItemStatEntity);
+                }
+
                 // Swap the items
                 ContainerChild.PlaceItemInSlot(selectedItemContainer, selectedItemSlot, clickedItemEntity);
                 ContainerChild.PlaceItemInSlot(clickedItemContainer, clickedItemSlot, selectedItem.entity);
-
-                // TODO redo all this but make it actually work lol
-                var selectedContainerEquipmentTarget = SystemAPI.GetComponent<EquipmentContainer>(selectedContainerEntity).target;
-                var clickedContainerEquipmentTarget = SystemAPI.GetComponent<EquipmentContainer>(clickedContainerEntity).target;
-
-                var selectedTargetStatEntity = SystemAPI.GetAspect<StatEntity>(selectedContainerEquipmentTarget);
-                var clickedTargetStatEntity = SystemAPI.GetAspect<StatEntity>(clickedContainerEquipmentTarget);
-
-                var selectedItemStatEntity = SystemAPI.GetAspect<StatEntity>(selectedItem.entity);
-                var clickedItemStatEntity = SystemAPI.GetAspect<StatEntity>(clickedItemEntity);
-
-                selectedTargetStatEntity.TryUnequipStatStick(selectedItemStatEntity);
-                clickedTargetStatEntity.TryUnequipStatStick(clickedItemStatEntity);
-
-                selectedTargetStatEntity.TryEquipUniqueStatStick(clickedItemStatEntity);
-                clickedTargetStatEntity.TryEquipUniqueStatStick(selectedItemStatEntity);
 
                 // These could just be Entity.Null checks...
                 if (containerParentLookup.HasComponent(selectedItem.entity))
