@@ -134,16 +134,7 @@ public readonly partial struct StatEntity : IAspect
 
     public bool TryEquipUniqueStatStick(StatEntity statStickEntity)
     {
-        if (!equipped.IsCreated) return false;
-
-        for (var i = 0; i < equipped.Length; i++)
-        {
-            var item = equipped[i].entity;
-            if (item.Equals(statStickEntity.self))
-            {
-                return false;
-            }
-        }
+        if (IsEquipped(statStickEntity)) return false;
         
         return TryEquipStatStick(statStickEntity);
     }
@@ -160,6 +151,21 @@ public readonly partial struct StatEntity : IAspect
                 equipped.RemoveAt(i);
                 RemoveStats(statStickEntity);
                 statStickEntity.UnequipFrom(self);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool IsEquipped(StatEntity statStickEntity)
+    {
+        if (!equipped.IsCreated) return false;
+
+        for (var i = 0; i < equipped.Length; i++)
+        {
+            var item = equipped[i].entity;
+            if (item.Equals(statStickEntity.self))
+            {
                 return true;
             }
         }

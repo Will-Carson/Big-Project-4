@@ -116,6 +116,22 @@ public partial struct ContainerServerSystem : ISystem
                 ContainerChild.PlaceItemInSlot(selectedItemContainer, selectedItemSlot, clickedItemEntity);
                 ContainerChild.PlaceItemInSlot(clickedItemContainer, clickedItemSlot, selectedItem.entity);
 
+                // TODO redo all this but make it actually work lol
+                var selectedContainerEquipmentTarget = SystemAPI.GetComponent<EquipmentContainer>(selectedContainerEntity).target;
+                var clickedContainerEquipmentTarget = SystemAPI.GetComponent<EquipmentContainer>(clickedContainerEntity).target;
+
+                var selectedTargetStatEntity = SystemAPI.GetAspect<StatEntity>(selectedContainerEquipmentTarget);
+                var clickedTargetStatEntity = SystemAPI.GetAspect<StatEntity>(clickedContainerEquipmentTarget);
+
+                var selectedItemStatEntity = SystemAPI.GetAspect<StatEntity>(selectedItem.entity);
+                var clickedItemStatEntity = SystemAPI.GetAspect<StatEntity>(clickedItemEntity);
+
+                selectedTargetStatEntity.TryUnequipStatStick(selectedItemStatEntity);
+                clickedTargetStatEntity.TryUnequipStatStick(clickedItemStatEntity);
+
+                selectedTargetStatEntity.TryEquipUniqueStatStick(clickedItemStatEntity);
+                clickedTargetStatEntity.TryEquipUniqueStatStick(selectedItemStatEntity);
+
                 // These could just be Entity.Null checks...
                 if (containerParentLookup.HasComponent(selectedItem.entity))
                 {
@@ -259,25 +275,5 @@ public struct EquipmentContainer : IComponentData
     public EquipmentContainer(Entity target) : this()
     {
         this.target = target;
-    }
-}
-
-[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
-public partial struct EquipmentContainerSystem : ISystem
-{
-    public void OnUpdate(ref SystemState state)
-    {
-        foreach (var (equipmentContainer, container) in SystemAPI
-            .Query<RefRO<EquipmentContainer>, DynamicBuffer<ContainerChild>>())
-        {
-            for (var i = 0; i < container.Length; i++)
-            {
-                var item = container[i].child;
-                if (item == Entity.Null) continue;
-                var statStickEntity = SystemAPI.GetAspect<StatEntity>(item);
-                var statEntity = SystemAPI.GetAspect<StatEntity>(equipmentContainer.ValueRO.target);
-                statEntity.TryEquipUniqueStatStick(statStickEntity);
-            }
-        }
     }
 }
