@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Button display-tooltip-when-elided="true" style="flex-direction: row;">
+        <ui:Label tabindex="-1" text="Strike" display-tooltip-when-elided="true" name="effect-name" />
+        <ui:Label tabindex="-1" text="100" display-tooltip-when-elided="true" name="price" style="position: absolute; right: 10px;" />
+    </ui:Button>
+</ui:UXML>

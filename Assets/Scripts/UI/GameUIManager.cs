@@ -1,8 +1,6 @@
 using MyUILibrary;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
@@ -15,8 +13,9 @@ public class GameUIManager : MonoBehaviour
     /// X Health bar
     /// X Focus bar
     /// Experience bar
-    /// Inventory screen
+    /// X Inventory screen
     /// X Talent screen
+    /// Anvil screen
     /// Menu screen
 
     public UIDocument gameUI;
@@ -292,6 +291,7 @@ public partial class InventoryUIManager : SystemBase
 {
     ClientContainer inventory;
     ClientContainer equipment;
+    ClientContainer anvil;
 
     ComponentLookup<ItemData> itemDataLookup;
 
@@ -321,9 +321,7 @@ public partial class InventoryUIManager : SystemBase
                 var inventoryPanel = gameUI.rootVisualElement.Q<VisualElement>("inventory-panel");
 
                 var inventoryEntity = container[0].child;
-
                 if (inventoryEntity == Entity.Null) return;
-
                 var inventorySessionId = SystemAPI.GetComponent<GhostInstance>(inventoryEntity);
                 var inventorySlotIds = new string[16];
                 for (var i = 0; i < inventorySlotIds.Length; i++)
@@ -347,11 +345,18 @@ public partial class InventoryUIManager : SystemBase
                     "right-ring-slot",
                 };
 
+                var anvilEntity = container[2].child;
+                var anvilSessionId = SystemAPI.GetComponent<GhostInstance>(anvilEntity);
+                string[] anvilSlotIds = new string[] { "anvil-slot" };
+                var anvilPanel = gameUI.rootVisualElement.Q<VisualElement>("anvil-panel");
+
                 inventory = new ClientContainer(inventorySessionId, inventoryPanel, inventorySlotIds);
                 equipment = new ClientContainer(equipmentSessionId, inventoryPanel, equipmentSlotIds);
+                anvil = new ClientContainer(anvilSessionId, anvilPanel, anvilSlotIds);
 
                 inventory.clicked += Container_clicked;
                 equipment.clicked += Container_clicked;
+                anvil.clicked += Container_clicked;
             }
 
             Debug.Log("Containers set up.");
@@ -361,11 +366,14 @@ public partial class InventoryUIManager : SystemBase
         {
             var inventoryEntity = container[0].child;
             var equipmentEntity = container[1].child;
+            var anvilEntity = container[2].child;
             var inventoryContainer = SystemAPI.GetBuffer<ContainerChild>(inventoryEntity);
             var equipmentContainer = SystemAPI.GetBuffer<ContainerChild>(equipmentEntity);
+            var anvilContainer = SystemAPI.GetBuffer<ContainerChild>(anvilEntity);
 
             UpdateContainer(inventory, inventoryContainer);
             UpdateContainer(equipment, equipmentContainer);
+            UpdateContainer(anvil, anvilContainer);
         }
     }
 
@@ -462,11 +470,11 @@ public class ClientItemPlate
             if (value.Length > 0)
             {
                 var itemArt = Resources.Load<Sprite>($"Sprites/{value}");
-                visualElement.Q<Button>().style.backgroundImage = new StyleBackground(itemArt);
+                visualElement.Q<VisualElement>("portrait").style.backgroundImage = new StyleBackground(itemArt);
             }
             else
             {
-                visualElement.Q<Button>().style.backgroundImage = new StyleBackground(StyleKeyword.None);
+                visualElement.Q<VisualElement>("portrait").style.backgroundImage = new StyleBackground(StyleKeyword.None);
             }
         }
     }
@@ -477,6 +485,7 @@ public class ClientItemPlate
     }
 }
 
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
 public partial class TooltipUIManager : SystemBase
 {
     TooltipPlate leftTooltipPlate;
@@ -561,5 +570,32 @@ public class TooltipPlate
         {
             tooltipElement.style.display = DisplayStyle.None;
         }
+    }
+}
+
+[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
+public partial class AnvilUIManager : SystemBase
+{
+    private VisualElement effectPlateParent;
+    private Button applyEffectButton;
+    private VisualElement augmentParent;
+    private ClientItemPlate anvilSlot;
+
+    protected override void OnStartRunning()
+    {
+        //var gameUIManager = UnityEngine.Object.FindObjectOfType<GameUIManager>();
+        //var gameUI = gameUIManager.gameUI;
+        //var anvilPanel = gameUI.rootVisualElement.Q<VisualElement>("anvil-panel");
+
+        //effectPlateParent = anvilPanel.Q<VisualElement>("effect-plate-parent");
+        //applyEffectButton = anvilPanel.Q<Button>("apply-effect-button");
+        //augmentParent = anvilPanel.Q<VisualElement>("augment-parent");
+        //var anvilSlotElement = anvilPanel.Q<VisualElement>("anvil-slot");
+        //anvilSlot = new ClientItemPlate(anvilSlotElement, 0);
+    }
+
+    protected override void OnUpdate()
+    {
+        
     }
 }

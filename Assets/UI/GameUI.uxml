@@ -1,14 +1,17 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="AnvilPanel" src="project://database/Assets/Scripts/UI/anvil/AnvilPanel.uxml?fileID=9197481963319205126&amp;guid=5e73a7da566d1084ba1d4d736b6d734d&amp;type=3#AnvilPanel" />
     <ui:Template name="InventoryScreen" src="project://database/Assets/Scripts/UI/inventory/InventoryScreen.uxml?fileID=9197481963319205126&amp;guid=0234f7f592d9d0942a84d1643de7b7ab&amp;type=3#InventoryScreen" />
-    <ui:Template name="TalentScreen" src="project://database/Assets/Scripts/UI/talents/TalentScreen.uxml?fileID=9197481963319205126&amp;guid=73e36c7232fd05a428f3ea5f9aafa038&amp;type=3#TalentScreen" />
     <ui:Template name="tooltip" src="project://database/Assets/Scripts/UI/tooltip/tooltip.uxml?fileID=9197481963319205126&amp;guid=de2da061026f8f94d9025e61d6fc77b7&amp;type=3#tooltip" />
+    <ui:Template name="TalentScreen" src="project://database/Assets/Scripts/UI/talents/TalentScreen.uxml?fileID=9197481963319205126&amp;guid=73e36c7232fd05a428f3ea5f9aafa038&amp;type=3#TalentScreen" />
     <ui:VisualElement name="game-screen" style="display: flex; flex-grow: 1; height: 100%; width: 100%;">
-        <ui:VisualElement name="world-space" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); min-height: 100%; min-width: 100%; position: absolute;" />
-        <ui:VisualElement name="left-panel" style="position: absolute; width: 475px; height: 100%; left: 0; display: flex;" />
-        <ui:VisualElement name="right-panel" style="position: absolute; right: 0; min-height: 100%; width: 600px; justify-content: space-around; align-items: center; height: 100%; display: flex;">
+        <ui:VisualElement name="world-space" style="background-color: rgba(0, 0, 0, 0); min-height: 100%; min-width: 100%; position: absolute; top: -1px; left: -1px;" />
+        <ui:VisualElement name="left-panel" style="position: absolute; width: 600px; left: 0; display: flex; min-height: 100%; flex-grow: 1;">
+            <ui:Instance template="AnvilPanel" name="anvil-panel" style="flex-grow: 1;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="right-panel" style="position: absolute; right: 0; min-height: 100%; width: 600px; justify-content: space-around; align-items: center; height: 100%; display: flex; flex-grow: 1;">
             <ui:Instance template="InventoryScreen" name="inventory-panel" style="width: 600px; height: 100%; display: none;" />
         </ui:VisualElement>
-        <ui:VisualElement name="tooltip" style="background-color: rgba(0, 0, 0, 0); min-width: auto; min-height: auto; align-items: flex-start; align-self: flex-start; flex-direction: row;">
+        <ui:VisualElement name="tooltip" style="background-color: rgba(0, 0, 0, 0); min-width: auto; min-height: auto; align-items: flex-start; align-self: flex-start; flex-direction: row; display: none;">
             <ui:Instance template="tooltip" name="tooltip-left" />
             <ui:Instance template="tooltip" name="tooltip-right" />
         </ui:VisualElement>

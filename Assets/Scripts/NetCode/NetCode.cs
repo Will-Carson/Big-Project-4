@@ -117,14 +117,14 @@ public partial struct GoInGameServerSystem : ISystem
 
                 var inventoryEntity = commandBuffer.Instantiate(itemPrefab);
                 var equipmentEntity = commandBuffer.Instantiate(itemPrefab);
-                var abilitiesEntity = commandBuffer.Instantiate(itemPrefab);
+                var anvilEntity = commandBuffer.Instantiate(itemPrefab);
                 var foreignEntity = commandBuffer.Instantiate(itemPrefab);
 
                 commandBuffer.AddComponent(equipmentEntity, new EquipmentContainer(character));
 
                 rootContainer.Add(new ContainerChild(inventoryEntity));
                 rootContainer.Add(new ContainerChild(equipmentEntity));
-                rootContainer.Add(new ContainerChild(abilitiesEntity));
+                rootContainer.Add(new ContainerChild(anvilEntity));
                 rootContainer.Add(new ContainerChild(foreignEntity));
 
                 // Give the different containers their stats
@@ -167,16 +167,19 @@ public partial struct GoInGameServerSystem : ISystem
                 equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.LeftRing));
                 equipmentRestrictionsBuffer.Add(new ContainerChildRestrictions(Restrictions.RightRing));
 
+                var anvil = commandBuffer.AddBuffer<ContainerChild>(anvilEntity);
+                anvil.Add(new ContainerChild());
+
                 // Set the owner for the container
                 commandBuffer.SetComponent(inventoryEntity, new GhostOwner { NetworkId = networkId });
                 commandBuffer.SetComponent(equipmentEntity, new GhostOwner { NetworkId = networkId });
-                commandBuffer.SetComponent(abilitiesEntity, new GhostOwner { NetworkId = networkId });
+                commandBuffer.SetComponent(anvilEntity, new GhostOwner { NetworkId = networkId });
                 commandBuffer.SetComponent(foreignEntity, new GhostOwner { NetworkId = networkId });
 
                 // Make sure these entities get destroyed when the player that holds them is destroyed.
                 commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = inventoryEntity });
                 commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = equipmentEntity });
-                commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = abilitiesEntity });
+                commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = anvilEntity });
                 commandBuffer.AppendToBuffer(reqSrc.ValueRO.SourceConnection, new LinkedEntityGroup { Value = foreignEntity });
             } // Container set up
 

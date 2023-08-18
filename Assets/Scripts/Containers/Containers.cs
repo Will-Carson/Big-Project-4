@@ -132,7 +132,6 @@ public partial struct ContainerServerSystem : ISystem
                         continue;
                     }
                 }
-
                 if (equipmentContainerLookup.TryGetComponent(clickedContainerEntity, out var clickedEquipmentContainer))
                 {
                     var equipmentTarget = clickedEquipmentContainer.target;
@@ -152,7 +151,6 @@ public partial struct ContainerServerSystem : ISystem
                     targetStatEntity.TryEquipUniqueStatStick(clickedItemStatEntity);
                     targetStatEntity.TryUnequipStatStick(selectedItemStatEntity);
                 }
-
                 if (equipmentContainerLookup.HasComponent(clickedContainerEntity))
                 {
                     var equipmentTarget = clickedEquipmentContainer.target;
