@@ -590,6 +590,8 @@ public partial class AnvilUIManager : SystemBase
     VisualElement effectPlateParent;
     Button applyEffectButton;
     VisualElement augmentParent;
+    List<AnvilEffectPlate> anvilEffectPlates = new List<AnvilEffectPlate>();
+    AnvilEffect selectedEffect;
 
     protected override void OnStartRunning()
     {
@@ -602,17 +604,38 @@ public partial class AnvilUIManager : SystemBase
         augmentParent = anvilPanel.Q<VisualElement>("augment-parent");
 
         var effectPlateTemplate = gameUIManager.effectPlateTemplate;
-        var effects = AnvilEffects.Effects;
-        foreach (var effect in effects)
+        foreach (var effect in AnvilEffects.effects)
         {
-            var plate = effectPlateTemplate.Instantiate();
-            effectPlateParent.Add(plate);
+            var instance = effectPlateTemplate.Instantiate();
+            effectPlateParent.Add(instance);
+            var plate = new AnvilEffectPlate(instance, effect);
+            plate.clicked += AnvilEffectPlate_clicked;
+            anvilEffectPlates.Add(plate);
+        }
 
-            var name = plate.Q<Label>("effect-name");
-            var cost = plate.Q<Label>("price");
+        applyEffectButton.clicked += ApplyEffectButton_clicked;
+    }
 
-            name.text = effect.name;
-            cost.text = effect.cost.ToString();
+    private void ApplyEffectButton_clicked()
+    {
+        var entity = EntityManager.CreateEntity();
+        EntityManager.AddComponent<SendRpcCommandRequest>(entity);
+        EntityManager.AddComponentData(entity, new ApplyAnvilEffectRequest(selectedEffect));
+    }
+
+    private void AnvilEffectPlate_clicked(AnvilEffect effect)
+    {
+        selectedEffect = effect;
+        foreach (var plate in anvilEffectPlates)
+        {
+            if (plate.effect == effect)
+            {
+                plate.Select();
+            }
+            else
+            {
+                plate.Deselect();
+            }
         }
     }
 
@@ -624,7 +647,7 @@ public partial class AnvilUIManager : SystemBase
 
 public static class AnvilEffects
 {
-    public static AnvilEffectAuthoring[] Effects = new AnvilEffectAuthoring[]
+    public static AnvilEffectAuthoring[] effects = new AnvilEffectAuthoring[]
     {
         new AnvilEffectAuthoring
         {
@@ -677,6 +700,51 @@ public static class AnvilEffects
     };
 }
 
+public struct ApplyAnvilEffectRequest : IRpcCommand
+{
+    public AnvilEffect effect;
+
+    public ApplyAnvilEffectRequest(AnvilEffect effect) : this()
+    {
+        this.effect = effect;
+    }
+}
+
+public class AnvilEffectPlate
+{
+    public Action<AnvilEffect> clicked;
+    public AnvilEffect effect;
+    Button button;
+
+    public AnvilEffectPlate(TemplateContainer instance, AnvilEffectAuthoring effect)
+    {
+        this.effect = effect.effect;
+        var name = instance.Q<Label>("effect-name");
+        var cost = instance.Q<Label>("price");
+
+        name.text = effect.name;
+        cost.text = effect.cost.ToString();
+
+        button = instance.Q<Button>();
+        button.clicked += Button_clicked;
+    }
+
+    public void Select()
+    {
+        button.style.backgroundColor = new StyleColor(Color.red);
+    }
+
+    public void Deselect()
+    {
+        button.style.backgroundColor = new StyleColor(Color.blue);
+    }
+
+    private void Button_clicked()
+    {
+        clicked.Invoke(effect);
+    }
+}
+
 public struct AnvilEffectAuthoring
 {
     public AnvilEffect effect;
@@ -695,4 +763,21 @@ public enum AnvilEffect
     Annul,
     Exalt,
     Vaal,
+}
+
+public partial class AnvilEffectSystem : SystemBase
+{
+    protected override void OnUpdate()
+    {
+        var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+        foreach (var (request, rpc, entity) in SystemAPI.Query<RefRO<ApplyAnvilEffectRequest>, RefRO<ReceiveRpcCommandRequest>>().WithEntityAccess())
+        {
+            commandBuffer.DestroyEntity(entity);
+            var playerEntity = SystemAPI.GetComponent<CommandTarget>(rpc.ValueRO.SourceConnection).targetEntity;
+            var anvilEntity = SystemAPI.GetBuffer<ContainerChild>(playerEntity)[2].child;
+            var anvilTarget = SystemAPI.GetBuffer<ContainerChild>(anvilEntity)[0].child;
+
+            Debug.Log($"Anvil target: {anvilTarget}, Effect {request.ValueRO.effect}");
+        }
+    }
 }
