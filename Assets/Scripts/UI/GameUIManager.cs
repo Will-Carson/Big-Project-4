@@ -23,6 +23,7 @@ public class GameUIManager : MonoBehaviour
     public VisualTreeAsset focusBarTemplate;
     public VisualTreeAsset talentColumnTemplate;
     public VisualTreeAsset talentPlateTemplate;
+    public VisualTreeAsset effectPlateTemplate;
 
     List<VisualElement> exclusiveGameScreens = new List<VisualElement>();
     VisualElement defaultGameScreen;
@@ -371,27 +372,14 @@ public partial class InventoryUIManager : SystemBase
             var equipmentContainer = SystemAPI.GetBuffer<ContainerChild>(equipmentEntity);
             var anvilContainer = SystemAPI.GetBuffer<ContainerChild>(anvilEntity);
 
-            UpdateContainer(inventory, inventoryContainer);
-            UpdateContainer(equipment, equipmentContainer);
-            UpdateContainer(anvil, anvilContainer);
+            var updateContext = new ClientContainerUpdateContext
+            {
+                itemDataLookup = itemDataLookup
+            };
+            inventory.UpdateContainer(inventoryContainer, updateContext);
+            equipment.UpdateContainer(equipmentContainer, updateContext);
+            anvil.UpdateContainer(anvilContainer, updateContext);
         }
-    }
-
-    public void UpdateContainer(ClientContainer clientContainer, DynamicBuffer<ContainerChild> container)
-    {
-        for (var i = 0; i < container.Length; i++)
-        {
-            var child = container[i].child;
-            var plate = clientContainer.containerSlots[i];
-            UpdateItemPlate(plate, child);
-        }
-    }
-
-    public void UpdateItemPlate(ClientItemPlate itemPlate, Entity entity)
-    {
-        itemDataLookup.TryGetComponent(entity, out var itemData);
-
-        itemPlate.ItemData = itemData;
     }
 }
 
@@ -418,9 +406,18 @@ public class ClientContainer
     {
         clicked.Invoke(slot, containerSessionId);
     }
+
+    public void UpdateContainer(DynamicBuffer<ContainerChild> container, ClientContainerUpdateContext updateContext)
+    {
+        for (var i = 0; i < container.Length; i++)
+        {
+            var child = container[i].child;
+            var plate = containerSlots[i];
+            plate.UpdateItemPlate(child, updateContext);
+        }
+    }
 }
 
-[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
 public class ClientItemPlate
 {
     public static event EventHandler<ItemData> MouseOver;
@@ -429,6 +426,7 @@ public class ClientItemPlate
     public int index;
 
     VisualElement visualElement;
+    VisualElement portrait;
 
     public ClientItemPlate(VisualElement visualElement, int index)
     {
@@ -439,6 +437,7 @@ public class ClientItemPlate
         button.clicked += Button_clicked;
         button.RegisterCallback<MouseOverEvent>((_) => { MouseOver?.Invoke(this, itemData); });
         button.RegisterCallback<MouseOutEvent>((_) => { MouseOut?.Invoke(this, null); });
+        portrait = visualElement.Q<VisualElement>("portrait");
     }
 
     ItemData itemData;
@@ -470,11 +469,11 @@ public class ClientItemPlate
             if (value.Length > 0)
             {
                 var itemArt = Resources.Load<Sprite>($"Sprites/{value}");
-                visualElement.Q<VisualElement>("portrait").style.backgroundImage = new StyleBackground(itemArt);
+                portrait.style.backgroundImage = new StyleBackground(itemArt);
             }
             else
             {
-                visualElement.Q<VisualElement>("portrait").style.backgroundImage = new StyleBackground(StyleKeyword.None);
+                portrait.style.backgroundImage = new StyleBackground(StyleKeyword.None);
             }
         }
     }
@@ -483,6 +482,18 @@ public class ClientItemPlate
     {
         clicked.Invoke(index);
     }
+
+    public void UpdateItemPlate(Entity entity, ClientContainerUpdateContext updateContext)
+    {
+        updateContext.itemDataLookup.TryGetComponent(entity, out var itemData);
+
+        ItemData = itemData;
+    }
+}
+
+public struct ClientContainerUpdateContext
+{
+    public ComponentLookup<ItemData> itemDataLookup;
 }
 
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
@@ -576,26 +587,112 @@ public class TooltipPlate
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
 public partial class AnvilUIManager : SystemBase
 {
-    private VisualElement effectPlateParent;
-    private Button applyEffectButton;
-    private VisualElement augmentParent;
-    private ClientItemPlate anvilSlot;
+    VisualElement effectPlateParent;
+    Button applyEffectButton;
+    VisualElement augmentParent;
 
     protected override void OnStartRunning()
     {
-        //var gameUIManager = UnityEngine.Object.FindObjectOfType<GameUIManager>();
-        //var gameUI = gameUIManager.gameUI;
-        //var anvilPanel = gameUI.rootVisualElement.Q<VisualElement>("anvil-panel");
+        var gameUIManager = UnityEngine.Object.FindObjectOfType<GameUIManager>();
+        var gameUI = gameUIManager.gameUI;
+        var anvilPanel = gameUI.rootVisualElement.Q<VisualElement>("anvil-panel");
 
-        //effectPlateParent = anvilPanel.Q<VisualElement>("effect-plate-parent");
-        //applyEffectButton = anvilPanel.Q<Button>("apply-effect-button");
-        //augmentParent = anvilPanel.Q<VisualElement>("augment-parent");
-        //var anvilSlotElement = anvilPanel.Q<VisualElement>("anvil-slot");
-        //anvilSlot = new ClientItemPlate(anvilSlotElement, 0);
+        effectPlateParent = anvilPanel.Q<VisualElement>("effect-plate-parent");
+        applyEffectButton = anvilPanel.Q<Button>("apply-effect-button");
+        augmentParent = anvilPanel.Q<VisualElement>("augment-parent");
+
+        var effectPlateTemplate = gameUIManager.effectPlateTemplate;
+        var effects = AnvilEffects.Effects;
+        foreach (var effect in effects)
+        {
+            var plate = effectPlateTemplate.Instantiate();
+            effectPlateParent.Add(plate);
+
+            var name = plate.Q<Label>("effect-name");
+            var cost = plate.Q<Label>("price");
+
+            name.text = effect.name;
+            cost.text = effect.cost.ToString();
+        }
     }
 
     protected override void OnUpdate()
     {
         
     }
+}
+
+public static class AnvilEffects
+{
+    public static AnvilEffectAuthoring[] Effects = new AnvilEffectAuthoring[]
+    {
+        new AnvilEffectAuthoring
+        {
+            effect = AnvilEffect.Transmute,
+            name = "Transmute",
+            cost = 100,
+        },
+        new AnvilEffectAuthoring
+        {
+            effect = AnvilEffect.Alteration,
+            name = "Alteration",
+            cost = 100,
+        },
+        new AnvilEffectAuthoring
+        {
+            effect = AnvilEffect.Augmentation,
+            name = "Augmentation",
+            cost = 300,
+        },
+        new AnvilEffectAuthoring
+        {
+            effect = AnvilEffect.Regal,
+            name = "Regal",
+            cost = 500,
+        },
+        new AnvilEffectAuthoring
+        {
+            effect = AnvilEffect.Scour,
+            name = "Scour",
+            cost = 300,
+        },
+        new AnvilEffectAuthoring
+        {
+            effect = AnvilEffect.Annul,
+            name = "Annul",
+            cost = 1000,
+        },
+        new AnvilEffectAuthoring
+        {
+            effect = AnvilEffect.Exalt,
+            name = "Exalt",
+            cost = 5000,
+        },
+        new AnvilEffectAuthoring
+        {
+            effect = AnvilEffect.Vaal,
+            name = "Vaal",
+            cost = 2500,
+        },
+    };
+}
+
+public struct AnvilEffectAuthoring
+{
+    public AnvilEffect effect;
+    public string name;
+    public float cost;
+}
+
+public enum AnvilEffect
+{
+    None,
+    Transmute,
+    Alteration,
+    Augmentation,
+    Regal,
+    Scour,
+    Annul,
+    Exalt,
+    Vaal,
 }
