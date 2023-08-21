@@ -13,7 +13,7 @@ public class TalentDefinition : ScriptableObject
     public int maxTalentLevel;
 
     // Stats required to allocate a talent
-    public StatRequirementElement[] requires;
+    public StatRangeElement[] requires;
 
     // Stats granted by allocating a talent
     public StatElement[] grants;

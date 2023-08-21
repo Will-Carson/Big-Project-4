@@ -18,7 +18,7 @@ public class ItemAuthoring : MonoBehaviour
             AddBuffer<StatElement>(entity);
             AddBuffer<EquippedElement>(entity);
             AddBuffer<EquippedToElement>(entity);
-            AddBuffer<StatRequirementElement>(entity);
+            AddBuffer<StatRangeElement>(entity);
         }
     }
 }

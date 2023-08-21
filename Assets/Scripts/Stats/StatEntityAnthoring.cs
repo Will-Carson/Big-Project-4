@@ -28,7 +28,7 @@ public class StatEntityAnthoring : MonoBehaviour
             finalStats.Add(new StatElement(Stat.Level, 10));
 
             AddBuffer<EquippedToElement>(entity);
-            AddBuffer<StatRequirementElement>(entity);
+            AddBuffer<StatRangeElement>(entity);
         }
     }
 }

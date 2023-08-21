@@ -1,6 +1,7 @@
 using MyUILibrary;
 using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
@@ -698,6 +699,11 @@ public static class AnvilEffects
             cost = 2500,
         },
     };
+
+    public static AffixAuthoring[] affixes = new AffixAuthoring[]
+    {
+        // TODO
+    };
 }
 
 public struct ApplyAnvilEffectRequest : IRpcCommand
@@ -765,19 +771,122 @@ public enum AnvilEffect
     Vaal,
 }
 
-public partial class AnvilEffectSystem : SystemBase
+[WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+public partial class AnvilSystem : SystemBase
 {
+    protected override void OnStartRunning()
+    {
+        var commandBuffer = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+        foreach (var affix in AnvilEffects.affixes)
+        {
+            var entity = commandBuffer.CreateEntity();
+
+        }
+    }
+
     protected override void OnUpdate()
     {
         var commandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
-        foreach (var (request, rpc, entity) in SystemAPI.Query<RefRO<ApplyAnvilEffectRequest>, RefRO<ReceiveRpcCommandRequest>>().WithEntityAccess())
+        foreach (var (request, rpc, rpcEntity) in SystemAPI.Query<RefRO<ApplyAnvilEffectRequest>, RefRO<ReceiveRpcCommandRequest>>().WithEntityAccess())
         {
-            commandBuffer.DestroyEntity(entity);
+            commandBuffer.DestroyEntity(rpcEntity);
             var playerEntity = SystemAPI.GetComponent<CommandTarget>(rpc.ValueRO.SourceConnection).targetEntity;
             var anvilEntity = SystemAPI.GetBuffer<ContainerChild>(playerEntity)[2].child;
             var anvilTarget = SystemAPI.GetBuffer<ContainerChild>(anvilEntity)[0].child;
 
             Debug.Log($"Anvil target: {anvilTarget}, Effect {request.ValueRO.effect}");
+
+            var itemRequirements = SystemAPI.GetComponent<AffixRequirementsComponent>(anvilTarget);
+            itemRequirements.requirements = itemRequirements.requirements & AffixRequirements.Prefix & AffixRequirements.Suffix;
+            var possibleAffixes = new NativeList<Entity>(Allocator.Temp);
+            foreach (var (requirements, affixEntity) in SystemAPI.Query<RefRO<AffixRequirementsComponent>>().WithAll<AffixTag>().WithEntityAccess())
+            {
+                if (itemRequirements.RequirementsMet(requirements.ValueRO.requirements))
+                {
+                    possibleAffixes.Add(affixEntity);
+                }
+            }
+
+            switch (request.ValueRO.effect)
+            {
+                case AnvilEffect.None:
+                    Debug.Log("Anvil effect invalid.");
+                    break;
+                case AnvilEffect.Transmute:
+                    break;
+                case AnvilEffect.Alteration:
+                    break;
+                case AnvilEffect.Augmentation:
+                    break;
+                case AnvilEffect.Regal:
+                    break;
+                case AnvilEffect.Scour:
+                    break;
+                case AnvilEffect.Annul:
+                    break;
+                case AnvilEffect.Exalt:
+                    break;
+                case AnvilEffect.Vaal:
+                    break;
+                default:
+                    break;
+            }
         }
     }
+}
+
+public struct AffixTag : IComponentData { }
+
+public struct AffixRequirementsComponent : IComponentData
+{
+    public AffixRequirements requirements;
+
+    public bool RequirementsMet(AffixRequirements otherRequirements)
+    {
+        return (requirements & otherRequirements) == requirements;
+    }
+}
+
+public enum Affix
+{
+
+}
+
+public struct AffixAuthoring
+{
+    public Affix affix;
+    public string name;
+
+    public AffixRequirements requirements;
+    public StatRangeElement[] grants;
+}
+
+[Flags]
+public enum AffixRequirements
+{
+    None = 0,
+
+    All = 1,
+
+    Helm = 1 << 1,
+    Body = 1 << 2,
+    Belt = 1 << 3,
+    Boots = 1 << 4,
+    Gloves = 1 << 5,
+    Amulet = 1 << 6,
+    Ring = 1 << 7,
+
+    Armor = 1 << 8,
+    Weapon = 1 << 9,
+    Jewellery = 1 << 10,
+
+    Tier1 = 1 << 11,
+    Tier2 = 1 << 12,
+    Tier3 = 1 << 13,
+    Tier4 = 1 << 14,
+    Tier5 = 1 << 15,
+    Tier6 = 1 << 16,
+
+    Prefix = 1 << 17,
+    Suffix = 1 << 18,
 }

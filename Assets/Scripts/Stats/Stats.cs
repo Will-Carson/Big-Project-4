@@ -57,12 +57,12 @@ public struct EquippedToElement : IBufferElementData
 
 
 [Serializable]
-public struct StatRequirementElement : IBufferElementData
+public struct StatRangeElement : IBufferElementData
 {
     public Stat stat;
     public Range range;
 
-    public StatRequirementElement(Stat stat, Range range) : this()
+    public StatRangeElement(Stat stat, Range range) : this()
     {
         this.stat = stat;
         this.range = range;
@@ -118,7 +118,7 @@ public readonly partial struct StatEntity : IAspect
     readonly DynamicBuffer<StatElement> stats;
     [Optional] readonly DynamicBuffer<EquippedElement> equipped;
     [Optional] readonly DynamicBuffer<EquippedToElement> equippedTo;
-    [Optional] readonly DynamicBuffer<StatRequirementElement> requirements;
+    [Optional] readonly DynamicBuffer<StatRangeElement> requirements;
 
     public bool TryEquipStatStick(StatEntity statStickEntity)
     {

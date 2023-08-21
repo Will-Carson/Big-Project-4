@@ -70,14 +70,14 @@ public partial class TalentServerSystem : SystemBase
             });
 
             // Add requirements
-            var requirements = em.AddBuffer<StatRequirementElement>(talentEntity);
+            var requirements = em.AddBuffer<StatRangeElement>(talentEntity);
 
             /// Do not allow players to take the talent if they do not meet level requirements, or if
             /// they already have too many points allocated in this talent. Next add the talent points
             /// requirement. Then add the addition requirements that are specific to a talent.
-            requirements.Add(new StatRequirementElement(Stat.Level, Range.FromMin(talent.levelRequirement)));
-            requirements.Add(new StatRequirementElement(talent.stat, Range.FromMax(talent.maxTalentLevel)));
-            requirements.Add(new StatRequirementElement(Stat.TalentPoint, Range.FromMin(talent.pointCost)));
+            requirements.Add(new StatRangeElement(Stat.Level, Range.FromMin(talent.levelRequirement)));
+            requirements.Add(new StatRangeElement(talent.stat, Range.FromMax(talent.maxTalentLevel)));
+            requirements.Add(new StatRangeElement(Stat.TalentPoint, Range.FromMin(talent.pointCost)));
 
             if (talent.requires != null)
             {
